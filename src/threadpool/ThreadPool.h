@@ -19,7 +19,7 @@
 #include "../Logger/Logger.h"
 
 
-namespace bbt::readpool
+namespace bbt::threadpool
 {
 
 enum ThreadPoolErrnoCode{

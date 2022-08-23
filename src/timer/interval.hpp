@@ -29,7 +29,7 @@ public:
 
     //获取类初始化到现在为止的时间间隔
 
-    template<typename Clock>
+    template<typename Clock = std::chrono::milliseconds>
     clock_t intervalnow()
     {
         end = std::chrono::system_clock::now();

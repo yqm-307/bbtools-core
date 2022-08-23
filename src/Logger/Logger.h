@@ -106,7 +106,7 @@ std::string format(const char* fmt, ...);
 
 
 #define TRACE(fmt, ...)     bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_TRACE, bbt::log::format(fmt,##__VA_ARGS__))
-#define DEBUG(fmt, ...)     bbt::g::Logger::GetInstance()->Log(YUbbt::g::LOG_DEBUG, bbt::log::format(fmt,##__VA_ARGS__))
+#define DEBUG(fmt, ...)     bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_DEBUG, bbt::log::format(fmt,##__VA_ARGS__))
 #define INFO(fmt, ...)      bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_INFO,  bbt::log::format(fmt,##__VA_ARGS__))
 #define WARN(fmt, ...)      bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_WARN,  bbt::log::format(fmt,##__VA_ARGS__))
 #define ERROR(fmt, ...)     bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_ERROR, bbt::log::format(fmt,##__VA_ARGS__))
