@@ -1,3 +1,14 @@
+/**
+ * @file random.hpp
+ * @author your name (you@domain.com)
+ * @brief 封装了一些平时可能经常使用的随机数生成函数
+ * @version 0.1
+ * @date 2023-01-02
+ * 
+ * @copyright Copyright (c) 2023
+ */
+
+#pragma once
 #include <random>
 #include <chrono>
 #include <typeinfo>
