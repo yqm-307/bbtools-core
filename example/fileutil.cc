@@ -1,5 +1,4 @@
-// #include "../src/fileUtil/FileFind.h"
-
+#include <iostream>
 // using namespace bbt::file;
 
 // /// 测试当前目录下检查
@@ -21,7 +20,7 @@
 
 // }
 
-// int main()
-// {
-//     test1();
-// }
+int main()
+{
+    printf("none");
+}
