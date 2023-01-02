@@ -19,7 +19,6 @@
 #include "bbt/timer/clock.hpp"
 
 
-
 namespace bbt::timer
 {
 
@@ -42,8 +41,17 @@ public:
 
 
     TimeTask_Base()=default;
+    TimeTask_Base(const TimeTask_Base&task)
+        :m_data(task.m_data),
+        m_timeout(task.m_timeout),
+        m_multiple_trigger(task.m_multiple_trigger),
+        m_multiple_times(task.m_multiple_times),
+        m_interval_ms(task.m_interval_ms),
+        m_next_timeout(task.m_next_timeout)
+    {
+    }
     virtual ~TimeTask_Base(){}
-    virtual void Timeout() =0;
+    virtual void Timeout() const  =0;
 
     /**
      * @brief 任务是否超时
@@ -51,7 +59,7 @@ public:
      * @return true 
      * @return false 
      */
-    bool Is_Expired()
+    bool Is_Expired() const 
     {
         return bbt::timer::clock::is_expired<bbt::timer::ms>(m_timeout);
     }
@@ -86,7 +94,7 @@ public:
      *  如果已经触发过的任务且不会重复触发或者已经完成所有的触发次数了，则返回最后一次的触发时间
      * @return bbt::timer::Timestamp<bbt::timer::ms> 
      */
-    bbt::timer::Timestamp<bbt::timer::ms>   GetNextTimeOut()
+    bbt::timer::Timestamp<bbt::timer::ms>   GetNextTimeOut() const
     {
         return m_next_timeout;
     }
@@ -159,25 +167,131 @@ protected:
  *  这样做好处就是，没有限制驱动形式，可以随意的放在任何的模型里面。比如事件驱动、循环驱动都可以
  *  直接放进去就行。 
  */
+template<typename DataType>
 class TimeWheel 
 {
 public:
+    typedef std::shared_ptr<TimeTask_Base<DataType>> TaskBasePtr;
+    enum TimeWheel_Type:int
+    {
+        Interval_1_MS=1,
+        Interval_2_MS=2,
+        Interval_5_MS=5,
+        Interval_10_MS=10,
+        Interval_50_MS=50,
+        Interval_100_MS=100,
+        Interval_200_MS=200,
+        Interval_500_MS=500,
+        Interval_1000_MS=1000,
+    };
 
+public:
+    TimeWheel(TimeWheel_Type tick_type,int max_record_range_ms);
+    
+    bool AddTask(TaskBasePtr task);
+private:
     // 可以设置：禁用、启用，触发间隔，触发次数，回调，
     BBT_IMPL_STRUCT TimeWheel_Impl
     {
-        void Add();
+        typedef std::vector<TaskBasePtr> TimeWheelMap;
+
+        /**
+         * @brief 初始化TimeWheel
+         * 
+         * @param tick_type 最小间隔，也就是时间轮精度 ,毫秒级
+         * @param max_record_range_ms 最大记录时长，毫秒级
+         */
+        TimeWheel_Impl(TimeWheel_Type type,int ms):m_tick_interval_ms(type),m_max_range(ms)
+        {Init(type,ms);}
+
+        /**
+         * @brief 初始化TimeWheel
+         * 
+         * @param tick_type 最小间隔，也就是时间轮精度 ,毫秒级
+         * @param max_record_range_ms 最大记录时长，毫秒级
+         */
+        void Init(TimeWheel_Type tick_type,int max_record_range_ms);
+        bool Add(TaskBasePtr task_ptr);
         void Del();
         void Change();
         void Set();
         void Get();
 
-        void* m_wheel;
+        
+    public:
+        const int m_tick_interval_ms;   // 跨度间隔
+        const int m_max_range;          // 最大可记录时间跨度（就是计时器最大一个周期可以记录多大范围的时间）
+        
+        /**
+         * 选择循环数组作为整个时间跨度周期的映射。
+         * 一个current_time_ptr 指向当前位置，然后就正常的映射就可以了
+         */
+        TimeWheelMap* m_wheel;
+        std::mutex  m_lock;
+        int m_current_index;
+        bbt::timer::Timestamp<bbt::timer::ms>
+            m_current_timestamp;
+        int max_slots_size; // 最大槽数
     };
 
 private:
     std::unique_ptr<TimeWheel_Impl> m_time_wheel_ptr;
 };
+
+
+
+template<typename DataType>
+void TimeWheel<DataType>::TimeWheel_Impl::Init(TimeWheel_Type min_tick_interval,int max_record_range_ms)
+{
+    // 计算需要创建的数组大小，建立映射关系 
+    std::lock_guard<std::mutex> lock(m_lock);
+    max_slots_size = (max_record_range_ms%min_tick_interval) == 0 ? 
+            (max_record_range_ms/min_tick_interval) : (max_record_range_ms/min_tick_interval + 1);
+
+    m_wheel = new TimeWheelMap[max_slots_size];
+    m_current_index=0;
+    m_current_timestamp = bbt::timer::clock::now<bbt::timer::ms>();
+}
+
+template<typename DataType>
+bool TimeWheel<DataType>::TimeWheel_Impl::Add(TaskBasePtr task)
+{
+    assert(task != nullptr);
+    if (task->Is_Expired())
+        return false;
+    auto timeout_ms = task->GetNextTimeOut();
+
+    // 不可以超过当前最大范围
+    auto ts = timeout_ms - m_current_timestamp;
+    if (ts.count() >= m_max_range)
+        return false;
+
+    int index_distance = (ts.count()%m_tick_interval_ms)==0?
+            (ts.count()/m_tick_interval_ms) : (ts.count()/m_tick_interval_ms + 1);// 向上取整
+    
+    // 循环数组的映射
+    assert(index_distance < max_slots_size );  
+    auto index = (m_current_index + index_distance)%max_slots_size;
+
+    {
+        std::lock_guard<std::mutex> lock(m_lock);
+        (m_wheel+index)->push_back(task);
+    }
+    return true;
+}
+
+
+template<typename Datatype>
+TimeWheel<Datatype>::TimeWheel(TimeWheel<Datatype>::TimeWheel_Type tick_type,int max_record_range_ms)
+    :m_time_wheel_ptr(std::make_unique<TimeWheel_Impl>(tick_type,max_record_range_ms))
+{
+}
+
+template<typename Datatype>
+bool TimeWheel<Datatype>::AddTask(TaskBasePtr task)
+{
+    return m_time_wheel_ptr->Add(task);
+}
 
 
 
