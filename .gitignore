@@ -1,21 +1,48 @@
-#忽略所有文件和目录
-*
- 
-#增加指定目录和下面所有目录
-!/src/
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
 
 
-#增加指定扩展名文件和MAKEFILE文件
-!*.cpp
-!*.c
-!*.h
-!*.cc
-!*.hpp
-!*.sh
-!.gitignore
- 
-#当前目录下需要提交的文件                                                                                                                                                  
-!README.md
-!todo_list.md
-!开发日志.md
-!CMakeLists.txt
+
+
+# cmake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
