@@ -17,8 +17,9 @@
 #pragma once
 #include "bbt/detail/Define.hpp"
 #include "bbt/timer/clock.hpp"
-
-
+#include "bbt/template_util/comparator.hpp"
+#include "bbt/timer/timewheel_def.hpp"
+#include "bbt/pool_util/idpool.hpp"
 namespace bbt::timer
 {
 
@@ -28,142 +29,95 @@ namespace bbt::timer
  *  这个就需要考虑这个灵活性是否需要存在。（也可以通过函数闭包，算是通用方案，但是仍然是间接调用）
  */
 template<typename DataType>
-class TimeTask_Base
+class TimeTask_Base : public bbt::templateutil::comparator<bbt::timer::Timestamp<bbt::timer::ms>>
 {
 public:
+    enum Status:int
+    {
+        Uninitialized=0,
+        Finished=1,
+        Waitting=2,
+        Canneled=3,
+    }
     enum TimeTask_InitStatus: int
     {
         Failed = 0,                 // 失败，不明原因
         OK = 1,                     // 成功注册
         IS_TimeOut = 2,             // 尝试注册一个已经超时的事件
-        Invalid_IntervalTime = 3,   // 非法的时间间隔
     };
 
 
-    TimeTask_Base()=default;
+    TimeTask_Base(){}
     TimeTask_Base(const TimeTask_Base&task)
         :m_data(task.m_data),
-        m_timeout(task.m_timeout),
-        m_multiple_trigger(task.m_multiple_trigger),
-        m_multiple_times(task.m_multiple_times),
-        m_interval_ms(task.m_interval_ms),
-        m_next_timeout(task.m_next_timeout)
-    {
-    }
+        it_(task.m_timeout)
+    {}
+    TimeTask_Base(TimeTask_Base&&)
+        :m_data(std::move(task.m_data)),
+        it_(std::move(task.m_timeout))
+    {}
+    
     virtual ~TimeTask_Base(){}
     virtual void Timeout() const  =0;
 
-    /**
-     * @brief 任务是否超时
-     * 
-     * @return true 
-     * @return false 
-     */
+
     bool Is_Expired() const 
     {
-        return bbt::timer::clock::is_expired<bbt::timer::ms>(m_timeout);
+        return bbt::timer::clock::is_expired<bbt::timer::ms>(it_);
     }
 
-    /**
-     * @brief 滴答一次
-     * 滴答一次，触发超时时间，返回下一次的超时时间。
-     * 如果这个超时次数已经结束，则返回最后一次触发的时间
-     */
-    bbt::timer::Timestamp<bbt::timer::ms> TickTack()
+    void TickTack()
     {
-        if (Is_Expired())
+        if ((m_status!=Status::Canneled) && Is_Expired())
         {
             Timeout();  // 执行超时任务
+            m_status = Status::Finished;
         }
-        // 计算下次超时时间
-        if (m_multiple_times > 0)
-        {
-            -- m_multiple_times;
-        }
-        else if(m_multiple_times == 0)
-        {
-            return m_next_timeout;
-        }
-
-        m_next_timeout = m_next_timeout + m_interval_ms;
-        return m_next_timeout;
     }
 
-    /**
-     * @brief 获取下一次的超时时间戳
-     *  如果已经触发过的任务且不会重复触发或者已经完成所有的触发次数了，则返回最后一次的触发时间
-     * @return bbt::timer::Timestamp<bbt::timer::ms> 
-     */
-    bbt::timer::Timestamp<bbt::timer::ms>   GetNextTimeOut() const
+    void Cannel()
     {
-        return m_next_timeout;
+        if (m_status == Waitting)
+            m_status = Status::Canneled;
     }
 
-    /**
-     * @brief 初始化当前定时任务
-     * 
-     * @param data 数据成员
-     * @param timeout_ms 首次超时时间点
-     * @param multiple_trigger 是否重复触发（默认不重复，只触发一次）
-     * @param trigger_times 如果重复触发重复多少次（默认无限重复）
-     * @param interval_ms 如果重复触发时间间隔是多少（如果不设置这个值，则重复触发和重复触发次数的设置是被忽略的、无效的）
-     * 
-     * @return true 初始化成功
-     * @return false 初始化失败
-     */
-    TimeTask_InitStatus Init(DataType data,
-            bbt::timer::Timestamp<bbt::timer::ms> timeout_ms,
-            bool multiple_trigger=false,
-            int trigger_times=1,
-            bbt::timer::milliseconds interval_ms=0ms)
+    bbt::timer::Timestamp<bbt::timer::ms>   GetTimeOut() const
+    { return it_; }
+
+    TimeTask_InitStatus Init(DataType data,bbt::timer::Timestamp<bbt::timer::ms> timeout_ms)
     {
-        TimeTask_InitStatus flag{Failed};
+        TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
         do
         {
             if (bbt::timer::clock::is_expired<bbt::timer::ms>(timeout_ms))
             {
-                flag = IS_TimeOut;
+                flag = TimeTask_InitStatus::IS_TimeOut;
                 break;
             }
-            if (multiple_trigger && (interval_ms == 0ms))
-            {
-                flag = Invalid_IntervalTime;
-                break;
-            }
-
             m_data = data;
-            m_timeout = timeout_ms;
-            m_next_timeout = timeout_ms;
-            m_multiple_trigger = multiple_trigger;
-            m_multiple_times = trigger_times;
-            m_interval_ms = interval_ms;
-            flag = OK;
-
+            it_ = timeout_ms;
+            flag = TimeTask_InitStatus::OK;
+            m_status = Status:Waitting;
         } while (0);
 
         return flag;
     }
 
-
 protected:
     DataType    m_data;
-    
-    bbt::timer::Timestamp<bbt::timer::ms>    
-                m_timeout;                  // 首次超时时间  
-    bool        m_multiple_trigger;         // 是否重复
-    int         m_multiple_times;           // 重复触发最大次数（是否需要提供？如果不提供，用户就可以自己通过编程技巧去实现）
-    bbt::timer::milliseconds         
-                m_interval_ms;              // 重复触发的时间间隔
-
-    bbt::timer::Timestamp<bbt::timer::ms>
-                m_next_timeout;
+    Status      m_status{Status:Uninitialized};
+    const uint64_t  m_id;   // 初始化确定,存在期间不会改变
+    static bbt::pool_util::IDPool_Safe<uint32_t>*    
+                m_id_pool;
 };
 
+template<typename T>
+bbt::pool_util::IDPool_Safe<uint32_t>* TimeTask_Base<T>::m_id_pool = new bbt::pool_util::IDPool<uint32_t>(100*10000);
 
 
 
 /**
- * @brief 时间轮定时器，纯数据结构实现，外部驱动时钟滴答。如果需要自驱动，需要再封装。
+ * @brief 时间轮定时器，纯数据结构实现(无锁)，外部驱动时钟滴答。如果需要自驱动，需要再封装。
  *  这样做好处就是，没有限制驱动形式，可以随意的放在任何的模型里面。比如事件驱动、循环驱动都可以
  *  直接放进去就行。 
  */
@@ -172,28 +126,21 @@ class TimeWheel
 {
 public:
     typedef std::shared_ptr<TimeTask_Base<DataType>> TaskBasePtr;
-    enum TimeWheel_Type:int
-    {
-        Interval_1_MS=1,
-        Interval_2_MS=2,
-        Interval_5_MS=5,
-        Interval_10_MS=10,
-        Interval_50_MS=50,
-        Interval_100_MS=100,
-        Interval_200_MS=200,
-        Interval_500_MS=500,
-        Interval_1000_MS=1000,
-    };
+    struct TaskNode {TaskBasePtr m_ptr;TaskNode* m_next;};
 
 public:
-    TimeWheel(TimeWheel_Type tick_type,int max_record_range_ms);
+    TimeWheel();
     
+    // curd
     bool AddTask(TaskBasePtr task);
+    bool CannelTask(TaskBasePtr task);
 private:
     // 可以设置：禁用、启用，触发间隔，触发次数，回调，
     BBT_IMPL_STRUCT TimeWheel_Impl
     {
-        typedef std::vector<TaskBasePtr> TimeWheelMap;
+        typedef std::priority_queue<TaskBasePtr>        DelayQueue;         // 延时队列
+        typedef std::vector<DelayQueue>                 TimeWheelMap;       // 主动轮
+        typedef std::vector<DelayQueue>                 TimeWheelMap2;      // 从动轮
 
         /**
          * @brief 初始化TimeWheel
@@ -201,8 +148,11 @@ private:
          * @param tick_type 最小间隔，也就是时间轮精度 ,毫秒级
          * @param max_record_range_ms 最大记录时长，毫秒级
          */
-        TimeWheel_Impl(TimeWheel_Type type,int ms):m_tick_interval_ms(type),m_max_range(ms)
-        {Init(type,ms);}
+        TimeWheel_Impl()
+            :m_current_index_lv1(0),
+            m_current_index_lv2(0),
+            m_current_index_lv3(0),
+        {Init();}
 
         /**
          * @brief 初始化TimeWheel
@@ -210,80 +160,123 @@ private:
          * @param tick_type 最小间隔，也就是时间轮精度 ,毫秒级
          * @param max_record_range_ms 最大记录时长，毫秒级
          */
-        void Init(TimeWheel_Type tick_type,int max_record_range_ms);
+        void Init();
         bool Add(TaskBasePtr task_ptr);
         void Del();
         void Change();
         void Set();
         void Get();
+        void TickTack();
 
-        
-    public:
-        const int m_tick_interval_ms;   // 跨度间隔
+    private:
+        int Insert_Detail(TaskBasePtr task_ptr);
+    private:
+        const int m_tick_interval_ms;   // 每次tick跨度间隔
         const int m_max_range;          // 最大可记录时间跨度（就是计时器最大一个周期可以记录多大范围的时间）
         
-        /**
-         * 选择循环数组作为整个时间跨度周期的映射。
-         * 一个current_time_ptr 指向当前位置，然后就正常的映射就可以了
-         */
-        TimeWheelMap* m_wheel;
-        std::mutex  m_lock;
-        int m_current_index;
-        bbt::timer::Timestamp<bbt::timer::ms>
-            m_current_timestamp;
-        int max_slots_size; // 最大槽数
+
+        TimeWheelMap    m_wheel_lv1;        // 第一级主动轮 -- tick主动转动
+        TimeWheelMap2   m_wheel_lv2;    // 第二级存储轮 -- 存储数据,从动
+        TimeWheelMap2   m_wheel_lv3;    // 第二级存储轮 -- 存储数据,从动
+        DelayQueue      m_delay_queue; // 范围之外的超时任务，暂存DelayQueue
+        
+        int m_current_index_lv1;
+        int m_current_index_lv2;
+        int m_current_index_lv3;
+
+        // 上次tick的时间
+        bbt::timer::Timestamp<bbt::timer::ms> m_current_timestamp;
+        
+        // 当前时间轮的起始和结束时间
+        bbt::timer::Timestamp<bbt::timer::ms> m_end_timestamp;
+        bbt::timer::Timestamp<bbt::timer::ms> m_begin_timestamp;
+        
+            
     };
 
 private:
     std::unique_ptr<TimeWheel_Impl> m_time_wheel_ptr;
 };
 
+#define BBT_TW_LV1_Slot_MS   (__bbt_tickonce_ms__)
+#define BBT_TW_LV2_Slot_MS   (BBT_TW_LV1_Slot_MS*__bbt_slot_num__)
+#define BBT_TW_LV3_Slot_MS   (BBT_TW_LV2_Slot_MS*__bbt_slot_num__)
+
 
 
 template<typename DataType>
-void TimeWheel<DataType>::TimeWheel_Impl::Init(TimeWheel_Type min_tick_interval,int max_record_range_ms)
+void TimeWheel<DataType>::TimeWheel_Impl::Init()
 {
-    // 计算需要创建的数组大小，建立映射关系 
-    std::lock_guard<std::mutex> lock(m_lock);
-    max_slots_size = (max_record_range_ms%min_tick_interval) == 0 ? 
-            (max_record_range_ms/min_tick_interval) : (max_record_range_ms/min_tick_interval + 1);
-
-    m_wheel = new TimeWheelMap[max_slots_size];
-    m_current_index=0;
-    m_current_timestamp = bbt::timer::clock::now<bbt::timer::ms>();
+    // 记录3级时间轮总共可以记录到的时间点,理解为这个时间点就是整个时间轮全部遍历完成的时间
+    m_current_timestamp = bbt::timer::clock::now<bbt::timer::ms>(); 
+    m_begin_timestamp = bbt::timer::clock::now<bbt::timer::ms>();
+    m_end_timestamp = bbt::timer::clock::now<bbt::timer::ms>() +  bbt::timer::ms(__bbt_max_range_of_timeout_ms__);
 }
 
 template<typename DataType>
 bool TimeWheel<DataType>::TimeWheel_Impl::Add(TaskBasePtr task)
-{
+{    
     assert(task != nullptr);
     if (task->Is_Expired())
         return false;
-    auto timeout_ms = task->GetNextTimeOut();
-
-    // 不可以超过当前最大范围
-    auto ts = timeout_ms - m_current_timestamp;
-    if (ts.count() >= m_max_range)
-        return false;
-
-    int index_distance = (ts.count()%m_tick_interval_ms)==0?
-            (ts.count()/m_tick_interval_ms) : (ts.count()/m_tick_interval_ms + 1);// 向上取整
-    
-    // 循环数组的映射
-    assert(index_distance < max_slots_size );  
-    auto index = (m_current_index + index_distance)%max_slots_size;
-
-    {
-        std::lock_guard<std::mutex> lock(m_lock);
-        (m_wheel+index)->push_back(task);
-    }
+    Insert_Detail(task);    
     return true;
+}
+
+template<typename DataType>
+int TimeWheel<DataType>::TimeWheel_Impl::Insert_Detail(TaskBasePtr task)
+{
+    if (task->GetTimeOut() > m_end_timestamp)
+    {
+        m_delay_queue.push(task);
+        return 0;
+    }
+    else
+    {
+        auto diff_val = task->GetTimeOut() - m_begin_timestamp;
+        auto n_ms = diff_val.count()
+        int begin_pass_n_ms = 
+         m_current_index_lv1*__bbt_tickonce_ms__ +
+         m_current_index_lv2*__bbt_tickonce_ms__*__bbt_slot_num__ +
+         m_current_index_lv3*__bbt_slot_num__*__bbt_slot_num__*__bbt_tickonce_ms__;
+        assert(begin_pass_n_ms < n_ms);
+
+        // 计算应该在哪个槽中
+        // 主动轮 lv1
+        int n3 = n_ms/(BBT_TW_LV3_Slot_MS); n_ms %= BBT_TW_LV3_Slot_MS;
+        int n2 = n_ms/(BBT_TW_LV2_Slot_MS); n_ms %= BBT_TW_LV2_Slot_MS;
+        int n1 = n_ms/(BBT_TW_LV1_Slot_MS);
+        assert( n3 >= m_current_index_lv3 &&    
+                n2 >= m_current_index_lv2 &&
+                n1 >= m_current_index_lv1);
+        if ( n3 > m_current_index_lv3 )
+            m_wheel_lv3[n3].push(task);
+        else if( n3 == m_current_index_lv3 )
+        {
+            if ( n2 > m_current_index_lv2 )
+                m_wheel_lv2[n2].push(task);
+            else if (n2 == m_current_index_lv2)
+            {
+                if ( n1 >= m_current_index_lv1) // 这里是为了抹除误差,
+                    m_wheel_lv1[n1].push(task);
+            }
+        }
+        return 0;
+
+    }   
+    return -1;
+}
+
+template<typename DataType>
+void TimeWheel<DataType>::TimeWheel_Impl::TickTack()
+{
+    // 需要注意解析下一轮
 }
 
 
 template<typename Datatype>
-TimeWheel<Datatype>::TimeWheel(TimeWheel<Datatype>::TimeWheel_Type tick_type,int max_record_range_ms)
-    :m_time_wheel_ptr(std::make_unique<TimeWheel_Impl>(tick_type,max_record_range_ms))
+TimeWheel<Datatype>::TimeWheel()
+    :m_time_wheel_ptr(std::make_unique<TimeWheel_Impl>())
 {
 }
 
