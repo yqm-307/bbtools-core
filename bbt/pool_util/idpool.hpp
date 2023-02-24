@@ -9,6 +9,7 @@ namespace bbt::pool_util
 template<typename IntType> class IDPool {};
 template<typename IntType> class IDPool_Safe {};
 
+template<>
 class IDPool<uint32_t>
 {
 public:    
@@ -60,10 +61,10 @@ private:
 };
 
 
-
+template<>
 class IDPool_Safe<uint32_t>
 {
- 
+public:
     IDPool_Safe(uint64_t max)
         :m_current(0),
         m_max_id_num(max)

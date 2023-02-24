@@ -38,7 +38,7 @@ public:
         Finished=1,
         Waitting=2,
         Canneled=3,
-    }
+    };
     enum TimeTask_InitStatus: int
     {
         Failed = 0,                 // 失败，不明原因
@@ -50,16 +50,27 @@ public:
     TimeTask_Base(){}
     TimeTask_Base(const TimeTask_Base&task)
         :m_data(task.m_data),
-        it_(task.m_timeout)
-    {}
-    TimeTask_Base(TimeTask_Base&&)
+        m_id(m_id_pool->GetID())
+    {
+        this->SetValue(task.m_timeout);
+    }
+    TimeTask_Base(TimeTask_Base&& task)
         :m_data(std::move(task.m_data)),
-        it_(std::move(task.m_timeout))
-    {}
+        m_id(m_id_pool->GetID())
+    {
+        this->SetValue(task.m_timeout);
+    }
     
-    virtual ~TimeTask_Base(){}
+    virtual ~TimeTask_Base(){
+        m_id_pool->ReleaseID(m_id);
+    }
     virtual void Timeout() const  =0;
 
+    void GenerateID()
+    {
+        auto [bsuccess,m_id] = m_id_pool->GetID();
+        assert(bsuccess);
+    }
 
     bool Is_Expired() const 
     {
@@ -97,7 +108,7 @@ public:
             m_data = data;
             it_ = timeout_ms;
             flag = TimeTask_InitStatus::OK;
-            m_status = Status:Waitting;
+            m_status = Status::Waitting;
         } while (0);
 
         return flag;
@@ -106,13 +117,13 @@ public:
 protected:
     DataType    m_data;
     Status      m_status{Status:Uninitialized};
-    const uint64_t  m_id;   // 初始化确定,存在期间不会改变
+    uint32_t  m_id;   // 初始化确定,存在期间不会改变
     static bbt::pool_util::IDPool_Safe<uint32_t>*    
                 m_id_pool;
 };
 
 template<typename T>
-bbt::pool_util::IDPool_Safe<uint32_t>* TimeTask_Base<T>::m_id_pool = new bbt::pool_util::IDPool<uint32_t>(100*10000);
+bbt::pool_util::IDPool_Safe<uint32_t>* TimeTask_Base<T>::m_id_pool = new bbt::pool_util::IDPool_Safe<uint32_t>(100*10000);
 
 
 
@@ -151,7 +162,7 @@ private:
         TimeWheel_Impl()
             :m_current_index_lv1(0),
             m_current_index_lv2(0),
-            m_current_index_lv3(0),
+            m_current_index_lv3(0)
         {Init();}
 
         /**
@@ -234,7 +245,7 @@ int TimeWheel<DataType>::TimeWheel_Impl::Insert_Detail(TaskBasePtr task)
     else
     {
         auto diff_val = task->GetTimeOut() - m_begin_timestamp;
-        auto n_ms = diff_val.count()
+        auto n_ms = diff_val.count();
         int begin_pass_n_ms = 
          m_current_index_lv1*__bbt_tickonce_ms__ +
          m_current_index_lv2*__bbt_tickonce_ms__*__bbt_slot_num__ +

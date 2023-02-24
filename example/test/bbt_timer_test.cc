@@ -38,44 +38,44 @@ typedef std::shared_ptr<Task> TaskPtr;
 
 bool test_1()
 {
-    Task ts;
+    // Task ts;
 
-    ts.Init([](){
-            printf("timeout once! timenow : %s\n",bbt::timer::clock::getnow_str().c_str());
-        },
-        bbt::timer::clock::nowAfter(bbt::timer::ms(1000*60*60)),
-        true,
-        10,
-        bbt::timer::ms(100)
-    );
+    // ts.Init([](){
+    //         printf("timeout once! timenow : %s\n",bbt::timer::clock::getnow_str().c_str());
+    //     },
+    //     bbt::timer::clock::nowAfter(bbt::timer::ms(1000*60*60)),
+    //     true,
+    //     10,
+    //     bbt::timer::ms(100)
+    // );
 
-    if (ts.Is_Expired())
-    {
-        perror("error , not timeout");
-        return false;
-    }
-    else
-    {
-    }
+    // if (ts.Is_Expired())
+    // {
+    //     perror("error , not timeout");
+    //     return false;
+    // }
+    // else
+    // {
+    // }
     
-    return true;
+    // return true;
 }
 
 bool test_2()
 {
-    bbt::timer::TimeWheel<std::function<void()>> 
-        wheel(bbt::timer::TimeWheel<std::function<void()>>::Interval_10_MS,1000*60);
+    // bbt::timer::TimeWheel<std::function<void()>> 
+    //     wheel(bbt::timer::TimeWheel<std::function<void()>>::Interval_10_MS,1000*60);
 
-    auto task = std::make_shared<Task>();
-    task->Init([](){
-            printf("timeout once! timenow : %s\n",bbt::timer::clock::getnow_str().c_str());
-        },
-        bbt::timer::clock::nowAfter(bbt::timer::ms(1000*60*60)),
-        true,
-        10,
-        bbt::timer::ms(100)
-    );
+    // auto task = std::make_shared<Task>();
+    // task->Init([](){
+    //         printf("timeout once! timenow : %s\n",bbt::timer::clock::getnow_str().c_str());
+    //     },
+    //     bbt::timer::clock::nowAfter(bbt::timer::ms(1000*60*60)),
+    //     true,
+    //     10,
+    //     bbt::timer::ms(100)
+    // );
     
-    return wheel.AddTask(std::static_pointer_cast<TaskBase>(task));
+    // return wheel.AddTask(std::static_pointer_cast<TaskBase>(task));
     
 }

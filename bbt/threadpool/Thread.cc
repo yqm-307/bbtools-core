@@ -1,4 +1,4 @@
-#include "bbt/threadpool/Thread.h"
+#include "bbt/threadpool/Thread.hpp"
 #include <unistd.h>
 
 using namespace bbt::threadpool;
