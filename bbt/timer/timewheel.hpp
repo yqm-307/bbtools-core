@@ -84,6 +84,8 @@ public:
             Timeout();  // 执行超时任务
             m_status = Status::Finished;
         }
+        else
+            assert(Is_Expired());
     }
 
     void Cannel()
@@ -181,6 +183,10 @@ private:
 
     private:
         int Insert_Detail(TaskBasePtr task_ptr);
+        void RotateOnce(); // 钟表摆臂转动一格
+        void WheelLv2RotateOnce();  // lv2 从动
+        void WheelLv3RotateOnce();  // lv3 从动
+        void DelayQueueRotate();    // 从延迟队列重新解析        
     private:
         const int m_tick_interval_ms;   // 每次tick跨度间隔
         const int m_max_range;          // 最大可记录时间跨度（就是计时器最大一个周期可以记录多大范围的时间）
@@ -281,9 +287,61 @@ int TimeWheel<DataType>::TimeWheel_Impl::Insert_Detail(TaskBasePtr task)
 template<typename DataType>
 void TimeWheel<DataType>::TimeWheel_Impl::TickTack()
 {
-    // 需要注意解析下一轮
+    auto& current_slot = m_wheel_lv1[m_current_index_lv1];
+    while(!current_slot.empty())
+    {
+        auto& it = current_slot.front();
+        it->TickTack();
+    }
+
 }
 
+template<typename DataType>
+void TimeWheel<DataType>::TimeWheel_Impl::RotateOnce()
+{
+    m_current_index_lv1++;  //推进
+    if (m_current_index_lv1 >= __bbt_slot_num__)
+    {
+        m_current_index_lv1 = 0;
+        WheelLv2RotateOnce();
+    }
+    else
+    {
+    }
+}
+template<typename DataType>
+void TimeWheel<DataType>::TimeWheel_Impl::WheelLv2RotateOnce()
+{
+    m_current_index_lv2++; // 从动
+    if (m_current_index_lv2 >= __bbt_slot_num__)
+    {
+        m_current_index_lv2 = 0;
+        WheelLv3RotateOnce();
+    }
+    else
+    {
+    }
+}
+
+template<typename DataType>
+void TimeWheel<DataType>::TimeWheel_Impl::WheelLv3RotateOnce()
+{
+    m_current_index_lv3++; // 从动
+    if (m_current_index_lv3 >= __bbt_slot_num__)
+    {
+        m_current_index_lv3=0;
+        DelayQueueRotate();
+    }
+    else
+    {
+    }
+}
+
+template<typename DataType>
+void TimeWheel<DataType>::TimeWheel_Impl::DelayQueueRotate()
+{
+
+}
 
 template<typename Datatype>
 TimeWheel<Datatype>::TimeWheel()

@@ -16,18 +16,16 @@ message(STATUS "${PROJECT_SOURCE_DIR}")
 
 
 #完全编译
-# file(GLOB HPPSRCS src/*/*.cpp src/*/*.hpp src/*/*.cc)
 file(GLOB_RECURSE BBT_SRCS 
     ${PROJECT_SOURCE_DIR}/bbt/*.cc
     ${PROJECT_SOURCE_DIR}/bbt/*.hpp
     ${PROJECT_SOURCE_DIR}/bbt/*.cpp
     ${PROJECT_SOURCE_DIR}/bbt/*.h
 )
-# message("srcs : "${BBT_SRCS})
+# message("begin" ${BBT_SRCS} "end")
 
 add_library(ybbt SHARED ${BBT_SRCS})
-#install(TARGETS YUtil DESTINATION lib/)
 
 
 add_subdirectory(example)
-add_subdirectory(example/test)
+# add_subdirectory(example/test) ## 

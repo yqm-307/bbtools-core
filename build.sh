@@ -18,7 +18,7 @@ build()
 {
     #编译整个项目目录
     #mkdir bin
-    sudo cp -rf src /usr/include/bbt
+    sudo cp -rf bbt /usr/local/include/
     cmake .
     make
     sudo cp -rf lib/libybbt.so /usr/lib/x86_64-linux-gnu/

@@ -87,6 +87,9 @@
 		},
 		{
 			"path" : "example/test/CMakeLists.txt"
+		},
+		{
+			"path" : "example/test/pool_util/CMakeLists.txt"
 		}
 	],
 	"kind" : "cmakeFiles",

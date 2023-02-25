@@ -117,9 +117,7 @@ public:
 				}
 				_taskqueue.push(std::move(task));	//插入任务队列
 				if(_run_num<_threadnum)	//当前有挂起的线程,唤醒一个线程
-			
-				WakeUpOne();
-			
+					WakeUpOne();
 			}
 			
 			
