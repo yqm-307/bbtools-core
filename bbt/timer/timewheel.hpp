@@ -187,6 +187,8 @@ private:
         void WheelLv2RotateOnce();  // lv2 从动
         void WheelLv3RotateOnce();  // lv3 从动
         void DelayQueueRotate();    // 从延迟队列重新解析        
+        DelayQueue& GetDelayQueueByTimestamp(bbt::timer::Timestamp<bbt::timer::ms>);
+        std::tuple<int,int,int> GetIndexsByTimestamp(bbt::timer::Timestamp<bbt::timer::ms>);
     private:
         const int m_tick_interval_ms;   // 每次tick跨度间隔
         const int m_max_range;          // 最大可记录时间跨度（就是计时器最大一个周期可以记录多大范围的时间）
@@ -292,22 +294,22 @@ void TimeWheel<DataType>::TimeWheel_Impl::TickTack()
     {
         auto& it = current_slot.front();
         it->TickTack();
+        current_slot.pop();
     }
-
+    RotateOnce();
 }
 
 template<typename DataType>
 void TimeWheel<DataType>::TimeWheel_Impl::RotateOnce()
 {
-    m_current_index_lv1++;  //推进
+    m_current_index_lv1++;
     if (m_current_index_lv1 >= __bbt_slot_num__)
     {
+        // 主动轮推进带动从动轮推进
         m_current_index_lv1 = 0;
         WheelLv2RotateOnce();
     }
-    else
-    {
-    }
+
 }
 template<typename DataType>
 void TimeWheel<DataType>::TimeWheel_Impl::WheelLv2RotateOnce()
@@ -315,11 +317,21 @@ void TimeWheel<DataType>::TimeWheel_Impl::WheelLv2RotateOnce()
     m_current_index_lv2++; // 从动
     if (m_current_index_lv2 >= __bbt_slot_num__)
     {
+        // lv2轮带动lv3推进
         m_current_index_lv2 = 0;
         WheelLv3RotateOnce();
     }
     else
     {
+        // lv2轮前进一格
+        auto delayqueue_lv2 = m_wheel_lv2[m_current_index_lv2];
+        while(!delayqueue_lv2.empty())
+        {
+            auto& task_ptr = delayqueue_lv2.front();
+            auto tick_ms = __bbt_tickonce_ms__;
+
+            delayqueue_lv2.pop();
+        }
     }
 }
 
@@ -341,6 +353,18 @@ template<typename DataType>
 void TimeWheel<DataType>::TimeWheel_Impl::DelayQueueRotate()
 {
 
+}
+
+template<typename DataType>
+TimeWheel<DataType>::TimeWheel_Impl::DelayQueue& TimeWheel<DataType>::TimeWheel_Impl::GetDelayQueueByTimestamp(bbt::timer::Timestamp<bbt::timer::ms>)
+{
+
+}
+
+template<typename DataType>
+std::tuple<int,int,int> TimeWheel<DataType>::TimeWheel_Impl::GetIndexsByTimestamp(bbt::timer::Timestamp<bbt::timer::ms>)
+{
+    
 }
 
 template<typename Datatype>
