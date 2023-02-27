@@ -42,7 +42,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : " -std=c++17 -g -g -fPIC"
+					"fragment" : " -std=c++17 -g -g -fPIC  "
 				}
 			],
 			"defines" : 
@@ -55,11 +55,11 @@
 			[
 				{
 					"backtrace" : 2,
-					"path" : "/home/yqm/Git/biangbiangtools/bbt"
+					"path" : "/home/yqm/Code/Git/github/biangbiangtools/bbt"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "/home/yqm/Git/biangbiangtools"
+					"path" : "/home/yqm/Code/Git/github/biangbiangtools"
 				}
 			],
 			"language" : "CXX",

@@ -10,7 +10,6 @@
 					[
 						1
 					],
-					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.2"
@@ -28,7 +27,6 @@
 					[
 						2
 					],
-					"jsonFile" : "directory-example-Debug-b6fca4a6d0a37c6ae6b9.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.2"
@@ -48,7 +46,6 @@
 						3,
 						4
 					],
-					"jsonFile" : "directory-example.test-Debug-e272dbd0dbbc608d7bcd.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.2"
@@ -63,7 +60,6 @@
 				},
 				{
 					"build" : "example/test/pool_util",
-					"jsonFile" : "directory-example.test.pool_util-Debug-75cf96e0818128d0e0cd.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.2"
@@ -78,7 +74,6 @@
 				},
 				{
 					"build" : "example/test/timer",
-					"jsonFile" : "directory-example.test.timer-Debug-8181cd6dbb6a8c5a3f3b.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.2"
@@ -120,35 +115,35 @@
 				{
 					"directoryIndex" : 2,
 					"id" : "bbt_timer_test::@d7ce33078a1c01a78c3e",
-					"jsonFile" : "target-bbt_timer_test-Debug-5874713cc8e05de9672c.json",
+					"jsonFile" : "target-bbt_timer_test-Debug-110efeeae718483e7808.json",
 					"name" : "bbt_timer_test",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "fileutil_test::@70983d692f648185febe",
-					"jsonFile" : "target-fileutil_test-Debug-9464ba5b2ad190dacfab.json",
+					"jsonFile" : "target-fileutil_test-Debug-24c0fe6791f0c7bab189.json",
 					"name" : "fileutil_test",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 3,
 					"id" : "id_pool_test::@74e9a1a837bec67da7dd",
-					"jsonFile" : "target-id_pool_test-Debug-7aaa2e098925c5cfcb32.json",
+					"jsonFile" : "target-id_pool_test-Debug-7de9a064ff2a6ad68981.json",
 					"name" : "id_pool_test",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 4,
 					"id" : "timewheel_test::@5350d478f0055baf7f01",
-					"jsonFile" : "target-timewheel_test-Debug-7084075f8e273d095e5f.json",
+					"jsonFile" : "target-timewheel_test-Debug-4cf637416d6d7e9e3305.json",
 					"name" : "timewheel_test",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "ybbt::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ybbt-Debug-ee3957ae418a910e7c94.json",
+					"jsonFile" : "target-ybbt-Debug-16a7f2f074a8e7ecb3c0.json",
 					"name" : "ybbt",
 					"projectIndex" : 0
 				}
@@ -158,12 +153,12 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/yqm/Git/biangbiangtools/build",
-		"source" : "/home/yqm/Git/biangbiangtools"
+		"build" : "/home/yqm/Code/Git/github/biangbiangtools/build",
+		"source" : "/home/yqm/Code/Git/github/biangbiangtools"
 	},
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 3
+		"minor" : 0
 	}
 }

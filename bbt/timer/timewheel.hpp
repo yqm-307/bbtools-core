@@ -81,7 +81,7 @@ public:
         }
         else
         {
-            printf("Tick now:%ld\ttimeout:%ld\n",bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count(),it_.time_since_epoch().count());
+            printf("Tick now:%ld\ttimeout:%ld\n",bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count(),GetTimeOut().time_since_epoch().count());
             fflush(stdout);
             assert(Is_Expired());
         }
@@ -94,11 +94,10 @@ public:
     }
 
     bbt::timer::Timestamp<bbt::timer::ms> GetTimeOut() const
-    { return it_; }
+    { return it_;}
 
     TimeTask_InitStatus Init(CallableType data,bbt::timer::Timestamp<bbt::timer::ms> timeout_ms)
     {
-        printf("Init now:%ld\ttimeout:%ld\n",bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count(),it_.time_since_epoch().count());
 
         TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
         do
@@ -275,26 +274,17 @@ bool TimeWheel<CallableType>::TimeWheel_Impl::Add(TaskBasePtr task)
 template<typename CallableType>
 int TimeWheel<CallableType>::TimeWheel_Impl::Insert_Detail(TaskBasePtr task)
 {
-    if (task->GetTimeOut() > m_end_timestamp)
-    {
-        m_delay_queue.push(task);
-        return 0;
-    }
-    else
-    {
-        DelayQueue* queue_ptr = GetDelayQueueByTimestamp(task->GetTimeOut());
-        if (!queue_ptr)
-            return -1;
-        queue_ptr->push(task); 
-        return 0;
-    }
-    return -1;
+    DelayQueue* queue_ptr = GetDelayQueueByTimestamp(task->GetTimeOut());
+    if (!queue_ptr)
+        return -1;
+    printf("push: %ld\n",task->GetTimeOut());
+    queue_ptr->push(task); 
+    return 0;
 }
 
 template<typename CallableType>
 void TimeWheel<CallableType>::TimeWheel_Impl::TickTack()
 {
-    printf("ticktack once \n");
     auto& current_slot = m_wheel_lv1[m_current_index_lv1];
     while(!current_slot.empty())
     {
@@ -308,6 +298,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::TickTack()
 template<typename CallableType>
 void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv1RotateOnce()
 {
+    // printf("---> lv1 从动 <---\n");
     m_current_index_lv1++;
     if (m_current_index_lv1 >= __bbt_slot_num__)
     {
@@ -318,6 +309,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv1RotateOnce()
 template<typename CallableType>
 void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv2RotateOnce()
 {
+    // printf("---> lv2 从动 <---\n");
     m_current_index_lv2++; // 从动
     if (m_current_index_lv2 >= __bbt_slot_num__)
     {
@@ -343,6 +335,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv2RotateOnce()
 template<typename CallableType>
 void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv3RotateOnce()
 {
+    // printf("---> lv3 从动 <---\n");
     m_current_index_lv3++; // 从动
     if (m_current_index_lv3 >= __bbt_slot_num__)
     {
@@ -384,7 +377,8 @@ void TimeWheel<CallableType>::TimeWheel_Impl::DelayQueueRotate()
 }
 
 template<typename CallableType>
-typename TimeWheel<CallableType>::TimeWheel_Impl::DelayQueue* TimeWheel<CallableType>::TimeWheel_Impl::GetDelayQueueByTimestamp(bbt::timer::Timestamp<bbt::timer::ms> timestamp)
+typename TimeWheel<CallableType>::TimeWheel_Impl::DelayQueue* 
+    TimeWheel<CallableType>::TimeWheel_Impl::GetDelayQueueByTimestamp(bbt::timer::Timestamp<bbt::timer::ms> timestamp)
 {
     DelayQueue* queue_ptr = nullptr;
     do{
@@ -400,6 +394,7 @@ typename TimeWheel<CallableType>::TimeWheel_Impl::DelayQueue* TimeWheel<Callable
         if (n3 > m_current_index_lv3)
         {
             queue_ptr = &m_wheel_lv3[n3];
+            printf("lv3: %d\n",n3,timestamp.time_since_epoch().count());
             break;
         }
         else if (n3 == m_current_index_lv3)
@@ -407,6 +402,7 @@ typename TimeWheel<CallableType>::TimeWheel_Impl::DelayQueue* TimeWheel<Callable
             if (n2 > m_current_index_lv2)
             {   
                 queue_ptr = &m_wheel_lv2[n2];
+                printf("lv2: %d\n",n2,timestamp.time_since_epoch().count());
                 break;
             }
             else if(n2 == m_current_index_lv2)
@@ -414,6 +410,7 @@ typename TimeWheel<CallableType>::TimeWheel_Impl::DelayQueue* TimeWheel<Callable
                 if (n1 >= m_current_index_lv1)
                 {
                     queue_ptr = &m_wheel_lv1[n1];
+                    printf("lv1: %d\n",n1,timestamp.time_since_epoch().count());
                     break;
                 }
                 else

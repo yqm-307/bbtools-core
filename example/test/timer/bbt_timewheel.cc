@@ -38,17 +38,34 @@ void test2()
 {
     TimeWheel<std::function<void()>> timer;
 
-    auto ptr = std::make_shared<decltype(timer)::Timer>();
+    std::mutex lock;
+    std::thread t([&](){
+        while(1)
+        {
+            {
+                std::lock_guard<std::mutex> lo(lock);
+                timer.Tick();
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        }
+    });
     for (int i =0;i<1000;i+=5)
     {
-        ptr->Init([](){printf("once\n");},clock::nowAfter(std::chrono::milliseconds(i)));
-        timer.AddTask(ptr);
+        auto ptr = std::make_shared<decltype(timer)::Timer>();
+        ptr->Init([ptr](){
+            printf("timeout  | now:%ld | timeout:%ld\n",
+                bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count(),
+                ptr->GetTimeOut().time_since_epoch().count());
+        },clock::nowAfter(std::chrono::milliseconds(i+1000)));
+        {
+            std::lock_guard<std::mutex> lo(lock);
+            if (timer.AddTask(ptr))
+            {
+                printf("addtask false!\n");
+            }
+        }
     }
-    while(1)
-    {
-        timer.Tick();
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    }
+    std::this_thread::sleep_for(std::chrono::seconds(120));
 }
 
 int main(int argc,char* argv[])
