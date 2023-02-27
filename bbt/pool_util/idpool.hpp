@@ -78,9 +78,7 @@ public:
         m_ids(1+max,IDStatus::free)
     {
         for (int i = 1;i<m_ids.size();++i)
-        {
             m_freequeue.push(i);
-        }
     }
     ~IDPool_Safe(){}
 
@@ -96,6 +94,7 @@ public:
         }
         return {false,0};
     }
+
     bool ReleaseID(int32_t id)
     {
         std::lock_guard<std::mutex> lock(m_mutex);

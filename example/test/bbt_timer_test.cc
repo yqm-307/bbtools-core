@@ -18,20 +18,20 @@ int main()
 
 typedef bbt::timer::TimeTask_Base<std::function<void()>> TaskBase;
 
-class Task : public TaskBase
-{
-public:
-    Task()=default;
+// class Task : public TaskBase
+// {
+// public:
+//     Task()=default;
 
-    virtual void Timeout() const override
-    {
-        m_tofunc();
-    }
+//     // virtual void Timeout() const override
+//     // {
+//     //     m_tofunc();
+//     // }
     
-private:
-    std::function<void()>   m_tofunc;
-};
-typedef std::shared_ptr<Task> TaskPtr;
+// private:
+//     std::function<void()>   m_tofunc;
+// };
+// typedef std::shared_ptr<Task> TaskPtr;
 
 
 

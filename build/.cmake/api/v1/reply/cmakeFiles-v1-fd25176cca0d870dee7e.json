@@ -90,6 +90,9 @@
 		},
 		{
 			"path" : "example/test/pool_util/CMakeLists.txt"
+		},
+		{
+			"path" : "example/test/timer/CMakeLists.txt"
 		}
 	],
 	"kind" : "cmakeFiles",

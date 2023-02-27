@@ -28,12 +28,9 @@ public:
     virtual bool operator==(const comparator<Item>& r_value_) const =0;
     virtual bool operator>(const comparator<Item>& r_value_) const = 0;
     
-
-    
     virtual bool operator!=(const comparator<Item>& r_value_) const
     { return !(*this == r_value_); }
     
-
     virtual bool operator<(const comparator<Item>& r_value_) const
     { return (!this->operator>(r_value_)) && (this->operator!=(r_value_));}
 
@@ -44,13 +41,10 @@ public:
     { return (this->operator<(r_value_) || (this->operator==(r_value_))); }
 
     virtual const Item& GetValue() const
-    {
-        return it_;
-    } 
+    { return it_; } 
+    
     virtual Item& SetValue(const Item& obj)
-    {
-        return it_=obj;
-    }
+    { return it_=obj; }
 protected:
     Item it_;
 };
