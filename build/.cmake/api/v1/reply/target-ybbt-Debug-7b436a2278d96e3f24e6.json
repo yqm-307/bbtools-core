@@ -42,7 +42,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : " -std=c++17 -g -g -fPIC  "
+					"fragment" : " -std=c++17 -g -g -fPIC"
 				}
 			],
 			"defines" : 
@@ -55,23 +55,19 @@
 			[
 				{
 					"backtrace" : 2,
-					"path" : "/home/yqm/Code/Git/github/biangbiangtools/bbt"
+					"path" : "/home/yqm/Git/biangbiangtools/bbt"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "/home/yqm/Code/Git/github/biangbiangtools"
+					"path" : "/home/yqm/Git/biangbiangtools"
 				}
 			],
 			"language" : "CXX",
 			"sourceIndexes" : 
 			[
 				0,
-				5,
-				11,
-				19,
-				28,
-				32,
-				37
+				4,
+				9
 			]
 		}
 	],
@@ -101,12 +97,8 @@
 			"sourceIndexes" : 
 			[
 				0,
-				5,
-				11,
-				19,
-				28,
-				32,
-				37
+				4,
+				9
 			]
 		},
 		{
@@ -116,36 +108,18 @@
 				1,
 				2,
 				3,
-				4,
+				5,
 				6,
 				7,
 				8,
-				9,
 				10,
+				11,
 				12,
 				13,
 				14,
 				15,
 				16,
-				17,
-				18,
-				20,
-				21,
-				22,
-				23,
-				24,
-				25,
-				26,
-				27,
-				29,
-				30,
-				31,
-				33,
-				34,
-				35,
-				36,
-				38,
-				39
+				17
 			]
 		}
 	],
@@ -174,24 +148,9 @@
 		},
 		{
 			"backtrace" : 1,
-			"path" : "bbt/fileUtil/FileFind.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "bbt/fileUtil/FileRead.cc",
 			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/fileUtil/FileRead.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/fileUtil/Filedetail.h",
-			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
@@ -206,109 +165,6 @@
 		{
 			"backtrace" : 1,
 			"path" : "bbt/random/random.hpp",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "bbt/structure/Array/Array_NULLCPP.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/Array/Basic_Array.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/Array/Simple_Array.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/Array/array.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/Array/queue.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/Array/stack.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/BSTree/AVLTree.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/BSTree/AVLinit.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "bbt/structure/BSTree/MainTest.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/BSTree/Node.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/BSTree/NodeADT.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/BSTree/curd.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/List/Basic_List.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/List/DLinkList.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/List/DListNode.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/List/LQueue.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/List/LStack.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "bbt/structure/List/List_NULLCPP.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/List/Pure_ListNode.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "bbt/structure/List/Pure_Virtual_List.h",
 			"sourceGroupIndex" : 1
 		},
 		{
@@ -344,9 +200,8 @@
 		},
 		{
 			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "bbt/timer/timewheel.cc",
-			"sourceGroupIndex" : 0
+			"path" : "bbt/timer/task.hpp",
+			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
@@ -356,6 +211,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "bbt/timer/timewheel_def.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "bbt/timer/timewheel_detail.hpp",
 			"sourceGroupIndex" : 1
 		}
 	],

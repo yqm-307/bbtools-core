@@ -19,8 +19,8 @@ message(STATUS "${PROJECT_SOURCE_DIR}")
 file(GLOB_RECURSE BBT_SRCS 
     ${PROJECT_SOURCE_DIR}/bbt/*.cc
     ${PROJECT_SOURCE_DIR}/bbt/*.hpp
-    ${PROJECT_SOURCE_DIR}/bbt/*.cpp
-    ${PROJECT_SOURCE_DIR}/bbt/*.h
+    # ${PROJECT_SOURCE_DIR}/bbt/*.cpp
+    # ${PROJECT_SOURCE_DIR}/bbt/*.h
 )
 # message("begin" ${BBT_SRCS} "end")
 
