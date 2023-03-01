@@ -1,5 +1,6 @@
 #include "bbt/timer/timewheel.hpp"
 #include "bbt/random/random.hpp"
+#include <atomic>
 using namespace bbt::timer;
 
 
@@ -37,34 +38,62 @@ void test1()
 void test2()
 {
     TimeWheel<std::function<void()>> timer;
-
+    std::atomic_int nCount(5000);
+    bbt::random::mt_random<int,1,1000> rd;
     std::mutex lock;
+    // consumer
     std::thread t([&](){
         while(1)
         {
+            bbt::timer::Timestamp<bbt::timer::ms> next;
             {
                 std::lock_guard<std::mutex> lo(lock);
-                timer.Tick();
+                while(bbt::timer::clock::is_expired<bbt::timer::milliseconds>(timer.GetNextTickTimestamp()))
+                {       
+                    timer.Tick();
+                }
+                next = timer.GetNextTickTimestamp();
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            std::this_thread::sleep_until(next);
         }
     });
-    for (int i =0;i<100;i+=5)
+
+    // producer
+    int jsucc=0,jfailed=0;
+    for (int i =0;i<5*5000;i+=5)
     {
         auto ptr = std::make_shared<decltype(timer)::Timer>();
-        ptr->Init([ptr](){
-            printf("timeout  | now:%ld | timeout:%ld\n",
-                bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count(),
-                ptr->GetTimeOut().time_since_epoch().count());
-        },clock::nowAfter(std::chrono::milliseconds(i+1000)));
+        ptr->Init([ptr,&nCount](){
+            nCount--;
+        },clock::nowAfter(std::chrono::milliseconds(rd())));
         {
             std::lock_guard<std::mutex> lo(lock);
             if (timer.AddTask(ptr))
             {
-                printf("addtask false!\n");
+                jsucc++;
+            }
+            else
+            {
+                jfailed++;
             }
         }
     }
+    
+    auto ptr = std::make_shared<decltype(timer)::Timer>();
+    ptr->Init([&timer,&lock,ptr,&nCount](){
+        printf("已触发: %d\n",nCount.load());
+        {
+            std::lock_guard<std::mutex> lo(lock);
+            ptr->Reset(clock::nowAfter(std::chrono::milliseconds(1000)));
+            timer.AddTask(ptr);
+        }
+
+    },clock::nowAfter(std::chrono::milliseconds(1000)));
+    {
+        std::lock_guard<std::mutex> lo(lock);
+        timer.AddTask(ptr);
+    }
+    printf("注册成功: %d\t注册失败: %d\n",jsucc,jfailed);
     t.join();
 }
 

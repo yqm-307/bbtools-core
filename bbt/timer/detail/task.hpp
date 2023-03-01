@@ -77,6 +77,24 @@ public:
     bbt::timer::Timestamp<bbt::timer::ms> GetTimeOut() const
     { return it_;}
 
+    TimeTask_InitStatus Reset(bbt::timer::Timestamp<bbt::timer::ms> timeout_ms)
+    {
+        TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
+        do
+        {
+            if (bbt::timer::clock::is_expired<bbt::timer::ms>(timeout_ms))
+            {
+                flag = TimeTask_InitStatus::IS_TimeOut;
+                break;
+            }
+            it_ = timeout_ms;
+            flag = TimeTask_InitStatus::OK;
+            m_status = Status::Waitting;
+        } while (0);
+
+        return flag;
+    }
+
     TimeTask_InitStatus Init(CallableType data,bbt::timer::Timestamp<bbt::timer::ms> timeout_ms)
     {
 

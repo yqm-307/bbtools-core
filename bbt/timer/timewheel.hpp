@@ -73,7 +73,7 @@ private:
         void Init();
         void TickTack();
         bool Add(TaskBasePtr task_ptr);
-        bbt::timer::Timestamp<bbt::timer::ms> GetNextSlotTimestamp();
+        bbt::timer::Timestamp<bbt::timer::ms> GetNextSlotTimestamp(); // 下一个 slot 全部超时的时间
     private:
         int Insert_Detail(TaskBasePtr task_ptr);
         void WheelLv1RotateOnce();  // 钟表摆臂转动一格
