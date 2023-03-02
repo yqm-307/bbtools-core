@@ -21,7 +21,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::Init()
     // 记录3级时间轮总共可以记录到的时间点,理解为这个时间点就是整个时间轮全部遍历完成的时间
     m_current_timestamp = bbt::timer::clock::now<bbt::timer::ms>(); 
     m_begin_timestamp   = bbt::timer::clock::now<bbt::timer::ms>();
-    m_end_timestamp     = bbt::timer::clock::now<bbt::timer::ms>() +  bbt::timer::ms(__bbt_max_range_of_timeout_ms__ + __bbt_tickonce_ms__);
+    m_end_timestamp     = m_begin_timestamp +  bbt::timer::ms(__bbt_max_range_of_timeout_ms__);
     // printf("begin: %ld ,end: %ld \n",m_begin_timestamp.time_since_epoch().count(),m_end_timestamp.time_since_epoch().count());
 }
 
@@ -127,7 +127,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::DelayQueueRotate()
     assert(!m_current_index_lv1 && !m_current_index_lv2 && !m_current_index_lv3);
     // 重置
     m_begin_timestamp = m_begin_timestamp + bbt::timer::milliseconds(__bbt_max_range_of_timeout_ms__);
-    m_begin_timestamp = m_begin_timestamp + bbt::timer::milliseconds(__bbt_max_range_of_timeout_ms__);
+    m_end_timestamp   = m_end_timestamp   + bbt::timer::milliseconds(__bbt_max_range_of_timeout_ms__);
 
     DoDelayQueueToWheelMap(
         m_delay_queue,
@@ -229,9 +229,12 @@ void TimeWheel<CallableType>::TimeWheel_Impl::DoDelayQueueToWheelMap(
     begin_time += bbt::timer::milliseconds(slot_interval_ms);   // ensure timeout
     int cur_index = 0;
     int j=0,k=0;
+    // while(!queue.empty())   // 导致延迟队列解析一定失败
+    
     while(!queue.empty())
     {
         auto task_ptr = queue.top();
+        if (cur_index>=slotnum) break;
         while(cur_index<slotnum)
         {   
             if (task_ptr->GetTimeOut() >= (begin_time + bbt::timer::milliseconds(slot_interval_ms*cur_index)))

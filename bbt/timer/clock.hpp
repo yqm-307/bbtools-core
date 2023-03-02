@@ -26,7 +26,7 @@ namespace clock
  * @brief 获取当前时间戳
  * @return Timestamp 时间戳
  */
-template<class timeaccuracy>
+template<class timeaccuracy = bbt::timer::milliseconds>
 inline Timestamp<timeaccuracy> utcnow()
 {
     return std::chrono::time_point_cast<timeaccuracy>(std::chrono::system_clock::now());
