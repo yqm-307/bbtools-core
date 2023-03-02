@@ -4,10 +4,12 @@
  * @brief 想要实现一个时间轮，本质上不想去实现滴答操作。因为Reactor模型中，根本不需要单独去为定时任务做一个线程
  *  一般都是直接嵌入到事件分发的大循环中。因此需要这样去做一个由外部驱动的时间轮。实现方法就是提供一个驱动接口，
  *  需要外部调用ticktack接口 (假设提供一个滴答接口，外部调用就会导致接口滴答一次，然后检查并触发超时任务)。
+ *
  * 
- *  时间轮的优缺点，其实非常的明显，空间换时间。
- *  空间占用大。如果定时任务非常多，那么相对来说时间槽占用的空间相对就少了。
- *  速度快，没错，其实就类似hash那种吧，数组很快的
+ * 注1*: 每个slot的时间都表示这个slot的结束时间
+ *  |--------------|  a slot
+ *  ^              ^
+ *  begin          end(this is slot time,ensure that all timers in this time period are timed out)
  * @version 0.1
  * @date 2023-01-02
  * 
@@ -19,11 +21,8 @@
 namespace bbt::timer
 {
 
-/**
- * @brief 时间轮定时器，纯数据结构实现(无锁)，外部驱动时钟滴答。如果需要自驱动，需要再封装。
- *  这样做好处就是，没有限制驱动形式，可以随意的放在任何的模型里面。比如事件驱动、循环驱动都可以
- *  直接放进去就行。 
- */
+
+
 template<typename CallableType>
 class TimeWheel 
 {
@@ -74,6 +73,7 @@ private:
         void TickTack();
         bool Add(TaskBasePtr task_ptr);
         bbt::timer::Timestamp<bbt::timer::ms> GetNextSlotTimestamp(); // 下一个 slot 全部超时的时间
+        size_t Size();
     private:
         int Insert_Detail(TaskBasePtr task_ptr);
         void WheelLv1RotateOnce();  // 钟表摆臂转动一格
@@ -103,8 +103,7 @@ private:
         // 当前时间轮的起始和结束时间
         bbt::timer::Timestamp<bbt::timer::ms> m_end_timestamp;
         bbt::timer::Timestamp<bbt::timer::ms> m_begin_timestamp;
-        
-            
+        size_t m_size;
     };
 
 private:

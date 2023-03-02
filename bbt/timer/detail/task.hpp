@@ -7,7 +7,7 @@
 #include "bbt/detail/Define.hpp"
 #include "bbt/timer/clock.hpp"
 #include "bbt/template_util/comparator.hpp"
-#include "bbt/timer/timewheel_def.hpp"
+#include "bbt/timer/detail/timewheel_def.hpp"
 #include "bbt/pool_util/idpool.hpp"
 template<typename CallableType>
 class TimeTask_Base final: public bbt::templateutil::comparator<bbt::timer::Timestamp<bbt::timer::ms>>
@@ -117,11 +117,11 @@ public:
 
     virtual bool operator==(const comparator<bbt::timer::Timestamp<bbt::timer::ms>>& r_value_) const override
     {
-        return it_ == r_value_.GetValue();
+        return ((it_).time_since_epoch().count() == r_value_.GetValue().time_since_epoch().count());
     }
     virtual bool operator>(const comparator<bbt::timer::Timestamp<bbt::timer::ms>>& r_value_) const override
     {
-        return it_ > r_value_.GetValue();
+        return ((it_).time_since_epoch().count() > r_value_.GetValue().time_since_epoch().count());
     }
 
 protected:

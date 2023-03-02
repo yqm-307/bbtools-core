@@ -22,6 +22,8 @@ build()
     cmake .
     make
     sudo cp -rf lib/libybbt.so /usr/lib/x86_64-linux-gnu/
+    echo "代码拷贝到/usr/local/include/"
+    echo "库文件拷贝到/usr/lib/x86_64-linux-gnu/"
     echo "install over"
 }
 
@@ -29,7 +31,8 @@ build()
 uninstall()
 {
     sudo rm -rf /usr/include/bbt
-    echo "删除src /usr/include/bbt"
+    sudo rm -rf /usr/local/include/bbt
+    echo "删除src /usr/include/bbt /usr/local/include/bbt"
     sudo rm -rf /usr/lib/x86_64-linux-gnu/libybbt.so
     echo "删除lib /usr/lib/x86_64-linux-gnu/libybbt.so"
 }
