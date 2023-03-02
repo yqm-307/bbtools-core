@@ -1,6 +1,7 @@
 #include "bbt/timer/timewheel.hpp"
 #include "bbt/random/random.hpp"
 #include <atomic>
+#include <map>
 using namespace bbt::timer;
 
 int a=0;
@@ -118,10 +119,12 @@ void test1()
 // 是否会丢失 timer
 void test2()
 {
+    const int timer_count = 20000;
     struct ctrl
     {
         std::atomic_int allcount=0;
         std::atomic_int trigger=0;
+        std::map<uint32_t,TimeWheel<std::function<void()>>::TaskBasePtr> map;
         void print()
         {
             printf("all: %5d \ttrigger: %d\n",allcount.load(),trigger.load());
@@ -129,14 +132,36 @@ void test2()
     }Ctrl;
     
     const int test_time_s = 300;    // 测试时长300s
-    const int timer_count = 20000;
     TimeWheel<std::function<void()>> wheel;
-    
+    bbt::random::mt_random<int,1000,200*1000> rd;
+    std::mutex mutex;
     for (int i = 0;i<timer_count;++i)
     {
         auto ptr = new_task();
-        ptr->Init();
-        assert(wheel.AddTask(ptr));
+        ptr->Init([&Ctrl,ptr](){
+            Ctrl.trigger++;
+            // Ctrl.map.insert(std::make_pair(ptr->TaskID(),ptr));
+            Ctrl.map.erase(ptr->TaskID());
+        },bbt::timer::clock::nowAfter(bbt::timer::milliseconds(rd())));
+        if (wheel.AddTask(ptr))
+        {
+            Ctrl.allcount += 1;
+            Ctrl.map.insert(std::make_pair(ptr->TaskID(),ptr));
+        }
+        else
+            printf("%ld %ld\n",ptr->GetTimeOut().time_since_epoch().count(),bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count());
+    }
+    auto ptr = new_task();
+    ptr->Init([&Ctrl,ptr,&wheel](){
+        Ctrl.print();
+        ptr->Reset(bbt::timer::clock::nowAfter(bbt::timer::milliseconds(5000)));
+        wheel.AddTask(ptr);
+    },bbt::timer::clock::nowAfter(bbt::timer::milliseconds(5000)));
+    wheel.AddTask(ptr);
+
+    while(1)
+    {
+        safe_timer_rotate(wheel,mutex);
     }
 }
 
@@ -165,7 +190,7 @@ void test3()
 
 int main(int argc,char* argv[])
 {
-    test1();
-    // test2();
+    // test1();
+    test2();
     // test3();
 }

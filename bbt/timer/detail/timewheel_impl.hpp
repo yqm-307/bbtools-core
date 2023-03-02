@@ -101,7 +101,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv2RotateOnce()
 template<typename CallableType>
 void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv3RotateOnce()
 {
-    printf("---> lv3 从动: %d %ld <---\n",m_current_index_lv3,bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count());
+    // printf("---> lv3 从动: %d %ld <---\n",m_current_index_lv3,bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count());
     m_current_index_lv3++; // 从动
     if (m_current_index_lv3 >= __bbt_slot_num__)
     {
@@ -230,7 +230,6 @@ void TimeWheel<CallableType>::TimeWheel_Impl::DoDelayQueueToWheelMap(
     int cur_index = 0;
     int j=0,k=0;
     // while(!queue.empty())   // 导致延迟队列解析一定失败
-    
     while(!queue.empty())
     {
         auto task_ptr = queue.top();
@@ -243,11 +242,12 @@ void TimeWheel<CallableType>::TimeWheel_Impl::DoDelayQueueToWheelMap(
             }   
             else{
                 wheel[cur_index].push(task_ptr); ++j;
+                queue.pop(); ++k;
                 break;
             }
         }
-        queue.pop(); ++k;
     }
+    assert(j == k);
 }
 
 template<typename CallableType>

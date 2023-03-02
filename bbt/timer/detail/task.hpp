@@ -74,6 +74,9 @@ public:
             m_status = Status::Canneled;
     }
 
+    uint32_t TaskID()
+    { return m_id; }
+
     bbt::timer::Timestamp<bbt::timer::ms> GetTimeOut() const
     { return it_;}
 
