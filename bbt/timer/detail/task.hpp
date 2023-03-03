@@ -4,7 +4,14 @@
  *  这个就需要考虑这个灵活性是否需要存在。（也可以通过函数闭包，算是通用方案，但是仍然是间接调用）
  */
 #pragma once
-#include "bbt/detail/Define.hpp"
+#include <memory>
+#include <chrono>
+#include <vector>
+#include <thread>
+#include <mutex>
+#include <assert.h>
+#include <queue>
+#include "bbt/config/bbtconfig.hpp"
 #include "bbt/timer/clock.hpp"
 #include "bbt/template_util/comparator.hpp"
 #include "bbt/timer/detail/timewheel_def.hpp"

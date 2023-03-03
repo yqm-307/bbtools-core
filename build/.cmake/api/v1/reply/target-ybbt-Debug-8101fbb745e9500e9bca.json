@@ -66,8 +66,8 @@
 			"sourceIndexes" : 
 			[
 				0,
-				4,
-				9
+				5,
+				10
 			]
 		}
 	],
@@ -97,8 +97,8 @@
 			"sourceIndexes" : 
 			[
 				0,
-				4,
-				9
+				5,
+				10
 			]
 		},
 		{
@@ -108,11 +108,11 @@
 				1,
 				2,
 				3,
-				5,
+				4,
 				6,
 				7,
 				8,
-				10,
+				9,
 				11,
 				12,
 				13,
@@ -120,7 +120,9 @@
 				15,
 				16,
 				17,
-				18
+				18,
+				19,
+				20
 			]
 		}
 	],
@@ -140,6 +142,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "bbt/assert/bbt_assert.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "bbt/config/bbtconfig.hpp",
 			"sourceGroupIndex" : 1
 		},
 		{
@@ -187,6 +194,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "bbt/threadpool/ThreadPool.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "bbt/threadpool/detail/ThreadPool_detail.hpp",
 			"sourceGroupIndex" : 1
 		},
 		{
