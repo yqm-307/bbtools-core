@@ -20,6 +20,7 @@ template<typename CallableType>
 class TimeTask_Base final: public bbt::templateutil::comparator<bbt::timer::Timestamp<bbt::timer::ms>>
 {
 public:
+    typedef uint32_t TaskID;
     enum Status:int
     {
         Uninitialized=0,
@@ -65,7 +66,7 @@ public:
         if ((m_status!=Status::Canneled) && Is_Expired())
         {
             m_data();  // 执行超时任务
-            m_status = Status::Finished;
+            m_status = Status::Finished;            
         }
         else
         {
@@ -75,13 +76,13 @@ public:
         }
     }
 
-    void Cannel()
+    void Cancel()
     {
         if (m_status == Waitting)
             m_status = Status::Canneled;
     }
 
-    uint32_t TaskID()
+    TaskID GetTaskID() const
     { return m_id; }
 
     bbt::timer::Timestamp<bbt::timer::ms> GetTimeOut() const
@@ -145,7 +146,7 @@ protected:
 private:
     CallableType    m_data;
     Status          m_status{Status:Uninitialized};
-    uint32_t        m_id;   // 初始化确定,存在期间不会改变
+    TaskID        m_id;   // 初始化确定,存在期间不会改变
     static bbt::pool_util::IDPool_Safe<uint32_t>*    
                     m_id_pool;
 };

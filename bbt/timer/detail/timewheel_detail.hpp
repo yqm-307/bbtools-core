@@ -28,4 +28,12 @@ bbt::timer::Timestamp<bbt::timer::ms> TimeWheel<CallableType>::GetNextTickTimest
 }
 
 
+template<typename CallableType>
+bool TimeWheel<CallableType>::CancelTask(TaskID task)
+{
+    return m_time_wheel_ptr->Cancel();
+}
+
+
+
 }

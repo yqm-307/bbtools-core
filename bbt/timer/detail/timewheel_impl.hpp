@@ -31,8 +31,13 @@ bool TimeWheel<CallableType>::TimeWheel_Impl::Add(TaskBasePtr task)
     assert(task != nullptr);
     if (task->Is_Expired())
         return false;
-    // if (Insert_Detail(task) == 0);    
-    return (Insert_Detail(task)==0);
+    if (Insert_Detail(task) == 0)
+    {
+        m_task2timer.insert(std::pair(task->GetTaskID(),task));
+        return true;
+    }   
+    else
+        return false;
 }
 
 template<typename CallableType>
@@ -57,7 +62,9 @@ void TimeWheel<CallableType>::TimeWheel_Impl::TickTack()
         assert(it->Is_Expired());
         it->TickTack();
         current_slot.pop();
+        m_task2timer.earse(it->GetTaskID());
         m_size--;
+
     }
     WheelLv1RotateOnce();
 }
@@ -262,12 +269,24 @@ bbt::timer::Timestamp<bbt::timer::ms> TimeWheel<CallableType>::TimeWheel_Impl::G
 }
 
 template<typename CallableType>
-size_t TimeWheel<CallableType>::TimeWheel_Impl::Size()
+size_t TimeWheel<CallableType>::TimeWheel_Impl::Size() const
 {
     return m_size;
 }
 
 
+template<typename CallableType>
+bool TimeWheel<CallableType>::TimeWheel_Impl::Cancel(TaskID id)
+{
+    auto it = m_task2timer.find(id);
+    if (it == m_task2timer.end())
+    {
+        return false;
+    }
+    else
+        it->second->Cancel();
+    return true;
+}
 
 
 #undef BBT_TW_LV1_Slot_MS

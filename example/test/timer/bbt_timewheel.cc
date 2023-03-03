@@ -141,12 +141,12 @@ void test2()
         ptr->Init([&Ctrl,ptr](){
             Ctrl.trigger++;
             // Ctrl.map.insert(std::make_pair(ptr->TaskID(),ptr));
-            Ctrl.map.erase(ptr->TaskID());
+            Ctrl.map.erase(ptr->GetTaskID());
         },bbt::timer::clock::nowAfter(bbt::timer::milliseconds(rd())));
         if (wheel.AddTask(ptr))
         {
             Ctrl.allcount += 1;
-            Ctrl.map.insert(std::make_pair(ptr->TaskID(),ptr));
+            Ctrl.map.insert(std::make_pair(ptr->GetTaskID(),ptr));
         }
         else
             printf("%ld %ld\n",ptr->GetTimeOut().time_since_epoch().count(),bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count());
@@ -165,32 +165,9 @@ void test2()
     }
 }
 
-// auto reset
-void test3()
-{
-    TimeWheel<std::function<void()>> timer;
-    std::mutex lock;
-
-    auto timer_ptr = std::make_shared<decltype(timer)::Timer>();
-    timer_ptr->Init([&](){
-        printf("Timer Tick now: %ld\t timeout:%ld\n",bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count(),timer_ptr->GetTimeOut().time_since_epoch().count());
-        a++;
-        timer_ptr->Reset(bbt::timer::clock::nowAfter(bbt::timer::seconds(1)));
-        assert(timer.AddTask(timer_ptr));   // 递归锁
-    },
-    bbt::timer::clock::nowAfter(bbt::timer::seconds(1)));
-    safe_insert(timer_ptr,timer,lock);
-    while(1)
-    {
-        safe_timer_rotate(timer,lock);
-    }
-    // safe_insert(timer_ptr,timer,lock);
-    
-}
 
 int main(int argc,char* argv[])
 {
     // test1();
     test2();
-    // test3();
 }

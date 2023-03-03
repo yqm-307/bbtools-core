@@ -28,16 +28,18 @@ class TimeWheel
 {
 public:
     typedef TimeTask_Base<CallableType> Timer;
-    typedef std::shared_ptr<TimeTask_Base<CallableType>> TaskBasePtr;
+    typedef std::shared_ptr<Timer> TaskBasePtr;
+    typedef Timer::TaskID   TaskID;
     struct TaskNode {TaskBasePtr m_ptr;TaskNode* m_next;};
 
 public:
     TimeWheel();
     
     bool AddTask(TaskBasePtr task);
-    bool CannelTask(TaskBasePtr task);
-    void Tick(); // 
+    bool CancelTask(TaskID task);
+    void Tick();
     bbt::timer::Timestamp<bbt::timer::ms> GetNextTickTimestamp();
+
 private:
     // 可以设置：禁用、启用，触发间隔，触发次数，回调，
     BBT_IMPL_STRUCT TimeWheel_Impl
@@ -45,6 +47,7 @@ private:
         typedef std::priority_queue<TaskBasePtr,std::vector<TaskBasePtr>,
                 std::function<bool(const TaskBasePtr& l,const TaskBasePtr& r)>>        DelayQueue;         // 延时队列
         typedef std::vector<DelayQueue>                 TimeWheelMap;       // 主动轮
+        typedef std::map<TaskID,TimeBasePtr>            TimerMap;
 
         /**
          * @brief 初始化TimeWheel
@@ -64,16 +67,18 @@ private:
          * @param tick_type 最小间隔，也就是时间轮精度 ,毫秒级
          * @param max_record_range_ms 最大记录时长，毫秒级
          */
-        void Del();
-        void Change();
-        void Set();
-        void Get();
+        // void Del();
+        // void Change();
+        // void Set();
+        // void Get();
 
         void Init();
         void TickTack();
         bool Add(TaskBasePtr task_ptr);
         bbt::timer::Timestamp<bbt::timer::ms> GetNextSlotTimestamp(); // 下一个 slot 全部超时的时间
-        size_t Size();
+        size_t Size() const;
+        bool Cancel(TaskID id);
+
     private:
         int Insert_Detail(TaskBasePtr task_ptr);
         void WheelLv1RotateOnce();  // 钟表摆臂转动一格
@@ -92,6 +97,8 @@ private:
         TimeWheelMap   m_wheel_lv2;    // 第二级存储轮 -- 存储数据,从动
         TimeWheelMap   m_wheel_lv3;    // 第二级存储轮 -- 存储数据,从动
         DelayQueue      m_delay_queue; // 范围之外的超时任务，暂存DelayQueue
+
+        TimerMap        m_task2timer;   
         
         int m_current_index_lv1;
         int m_current_index_lv2;
