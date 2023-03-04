@@ -7,7 +7,7 @@
 #include <memory>
 #include <condition_variable>   //mutex
 
-#include "../noncopyable/noncopyable.hpp"
+#include "bbt/template_util/noncopyable.hpp"
 
 #include <functional>
 
