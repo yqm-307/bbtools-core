@@ -147,9 +147,9 @@ private:
     CallableType    m_data;
     Status          m_status{Status:Uninitialized};
     TaskID        m_id;   // 初始化确定,存在期间不会改变
-    static bbt::pool_util::IDPool_Safe<uint32_t>*    
+    static bbt::pool_util::IDPool<uint32_t,true>*    
                     m_id_pool;
 };
 
 template<typename T>
-bbt::pool_util::IDPool_Safe<uint32_t>* TimeTask_Base<T>::m_id_pool = new bbt::pool_util::IDPool_Safe<uint32_t>(65535);
+bbt::pool_util::IDPool<uint32_t,true>* TimeTask_Base<T>::m_id_pool = new bbt::pool_util::IDPool_Safe<uint32_t>(65535);

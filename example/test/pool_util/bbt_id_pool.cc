@@ -12,7 +12,7 @@ using namespace bbt::threadpool;
 
 typedef std::function<void()> DoFunc;
 
-IDPool_Safe<uint32_t> id_pool(IDPool_MaxId);
+IDPool<uint32_t,true> id_pool(IDPool_MaxId);
 
 void test_1()
 {
