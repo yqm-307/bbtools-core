@@ -33,7 +33,7 @@ inline Timestamp<timeaccuracy> utcnow()
 }
 
 
-template<class timeaccuracy>
+template<class timeaccuracy = bbt::timer::milliseconds>
 inline Timestamp<timeaccuracy> now()
 {
     return std::chrono::time_point_cast<timeaccuracy>(std::chrono::system_clock::now());
@@ -47,7 +47,7 @@ inline Timestamp<timeaccuracy> now()
  * @param interval 加上多久时间（单位ns）
  * @return Timestamp 添加之后的时间戳
  */
-template<class timeaccuracy,class Tsp = Timestamp<timeaccuracy>>
+template<class timeaccuracy = bbt::timer::milliseconds,class Tsp = Timestamp<timeaccuracy>>
 inline Tsp nowAfter(timeaccuracy interval)
 { return now<timeaccuracy>() + interval; }
 
@@ -61,8 +61,8 @@ inline Tsp nowAfter(timeaccuracy interval)
  * @param interval 减去的多久时间（单位ns）
  * @return Timestamp 减去之后的时间戳
  */
-template<class timeaccuracy,class Timestamp>
-inline Timestamp nowBefore(timeaccuracy interval)
+template<class timeaccuracy = bbt::timer::milliseconds,class Tsp = Timestamp<timeaccuracy>>
+inline Tsp nowBefore(timeaccuracy interval)
 { return now<timeaccuracy>() - interval; }
 
 
