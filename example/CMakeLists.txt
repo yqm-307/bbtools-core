@@ -1,7 +1,7 @@
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin/example)
 
-add_executable(fileutil_test fileutil.cc)
-target_link_libraries(fileutil_test ybbt pthread)
+# 编译生成的二进制文件输出目录
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin/test)
 
-
-add_subdirectory(test)
+add_subdirectory(pool_util)
+add_subdirectory(timer)
+add_subdirectory(macro)

@@ -26,7 +26,9 @@
 					"build" : "example",
 					"childIndexes" : 
 					[
-						2
+						2,
+						3,
+						4
 					],
 					"jsonFile" : "directory-example-Debug-b6fca4a6d0a37c6ae6b9.json",
 					"minimumCMakeVersion" : 
@@ -35,56 +37,51 @@
 					},
 					"parentIndex" : 0,
 					"projectIndex" : 0,
-					"source" : "example",
-					"targetIndexes" : 
-					[
-						0
-					]
+					"source" : "example"
 				},
 				{
-					"build" : "example/test",
-					"childIndexes" : 
-					[
-						3,
-						4
-					],
-					"jsonFile" : "directory-example.test-Debug-e272dbd0dbbc608d7bcd.json",
+					"build" : "example/pool_util",
+					"jsonFile" : "directory-example.pool_util-Debug-7921a34059938e82b55a.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.2"
 					},
 					"parentIndex" : 1,
 					"projectIndex" : 0,
-					"source" : "example/test"
-				},
-				{
-					"build" : "example/test/pool_util",
-					"jsonFile" : "directory-example.test.pool_util-Debug-75cf96e0818128d0e0cd.json",
-					"minimumCMakeVersion" : 
-					{
-						"string" : "3.2"
-					},
-					"parentIndex" : 2,
-					"projectIndex" : 0,
-					"source" : "example/test/pool_util",
+					"source" : "example/pool_util",
 					"targetIndexes" : 
 					[
-						1
+						0
 					]
 				},
 				{
-					"build" : "example/test/timer",
-					"jsonFile" : "directory-example.test.timer-Debug-8181cd6dbb6a8c5a3f3b.json",
+					"build" : "example/timer",
+					"jsonFile" : "directory-example.timer-Debug-2784ac1e28c87607d853.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.2"
 					},
-					"parentIndex" : 2,
+					"parentIndex" : 1,
 					"projectIndex" : 0,
-					"source" : "example/test/timer",
+					"source" : "example/timer",
 					"targetIndexes" : 
 					[
 						2
+					]
+				},
+				{
+					"build" : "example/macro",
+					"jsonFile" : "directory-example.macro-Debug-42d59c3438530a402d7d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.2"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "example/macro",
+					"targetIndexes" : 
+					[
+						1
 					]
 				}
 			],
@@ -113,30 +110,30 @@
 			"targets" : 
 			[
 				{
-					"directoryIndex" : 1,
-					"id" : "fileutil_test::@70983d692f648185febe",
-					"jsonFile" : "target-fileutil_test-Debug-9464ba5b2ad190dacfab.json",
-					"name" : "fileutil_test",
-					"projectIndex" : 0
-				},
-				{
-					"directoryIndex" : 3,
-					"id" : "id_pool_test::@74e9a1a837bec67da7dd",
-					"jsonFile" : "target-id_pool_test-Debug-7aaa2e098925c5cfcb32.json",
+					"directoryIndex" : 2,
+					"id" : "id_pool_test::@54ea513b4dfffd164146",
+					"jsonFile" : "target-id_pool_test-Debug-582f45801d905b697db4.json",
 					"name" : "id_pool_test",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 4,
-					"id" : "timewheel_test::@5350d478f0055baf7f01",
-					"jsonFile" : "target-timewheel_test-Debug-80b163aef43bee1cfd5e.json",
+					"id" : "macro_test::@9b1c3acc78f0c53d598c",
+					"jsonFile" : "target-macro_test-Debug-769e0214f08327be971c.json",
+					"name" : "macro_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "timewheel_test::@98a9d31883854ed0598e",
+					"jsonFile" : "target-timewheel_test-Debug-6be01745d991087561fd.json",
 					"name" : "timewheel_test",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "ybbt::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ybbt-Debug-291beae90c946030cf0b.json",
+					"jsonFile" : "target-ybbt-Debug-efc23557e800c1d63d5f.json",
 					"name" : "ybbt",
 					"projectIndex" : 0
 				}

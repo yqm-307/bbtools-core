@@ -152,4 +152,4 @@ private:
 };
 
 template<typename T>
-bbt::pool_util::IDPool<uint32_t,true>* TimeTask_Base<T>::m_id_pool = new bbt::pool_util::IDPool_Safe<uint32_t>(65535);
+bbt::pool_util::IDPool<uint32_t,true>* TimeTask_Base<T>::m_id_pool = new bbt::pool_util::IDPool<uint32_t,true>(65535);

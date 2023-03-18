@@ -8,7 +8,7 @@
 	"installers" : [],
 	"paths" : 
 	{
-		"build" : "example/test",
-		"source" : "example/test"
+		"build" : "example/pool_util",
+		"source" : "example/pool_util"
 	}
 }

@@ -86,13 +86,13 @@
 			"path" : "example/CMakeLists.txt"
 		},
 		{
-			"path" : "example/test/CMakeLists.txt"
+			"path" : "example/pool_util/CMakeLists.txt"
 		},
 		{
-			"path" : "example/test/pool_util/CMakeLists.txt"
+			"path" : "example/timer/CMakeLists.txt"
 		},
 		{
-			"path" : "example/test/timer/CMakeLists.txt"
+			"path" : "example/macro/CMakeLists.txt"
 		}
 	],
 	"kind" : "cmakeFiles",

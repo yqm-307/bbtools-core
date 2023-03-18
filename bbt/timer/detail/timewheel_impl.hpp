@@ -6,7 +6,6 @@
 #define tmp_compare() [](const TaskBasePtr& l,const TaskBasePtr& r){return (*l) > (*r);};
 
 
-
 template<typename CallableType>
 void TimeWheel<CallableType>::TimeWheel_Impl::Init()
 {
@@ -62,7 +61,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::TickTack()
         assert(it->Is_Expired());
         it->TickTack();
         current_slot.pop();
-        m_task2timer.earse(it->GetTaskID());
+        m_task2timer.erase(it->GetTaskID());
         m_size--;
 
     }

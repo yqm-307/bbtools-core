@@ -16,7 +16,7 @@
 		],
 		"files" : 
 		[
-			"example/test/timer/CMakeLists.txt",
+			"example/timer/CMakeLists.txt",
 			"CMakeLists.txt"
 		],
 		"nodes" : 
@@ -81,7 +81,7 @@
 			"id" : "ybbt::@6890427a1f51a3e7e1df"
 		}
 	],
-	"id" : "timewheel_test::@5350d478f0055baf7f01",
+	"id" : "timewheel_test::@98a9d31883854ed0598e",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -100,7 +100,7 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "../../../lib/libybbt.so",
+				"fragment" : "../../lib/libybbt.so",
 				"role" : "libraries"
 			},
 			{
@@ -115,8 +115,8 @@
 	"nameOnDisk" : "timewheel_test",
 	"paths" : 
 	{
-		"build" : "example/test/timer",
-		"source" : "example/test/timer"
+		"build" : "example/timer",
+		"source" : "example/timer"
 	},
 	"sourceGroups" : 
 	[
@@ -133,7 +133,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "example/test/timer/bbt_timewheel.cc",
+			"path" : "example/timer/bbt_timewheel.cc",
 			"sourceGroupIndex" : 0
 		}
 	],

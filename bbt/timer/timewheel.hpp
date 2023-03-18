@@ -18,6 +18,7 @@
  */
 #pragma once
 #include "bbt/timer/detail/task.hpp"
+#include <map>
 namespace bbt::timer
 {
 
@@ -29,7 +30,7 @@ class TimeWheel
 public:
     typedef TimeTask_Base<CallableType> Timer;
     typedef std::shared_ptr<Timer> TaskBasePtr;
-    typedef Timer::TaskID   TaskID;
+    typedef typename Timer::TaskID   TaskID;
     struct TaskNode {TaskBasePtr m_ptr;TaskNode* m_next;};
 
 public:
@@ -47,7 +48,7 @@ private:
         typedef std::priority_queue<TaskBasePtr,std::vector<TaskBasePtr>,
                 std::function<bool(const TaskBasePtr& l,const TaskBasePtr& r)>>        DelayQueue;         // 延时队列
         typedef std::vector<DelayQueue>                 TimeWheelMap;       // 主动轮
-        typedef std::map<TaskID,TimeBasePtr>            TimerMap;
+        typedef std::map<TaskID,TaskBasePtr>            TimerMap;
 
         /**
          * @brief 初始化TimeWheel

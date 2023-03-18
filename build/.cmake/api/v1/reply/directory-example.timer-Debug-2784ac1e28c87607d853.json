@@ -8,7 +8,7 @@
 	"installers" : [],
 	"paths" : 
 	{
-		"build" : "example/test/timer",
-		"source" : "example/test/timer"
+		"build" : "example/timer",
+		"source" : "example/timer"
 	}
 }
