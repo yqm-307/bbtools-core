@@ -2,7 +2,6 @@
 #include "bbt/config/bbtconfig.hpp"
 
 
-#define BBT_DEBUG
 
 #define bbt_assert_debug(expr,infofunc,info)    _detail_bbt_assert_debug(expr,infofunc,info)
 #define bbt_assert(expr,infofunc,info)          _detail_bbt_assert(expr,infofunc,info)

@@ -13,7 +13,7 @@ namespace bbt::timer
     typedef std::chrono::minutes min;
     typedef std::chrono::hours hours;
 
-    template<class T>
+    template<typename T = ms>
     using Timestamp = std::chrono::time_point<std::chrono::system_clock,T>;
 
 
