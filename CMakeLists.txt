@@ -22,10 +22,12 @@ file(GLOB_RECURSE BBT_SRCS
     # ${PROJECT_SOURCE_DIR}/bbt/*.cpp
     # ${PROJECT_SOURCE_DIR}/bbt/*.h
 )
-message("begin" ${BBT_SRCS} "end")
+# message("begin" ${BBT_SRCS} "end")
 
 add_library(ybbt SHARED ${BBT_SRCS})
-
+target_link_libraries(ybbt 
+    pthread
+)
 
 # 编译例程
 add_subdirectory(example)

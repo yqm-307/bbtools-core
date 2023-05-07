@@ -11,8 +11,8 @@
 
 #include <functional>
 
-#if LOGGER_BUFFER_OFF
-#define YNET_LOG_BUFFER
+#ifndef BBT_LOG_ASYNC_OPEN
+#define BBT_LOG_ASYNC_OPEN 0
 #endif
 
 #ifndef LOG_LEVEL
@@ -20,7 +20,7 @@
 #endif
 
 #define ARRAY_NUM 8
-#define ARRAY_SIZE 1024*4   //4kb   linux下每次读写为4kb时，用户cpu时间和系统cpu时间最短
+#define ARRAY_SIZE 1024*4
 
 
 namespace  bbt::log
@@ -50,15 +50,15 @@ static const char* LeveL[6]{
 class Logger:noncopyable
 {
 public:
-    static Logger* GetInstance(std::string name = "./log.txt");
+    // 创建前调用
+    static Logger* GetInstance();
     void Log(LOGLEVEL level,const std::string log);
-    static void SetFileName(std::string name);
 
 private:
-    Logger(std::string);
+    Logger();
     ~Logger();
 
-#ifdef YNET_LOG_BUFFER
+#if BBT_LOG_ASYNC_OPEN > 0
     const char* GetFullArray();
     char* workarray(){return _buffers[_nowindex].second;}
     /**
@@ -71,16 +71,11 @@ private:
     void nextPending();
     bool hasfulled(){return _pendingwriteindex!=_nowindex;}
 #else
-    bool Dequeue(std::string& str);
 #endif
-    void Enqueue(std::string log);
-   
-    
-
     //todo flush 服务器关闭前，主动冲洗剩余内存
 private:
-
-#ifdef YNET_LOG_BUFFER
+    std::string GetLogName();
+#if BBT_LOG_ASYNC_OPEN > 0
     //buffer，第一个值是下一个节点下标。第二个值是储存数据
     std::vector<std::pair<int,char*>> _buffers;    //缓冲区
     int _nowsize;
@@ -96,12 +91,15 @@ private:
     std::function<void ()>  work;
     int _openfd;                    //文件
 #endif
-
+    bool _stdout_open;
 
 };
 
 std::string format(const char* fmt, ...);
-
+std::string format_red(const char* str,size_t len);
+std::string format_green(const char* str,size_t len);
+std::string format_yellow(const char* str,size_t len);
+std::string format_blue(const char* str,size_t len);
 
 
 

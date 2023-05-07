@@ -2,7 +2,8 @@
 #include <vector>
 #include <map>
 #include <typeinfo>
-#include "bbt/config/bbtconfig.hpp"
+#include "bbt/config/Define.hpp"
+
 
 
 namespace bbt::perf

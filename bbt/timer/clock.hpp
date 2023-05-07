@@ -1,21 +1,30 @@
 #pragma once
 #include <chrono>
 #include <iostream>
-
+#include <bbt/config/Define.hpp>
 namespace bbt::timer
 {
-    using namespace std::chrono;
-    using namespace std::chrono_literals;
-    typedef std::chrono::nanoseconds ns;
-    typedef std::chrono::microseconds us;
-    typedef std::chrono::milliseconds ms;
-    typedef std::chrono::seconds s;
-    typedef std::chrono::minutes min;
-    typedef std::chrono::hours hours;
 
-    template<typename T = ms>
-    using Timestamp = std::chrono::time_point<std::chrono::system_clock,T>;
+using namespace std::chrono;
+using namespace std::chrono_literals;
+typedef std::chrono::nanoseconds ns;
+typedef std::chrono::microseconds us;
+typedef std::chrono::milliseconds ms;
+typedef std::chrono::seconds s;
+typedef std::chrono::minutes min;
+typedef std::chrono::hours hours;
 
+template<typename T = ms>
+using Timestamp = std::chrono::time_point<std::chrono::system_clock,T>;
+
+// 时间值
+BBT_TIME_CONVERT_TYPE MinOfHour = 60;
+BBT_TIME_CONVERT_TYPE HourOfDay = 24;
+BBT_TIME_CONVERT_TYPE DayOfWeek = 7;
+BBT_TIME_CONVERT_TYPE SecOfMin = 60;
+BBT_TIME_CONVERT_TYPE SecOfHour = SecOfMin * MinOfHour; 
+BBT_TIME_CONVERT_TYPE SecOfDay = SecOfMin * MinOfHour * HourOfDay;
+BBT_TIME_CONVERT_TYPE SecOfWeek = SecOfDay * DayOfWeek;
 
 namespace clock
 {
@@ -193,5 +202,55 @@ inline bool is_expired(Tsp ts)
 }
 
 
+/*****************************************************
+ *  特殊时期函数,大多数精度到秒级
+ *****************************************************/
+
+/**
+ * @brief 获取1970.1.1 00:00:00 到当前时间的秒数
+ * @return uint32_t 
+ */
+static inline uint32_t UTCTime()
+{ return ::time(NULL); }
+
+/**
+ * @brief 获取有时区偏移的当前秒数(虚拟时间,一般用来做UTC时间计算)
+ * @return uint32_t 
+ */
+static inline uint32_t ZoneTime()
+{
+    time_t utc_now = ::time(NULL);
+    time_t gmt_now = ::mktime(gmtime(&utc_now));
+    bool isdst = (*localtime(&gmt_now)).tm_isdst;
+    int offset_sec = ((( utc_now - gmt_now )) + ( isdst ? SecOfHour : 0 ));
+    return (utc_now + offset_sec);
 }
+
+/**
+ * @brief 获取本周第几天
+ * @param time 毫秒时间戳
+ * @return int 本周第几天(1-7) (ps: 周一 00:00:00,其实还是周日,如果想要实现提前1s,入参提前1s即可)
+ */
+static inline int DayOfWeek(time_t secs)
+{
+    secs %= SecOfWeek;
+    int day = secs/SecOfDay;
+    return ((day+3)%7+1);
 }
+
+/**
+ * @brief 获取当天的第几个小时
+ * @param millisecond 时间戳
+ * @return int 当天第几个小时(1-24) (ps: 某小时 00:00,其实还是当前小时,如果想要实现提前1s,入参提前1s即可)
+ */
+static inline int HourOfDay(time_t secs)
+{
+    secs %= SecOfDay;
+    int nhours = secs/SecOfHour;
+    return nhours+1;
+}
+
+
+}// namespace clock
+
+}// namespace bbt::timer

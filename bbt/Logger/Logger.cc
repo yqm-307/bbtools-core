@@ -7,20 +7,25 @@
 #include <string.h>
 #include <assert.h>
 #include "./Logger.hpp"
-
+#include "bbt/config/GlobalConfig.hpp"
 using namespace bbt::log;
+using namespace bbt::config;
 //#define YNET_LOG_BUFFER
 
 
 
 
-Logger* Logger::GetInstance(std::string name)
+Logger* Logger::GetInstance()
 {
-    static Logger* _instance = new Logger(name);
+    static Logger* _instance = nullptr;
+    if (!_instance)
+    {
+       _instance = new Logger();
+    }
     return _instance;
 }
 
-#ifdef YNET_LOG_BUFFER
+#if BBT_LOG_ASYNC_OPEN > 0
 Logger::Logger(std::string name)
     :_pendingwriteindex(0),
     _nowindex(0),
@@ -56,21 +61,16 @@ Logger::Logger(std::string name)
     _writeThread = new std::thread(work);
 }
 #else
-Logger::Logger(std::string name)
+Logger::Logger()
 {
-    filename = name;
-    _openfd = open(filename.c_str(),O_RDWR|O_CREAT|O_APPEND,S_IRWXU);  //读写打开文件
-    work = [this](){
-        while(1)
-        {
-            static std::string line="";
-            if(this->_queue.empty())
-                continue;
-            this->Dequeue(line);                //取
-            write(this->_openfd,line.c_str(),line.size());  //写
-        }
-    };
-    _writeThread = new std::thread(work);
+    int* open = GlobalConfig::GetInstance()->GetDynamicCfg()->GetEntry<int>("BBT_LOG_STDOUT_OPEN");
+    if (open && ( *open > 0 ))
+        _stdout_open = true;
+    else
+        _stdout_open = false;
+
+    filename = GetLogName();
+    _openfd = ::open(filename.c_str(),O_RDWR|O_CREAT|O_APPEND,S_IRWXU);  //读写打开文件
 }
 #endif
 
@@ -88,7 +88,7 @@ Logger::~Logger()
 
 
 
-#ifdef YNET_LOG_BUFFER
+#if BBT_LOG_ASYNC_OPEN > 0
 //写入缓冲
 void Logger::Enqueue(std::string log)
 {
@@ -148,23 +148,6 @@ void Logger::nextPending()
 {
 }
 #else
-
-void Logger::Enqueue(std::string log)
-{
-    std::lock_guard<std::mutex> lock(_mutex);
-    _queue.push(log);
-}
-
-bool Logger::Dequeue(std::string& str)
-{
-    std::lock_guard<std::mutex> lock(_mutex);
-    if(_queue.size()<=0)
-        return false;
-    str = _queue.front();   //取队首
-    _queue.pop();           //出队
-    return true;
-}
-
 #endif
 
 
@@ -173,10 +156,9 @@ void Logger::Log(LOGLEVEL level ,const std::string str)
 {
     if(LOG_LEVEL > level)
         return;
-    //char log[128];
-    char log[1024];
+    char log[ARRAY_SIZE];
     int index = 0;
-
+    int len = 0;
 
     //
 	auto now = std::chrono::system_clock::now();
@@ -194,43 +176,124 @@ void Logger::Log(LOGLEVEL level ,const std::string str)
     switch (level)
     {
     case LOGLEVEL::LOG_TRACE :
-        strcpy(log+strlen(log),LeveL[0]);
+        strcpy(log + strlen(log), LeveL[0]);
         break;
     case LOGLEVEL::LOG_DEBUG :
-        strcpy(log+strlen(log),LeveL[1]);
+        strcpy(log + strlen(log), LeveL[1]);
         break;
     case LOGLEVEL::LOG_INFO :
-        strcpy(log+strlen(log),LeveL[2]);
+        strcpy(log + strlen(log), LeveL[2]);
         break;
     case LOGLEVEL::LOG_WARN :
-        strcpy(log+strlen(log),LeveL[3]);
+        strcpy(log + strlen(log), LeveL[3]);
         break;
     case LOGLEVEL::LOG_ERROR :
-        strcpy(log+strlen(log),LeveL[4]);
+        strcpy(log + strlen(log), LeveL[4]);
         break;
     case LOGLEVEL::LOG_FATAL :
-        strcpy(log+strlen(log),LeveL[5]);
+        strcpy(log + strlen(log), LeveL[5]);
         break;
     default:
         break;
     }
-    
-    strcpy(log+strlen(log),str.c_str());
-    strcpy(log+strlen(log),"\n");
-    Enqueue(log);
+    len = strlen(log);
+    strcpy(log + len, str.c_str());
+    len += str.size();
+    strcpy(log + len, "\n");
+    len += 1;
+
+    if (_stdout_open)
+    {
+        std::string line;
+        switch (level)
+        {
+        case LOGLEVEL::LOG_TRACE:
+        case LOGLEVEL::LOG_DEBUG:
+        case LOGLEVEL::LOG_INFO:
+            line = format_green(log, len);
+            break;
+        case LOGLEVEL::LOG_WARN:
+            line = format_yellow(log, len);
+            break;
+        case LOGLEVEL::LOG_ERROR:
+        case LOGLEVEL::LOG_FATAL:
+            line = format_red(log, len);   
+            break;     
+        default:
+            line = format_blue(log, len);
+            break;
+        }
+        write(STDOUT_FILENO,line.c_str(),line.size());
+    }
+    // 同步阻塞写,性能会有问题,其次可能阻塞
+    len = strlen(log);
+    while(len <= 0)
+    {
+        int n = write(_openfd,log,strlen(log));
+        if (n>0)
+        {
+            len -= n;
+        }
+    }
 }
 
+/**
+ * @brief 根据当前时间生成日志
+ *  格式: 20230412_14_35_00_123.log
+ * @return std::string 日志名
+ */
+std::string Logger::GetLogName()
+{
+    const int namelen = 255;
+    char name[namelen];
+    memset(name,'\0',namelen);
+	auto now = std::chrono::system_clock::now();
+    uint64_t dis_millseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count()
+		- std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count() * 1000;
+	time_t tt = std::chrono::system_clock::to_time_t(now);
+	tm* tm_time = localtime(&tt);
+
+    snprintf(name, namelen, "%4d%02d%02d_%02d_%02d_%02d_%06ld.log",
+                    tm_time->tm_year + 1900, tm_time->tm_mon + 1, tm_time->tm_mday,
+                    tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec, (int)dis_millseconds);
+    return std::string(name,strlen(name));
+}
 
 
 std::string bbt::log::format(const char* fmt, ...)
 {
-    char        data[128];
+    char        data[ARRAY_SIZE];
     size_t      i = 0;
     va_list     ap;
 
     va_start(ap, fmt);
-    vsnprintf(data + i, 128 - i, fmt, ap);
+    vsnprintf(data + i, sizeof(data) - i, fmt, ap);
     va_end(ap);
 
     return std::string(data);
+}
+
+std::string bbt::log::format_red(const char* str,size_t len)
+{
+    std::string string(len + 20,'\0');
+    snprintf(string.data(),string.size(),"\033[0m\033[1;31m%s\033[0m",str);
+    return string;
+}
+std::string bbt::log::format_green(const char* str,size_t len)
+{
+    std::string string(len + 20,'\0');
+    snprintf(string.data(),string.size(),"\033[0m\033[1;32m%s\033[0m",str);
+    return string;
+}
+std::string bbt::log::format_yellow(const char* str,size_t len)
+{
+    std::string string(len + 20,'\0');
+    snprintf(string.data(),string.size(),"\033[0m\033[1;33m%s\033[0m",str);
+    return string;
+}
+std::string bbt::log::format_blue(const char* str,size_t len)
+{
+    std::string string(len + 20,'\0');
+    snprintf(string.data(),string.size(),"\033[0m\033[1;34m%s\033[0m",str);
+    return string;
 }
