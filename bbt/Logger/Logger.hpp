@@ -6,21 +6,10 @@
 #include <atomic>
 #include <memory>
 #include <condition_variable>   //mutex
-
-#include "bbt/template_util/noncopyable.hpp"
-
 #include <functional>
+#include "bbt/template_util/noncopyable.hpp"
+#include "bbt/Define.hpp"
 
-#ifndef BBT_LOG_ASYNC_OPEN
-#define BBT_LOG_ASYNC_OPEN 0
-#endif
-
-#ifndef LOG_LEVEL
-#define LOG_LEVEL -1
-#endif
-
-#define ARRAY_NUM 8
-#define ARRAY_SIZE 1024*4
 
 
 namespace  bbt::log
@@ -28,12 +17,12 @@ namespace  bbt::log
 
 enum LOGLEVEL
 {
-    LOG_TRACE=0,        //跟踪点
-    LOG_DEBUG,          //调试
-    LOG_INFO,           //消息
-    LOG_WARN,           //警告
-    LOG_ERROR,          //错误
-    LOG_FATAL,          //致命错误
+    LOG_TRACE = 0,          //跟踪点
+    LOG_DEBUG = 1,          //调试
+    LOG_INFO  = 2,          //消息
+    LOG_WARN  = 3,          //警告
+    LOG_ERROR = 4,          //错误
+    LOG_FATAL = 5,          //致命错误
 };
 
 static const char* LeveL[6]{
@@ -46,7 +35,6 @@ static const char* LeveL[6]{
 };
 
 //缓冲日志
-
 class Logger:noncopyable
 {
 public:

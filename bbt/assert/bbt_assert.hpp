@@ -1,5 +1,5 @@
 #include <cassert>
-#include "bbt/config/Define.hpp"
+#include "bbt/Define.hpp"
 
 
 

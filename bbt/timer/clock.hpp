@@ -1,7 +1,7 @@
 #pragma once
 #include <chrono>
 #include <iostream>
-#include <bbt/config/Define.hpp>
+#include <bbt/Define.hpp>
 namespace bbt::timer
 {
 
@@ -16,6 +16,9 @@ typedef std::chrono::hours hours;
 
 template<typename T = ms>
 using Timestamp = std::chrono::time_point<std::chrono::system_clock,T>;
+
+template<typename T = ms>
+using Duration = std::chrono::duration<ms>; 
 
 // 时间值
 BBT_TIME_CONVERT_TYPE MinOfHour = 60;
@@ -35,14 +38,14 @@ namespace clock
  * @brief 获取当前时间戳
  * @return Timestamp 时间戳
  */
-template<class timeaccuracy = bbt::timer::milliseconds>
+template<class timeaccuracy = timer::ms>
 inline Timestamp<timeaccuracy> utcnow()
 {
     return std::chrono::time_point_cast<timeaccuracy>(std::chrono::system_clock::now());
 }
 
 
-template<class timeaccuracy = bbt::timer::milliseconds>
+template<class timeaccuracy = timer::ms>
 inline Timestamp<timeaccuracy> now()
 {
     return std::chrono::time_point_cast<timeaccuracy>(std::chrono::system_clock::now());
@@ -56,7 +59,7 @@ inline Timestamp<timeaccuracy> now()
  * @param interval 加上多久时间（单位ns）
  * @return Timestamp 添加之后的时间戳
  */
-template<class timeaccuracy = bbt::timer::milliseconds,class Tsp = Timestamp<timeaccuracy>>
+template<class timeaccuracy = timer::ms,class Tsp = Timestamp<timeaccuracy>>
 inline Tsp nowAfter(timeaccuracy interval)
 { return now<timeaccuracy>() + interval; }
 
@@ -70,7 +73,7 @@ inline Tsp nowAfter(timeaccuracy interval)
  * @param interval 减去的多久时间（单位ns）
  * @return Timestamp 减去之后的时间戳
  */
-template<class timeaccuracy = bbt::timer::milliseconds,class Tsp = Timestamp<timeaccuracy>>
+template<class timeaccuracy = timer::ms,class Tsp = Timestamp<timeaccuracy>>
 inline Tsp nowBefore(timeaccuracy interval)
 { return now<timeaccuracy>() - interval; }
 

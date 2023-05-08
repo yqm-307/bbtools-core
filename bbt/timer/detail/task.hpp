@@ -11,7 +11,7 @@
 #include <mutex>
 #include <assert.h>
 #include <queue>
-#include "bbt/config/Define.hpp"
+#include "bbt/Define.hpp"
 #include "bbt/timer/clock.hpp"
 #include "bbt/template_util/comparator.hpp"
 #include "bbt/timer/detail/timewheel_def.hpp"

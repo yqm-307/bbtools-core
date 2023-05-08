@@ -1,8 +1,6 @@
 #pragma once
 #include "GlobalConfig.hpp"
 
-using namespace bbt::config;
-
 template<typename Entry>
 Entry* GlobalConfig::DynamicConfig::GetEntry(const std::string& name)
 {

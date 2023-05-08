@@ -3,13 +3,13 @@
 #include <unordered_map>
 #include <vector>
 #include <memory>
-#include <bbt/template_util/noncopyable.hpp>
-#include "bbt/config/Define.hpp"
+#include "bbt/template_util/noncopyable.hpp"
+#include "bbt/Define.hpp"
 
 namespace bbt::config
 {
 
-class GlobalConfig : bbt::noncopyable
+class GlobalConfig : noncopyable
 {
 /**
  * @brief 系统初始化开始时,先设置配置信息.系统开始初始化则根据GlobalConfig获取配置数据

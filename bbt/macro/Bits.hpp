@@ -9,7 +9,7 @@
  * 
  */
 #include <bitset>
-#include "bbt/config/Define.hpp"
+#include "bbt/Define.hpp"
 
 
 /* 位运算都是从0开始,低位为0*/

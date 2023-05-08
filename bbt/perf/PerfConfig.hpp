@@ -2,7 +2,7 @@
 #include <vector>
 #include <map>
 #include <typeinfo>
-#include "bbt/config/Define.hpp"
+#include "bbt/Define.hpp"
 
 
 

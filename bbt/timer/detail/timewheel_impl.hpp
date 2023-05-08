@@ -18,9 +18,9 @@ void TimeWheel<CallableType>::TimeWheel_Impl::Init()
     }
     m_delay_queue =              DelayQueue([](const TaskBasePtr& l,const TaskBasePtr& r){return (*l) > (*r);});
     // 记录3级时间轮总共可以记录到的时间点,理解为这个时间点就是整个时间轮全部遍历完成的时间
-    m_current_timestamp = bbt::timer::clock::now<bbt::timer::ms>(); 
-    m_begin_timestamp   = bbt::timer::clock::now<bbt::timer::ms>();
-    m_end_timestamp     = m_begin_timestamp +  bbt::timer::ms(__bbt_max_range_of_timeout_ms__);
+    m_current_timestamp = timer::clock::now<timer::ms>(); 
+    m_begin_timestamp   = timer::clock::now<timer::ms>();
+    m_end_timestamp     = m_begin_timestamp +  timer::ms(__bbt_max_range_of_timeout_ms__);
     // printf("begin: %ld ,end: %ld \n",m_begin_timestamp.time_since_epoch().count(),m_end_timestamp.time_since_epoch().count());
 }
 
@@ -71,7 +71,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::TickTack()
 template<typename CallableType>
 void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv1RotateOnce()
 {
-    // printf("---> lv1 从动: %d %ld <---\n",m_current_index_lv1,bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count());
+    // printf("---> lv1 从动: %d %ld <---\n",m_current_index_lv1,timer::clock::now<timer::milliseconds>().time_since_epoch().count());
     m_current_index_lv1++;
     if (m_current_index_lv1 >= __bbt_slot_num__)
     {
@@ -82,7 +82,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv1RotateOnce()
 template<typename CallableType>
 void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv2RotateOnce()
 {
-    // printf("---> lv2 从动: %d %ld <---\n",m_current_index_lv2,bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count());
+    // printf("---> lv2 从动: %d %ld <---\n",m_current_index_lv2,timer::clock::now<timer::milliseconds>().time_since_epoch().count());
     m_current_index_lv2++; // 从动
     if (m_current_index_lv2 >= __bbt_slot_num__)
     {
@@ -91,7 +91,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv2RotateOnce()
         WheelLv3RotateOnce();
     }
 
-    auto begin = m_begin_timestamp + bbt::timer::milliseconds(
+    auto begin = m_begin_timestamp + timer::milliseconds(
                                             m_current_index_lv3*BBT_TW_LV3_Slot_MS + 
                                             m_current_index_lv2*BBT_TW_LV2_Slot_MS);
     // re map    
@@ -107,14 +107,14 @@ void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv2RotateOnce()
 template<typename CallableType>
 void TimeWheel<CallableType>::TimeWheel_Impl::WheelLv3RotateOnce()
 {
-    // printf("---> lv3 从动: %d %ld <---\n",m_current_index_lv3,bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count());
+    // printf("---> lv3 从动: %d %ld <---\n",m_current_index_lv3,timer::clock::now<timer::milliseconds>().time_since_epoch().count());
     m_current_index_lv3++; // 从动
     if (m_current_index_lv3 >= __bbt_slot_num__)
     {
         m_current_index_lv3=0;
         DelayQueueRotate();
     }
-    auto begin = m_begin_timestamp + bbt::timer::milliseconds(
+    auto begin = m_begin_timestamp + timer::milliseconds(
                                             m_current_index_lv3*BBT_TW_LV3_Slot_MS + 
                                             m_current_index_lv2*BBT_TW_LV2_Slot_MS +
                                             m_current_index_lv1*BBT_TW_LV1_Slot_MS);
@@ -132,8 +132,8 @@ void TimeWheel<CallableType>::TimeWheel_Impl::DelayQueueRotate()
 {
     assert(!m_current_index_lv1 && !m_current_index_lv2 && !m_current_index_lv3);
     // 重置
-    m_begin_timestamp = m_begin_timestamp + bbt::timer::milliseconds(__bbt_max_range_of_timeout_ms__);
-    m_end_timestamp   = m_end_timestamp   + bbt::timer::milliseconds(__bbt_max_range_of_timeout_ms__);
+    m_begin_timestamp = m_begin_timestamp + timer::milliseconds(__bbt_max_range_of_timeout_ms__);
+    m_end_timestamp   = m_end_timestamp   + timer::milliseconds(__bbt_max_range_of_timeout_ms__);
 
     DoDelayQueueToWheelMap(
         m_delay_queue,
@@ -146,7 +146,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::DelayQueueRotate()
 
 template<typename CallableType>
 typename TimeWheel<CallableType>::TimeWheel_Impl::DelayQueue* 
-    TimeWheel<CallableType>::TimeWheel_Impl::GetDelayQueueByTimestamp(bbt::timer::Timestamp<bbt::timer::ms> timestamp)
+    TimeWheel<CallableType>::TimeWheel_Impl::GetDelayQueueByTimestamp(timer::Timestamp<timer::ms> timestamp)
 {
     DelayQueue* queue_ptr = nullptr;
     do{
@@ -198,10 +198,10 @@ typename TimeWheel<CallableType>::TimeWheel_Impl::DelayQueue*
 
 #define IF_ZERO_OR_MINUS_ONE(expression) ( ((expression) == 0) ? 0 : (expression-1) ) 
 template<typename CallableType>
-std::tuple<bool,int,int,int> TimeWheel<CallableType>::TimeWheel_Impl::GetIndexsByTimestamp(bbt::timer::Timestamp<bbt::timer::ms> timestamp)
+std::tuple<bool,int,int,int> TimeWheel<CallableType>::TimeWheel_Impl::GetIndexsByTimestamp(timer::Timestamp<timer::ms> timestamp)
 {
     bool success = false;
-    // timestamp += bbt::timer::milliseconds(__bbt_tickonce_ms__);
+    // timestamp += timer::milliseconds(__bbt_tickonce_ms__);
     int wheel_index[3]={0,0,0};
     do{
         if (timestamp >= m_end_timestamp)
@@ -229,10 +229,10 @@ void TimeWheel<CallableType>::TimeWheel_Impl::DoDelayQueueToWheelMap(
     DelayQueue& queue,
     TimeWheelMap& wheel,
     int slotnum,
-    bbt::timer::Timestamp<bbt::timer::ms> begin_time,
+    timer::Timestamp<timer::ms> begin_time,
     int slot_interval_ms)
 {
-    begin_time += bbt::timer::milliseconds(slot_interval_ms);   // ensure timeout
+    begin_time += timer::milliseconds(slot_interval_ms);   // ensure timeout
     int cur_index = 0;
     int j=0,k=0;
     // while(!queue.empty())   // 导致延迟队列解析一定失败
@@ -242,7 +242,7 @@ void TimeWheel<CallableType>::TimeWheel_Impl::DoDelayQueueToWheelMap(
         if (cur_index>=slotnum) break;
         while(cur_index<slotnum)
         {   
-            if (task_ptr->GetTimeOut() >= (begin_time + bbt::timer::milliseconds(slot_interval_ms*cur_index)))
+            if (task_ptr->GetTimeOut() >= (begin_time + timer::milliseconds(slot_interval_ms*cur_index)))
             {
                 ++cur_index;
             }   
@@ -257,14 +257,14 @@ void TimeWheel<CallableType>::TimeWheel_Impl::DoDelayQueueToWheelMap(
 }
 
 template<typename CallableType>
-bbt::timer::Timestamp<bbt::timer::ms> TimeWheel<CallableType>::TimeWheel_Impl::GetNextSlotTimestamp()
+timer::Timestamp<timer::ms> TimeWheel<CallableType>::TimeWheel_Impl::GetNextSlotTimestamp()
 {   
-    auto NextTimeOut = m_begin_timestamp + bbt::timer::milliseconds(
+    auto NextTimeOut = m_begin_timestamp + timer::milliseconds(
         m_current_index_lv1 * BBT_TW_LV1_Slot_MS +
         m_current_index_lv2 * BBT_TW_LV2_Slot_MS +
         m_current_index_lv3 * BBT_TW_LV3_Slot_MS
     );
-    return (NextTimeOut + bbt::timer::milliseconds(__bbt_tickonce_ms__));   // 保证slot所有事件均超时
+    return (NextTimeOut + timer::milliseconds(__bbt_tickonce_ms__));   // 保证slot所有事件均超时
 }
 
 template<typename CallableType>

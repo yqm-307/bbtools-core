@@ -22,7 +22,7 @@ void TimeWheel<CallableType>::Tick()
 }
 
 template<typename CallableType>
-bbt::timer::Timestamp<bbt::timer::ms> TimeWheel<CallableType>::GetNextTickTimestamp()
+timer::Timestamp<timer::ms> TimeWheel<CallableType>::GetNextTickTimestamp()
 {
     m_time_wheel_ptr->GetNextSlotTimestamp();
 }
