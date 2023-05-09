@@ -60,11 +60,11 @@
 			[
 				{
 					"backtrace" : 4,
-					"path" : "/home/yqm/Git/biangbiangtools/bbt"
+					"path" : "/home/yqm/Git/owner/biangbiangtools/bbt"
 				},
 				{
 					"backtrace" : 4,
-					"path" : "/home/yqm/Git/biangbiangtools"
+					"path" : "/home/yqm/Git/owner/biangbiangtools"
 				}
 			],
 			"language" : "CXX",
@@ -95,12 +95,16 @@
 				"role" : "flags"
 			},
 			{
-				"fragment" : "-Wl,-rpath,/home/yqm/Git/biangbiangtools/build/lib",
+				"fragment" : "-Wl,-rpath,/home/yqm/Git/owner/biangbiangtools/build/lib",
 				"role" : "libraries"
 			},
 			{
 				"backtrace" : 2,
 				"fragment" : "../../lib/libybbt.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lpthread",
 				"role" : "libraries"
 			}
 		],

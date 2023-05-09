@@ -98,8 +98,8 @@
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "/home/yqm/Git/biangbiangtools/build",
-		"source" : "/home/yqm/Git/biangbiangtools"
+		"build" : "/home/yqm/Git/owner/biangbiangtools/build",
+		"source" : "/home/yqm/Git/owner/biangbiangtools"
 	},
 	"version" : 
 	{

@@ -1,6 +1,14 @@
-#ifndef LOGGER_H
-#define LOGGER_H
-
+/**
+ * @file Logger.hpp
+ * @author your name (you@domain.com)
+ * @brief 两种模式的日志，异步缓冲模式和同步模式
+ * @version 0.1
+ * @date 2023-05-09
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+#pragma once
 #include <queue>
 #include <thread>
 #include <atomic>
@@ -10,8 +18,7 @@
 #include "bbt/template_util/noncopyable.hpp"
 #include "bbt/Define.hpp"
 
-
-
+#define BBT_LOG_ASYNC_OPEN 1
 namespace  bbt::log
 {
 
@@ -100,6 +107,3 @@ std::string format_blue(const char* str,size_t len);
 
 
 }
-
-
-#endif

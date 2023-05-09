@@ -1,7 +1,12 @@
 #pragma once
 
 
-// CPP LIB
+// C
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+// CPP
 #include <memory>
 #include <chrono>
 #include <vector>
@@ -37,8 +42,11 @@
 
 namespace bbt
 {
+
+#define BBT_DEBUG
+
 namespace bbt::log
-{
+{ 
 #ifndef BBT_LOG_ASYNC_OPEN
 #define BBT_LOG_ASYNC_OPEN 0
 #endif
@@ -49,9 +57,13 @@ namespace bbt::log
 
 #define ARRAY_NUM 8
 #define ARRAY_SIZE 1024*4
-
-
-
 }// namespace bbt::log
+
+
+namespace bbt::file
+{
+#define BBT_PAGE_SIZE 4096
+
+}// namespace bbt::file
 
 }// namespace bbt

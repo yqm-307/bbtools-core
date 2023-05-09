@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/yqm/Git/biangbiangtools/build"
+			"value" : "/home/yqm/Git/owner/biangbiangtools/build"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -475,7 +475,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/yqm/Git/biangbiangtools"
+			"value" : "/home/yqm/Git/owner/biangbiangtools"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -1011,7 +1011,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/yqm/Git/biangbiangtools/build"
+			"value" : "/home/yqm/Git/owner/biangbiangtools/build"
 		},
 		{
 			"name" : "YUtil_IS_TOP_LEVEL",
@@ -1035,7 +1035,19 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/yqm/Git/biangbiangtools"
+			"value" : "/home/yqm/Git/owner/biangbiangtools"
+		},
+		{
+			"name" : "ybbt_LIB_DEPENDS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Dependencies for the target"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "general;pthread;"
 		}
 	],
 	"kind" : "cache",
