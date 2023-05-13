@@ -18,7 +18,6 @@
 #include "bbt/template_util/noncopyable.hpp"
 #include "bbt/Define.hpp"
 
-#define BBT_LOG_ASYNC_OPEN 1
 namespace  bbt::log
 {
 

@@ -36,6 +36,11 @@
 /*版本问题、中途觉得设计不合理、可能无用等原因暂时弃用而不删除*/
 #define Deprecate
 
+
+
+
+
+
 /**
  * @brief 不同模块的宏统一定义到这里,宏没有符号,所以用 namespace 来让看起来更美观
  */
@@ -57,6 +62,8 @@ namespace bbt::log
 
 #define ARRAY_NUM 8
 #define ARRAY_SIZE 1024*4
+
+#define BBT_LOG_ASYNC_OPEN 0
 }// namespace bbt::log
 
 

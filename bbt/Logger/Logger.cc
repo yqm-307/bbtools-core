@@ -59,7 +59,7 @@ Logger::Logger(std::string name)
 #else
 Logger::Logger()
 {
-    int* open = GlobalConfig::GetInstance()->GetDynamicCfg()->GetEntry<int>("BBT_LOG_STDOUT_OPEN");
+    int* open = GlobalConfig::GetInstance()->GetDynamicCfg()->GetEntry<int>(BBTSysCfg[BBT_LOG_STDOUT_OPEN]);
     if (open && ( *open > 0 ))
         _stdout_open = true;
     else
@@ -223,12 +223,16 @@ void Logger::Log(LOGLEVEL level ,const std::string str)
     }
     // 同步阻塞写,性能会有问题,其次可能阻塞
     len = strlen(log);
-    while(len <= 0)
+    while(len > 0)
     {
         int n = write(_openfd,log,strlen(log));
         if (n>0)
         {
             len -= n;
+        }
+        else
+        {
+            //todo错误处理
         }
     }
 }
