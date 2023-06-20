@@ -59,7 +59,7 @@ Logger::Logger(std::string name)
 #else
 Logger::Logger()
 {
-    int* open = GlobalConfig::GetInstance()->GetDynamicCfg()->GetEntry<int>(BBTSysCfg[BBT_LOG_STDOUT_OPEN]);
+    const int* open = GlobalConfig::GetInstance()->GetDynamicCfg()->GetEntry<int>(BBTSysCfg[BBT_LOG_STDOUT_OPEN]);
     if (open && ( *open > 0 ))
         _stdout_open = true;
     else

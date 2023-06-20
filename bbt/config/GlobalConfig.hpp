@@ -20,12 +20,12 @@ BBT_IMPL_CLASS DynamicConfig
 public:
     // static DynamicConfig* GetInstance();
     template<typename Entry>
-    Entry* GetEntry(const std::string& name);
+    const Entry *const GetEntry(const std::string& name);
 
     template<typename Entry>
-    bool SetEntry(const std::string& name,Entry* config);
+    bool SetEntry(const std::string& name,const Entry *const config);
 private:
-    std::unordered_map<std::string,void*> m_config_entry;    
+    std::unordered_map<std::string,const void *const> m_config_entry;    
 };
 
 public:
