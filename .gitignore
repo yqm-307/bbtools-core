@@ -46,3 +46,9 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+
+
+#忽略文件夹
+build/
+bin/
+.vscode/
