@@ -1,3 +1,4 @@
+#pragma once
 #include "bbt/threadpool/ThreadPool.hpp"
 // template<typename T>
 // class ThreadPool;

@@ -1,3 +1,4 @@
+#pragma once
 #include "bbt/timer/timewheel.hpp"
 
 #define BBT_TW_LV1_Slot_MS   (__bbt_tickonce_ms__)

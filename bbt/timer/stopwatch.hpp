@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2023
  * 
  */
-
+#pragma once
 #include "bbt/Define.hpp"
 #include "bbt/timer/clock.hpp"
 

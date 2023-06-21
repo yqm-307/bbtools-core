@@ -1,3 +1,4 @@
+#pragma once
 #include "bbt/timer/clock.hpp"
 
 inline static const int __bbt_tickonce_ms__ = 5;   // tick once interval

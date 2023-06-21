@@ -1,16 +1,8 @@
 #pragma once
-#include "../Uuid.hpp"
-#include "bbt/timer/clock.hpp"
-#include "bbt/random/random.hpp"
-#include <cstring>
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <net/if.h>
-#include <sys/ioctl.h>
 
 namespace bbt::uuid
 {
+
 template<int Version>
 UuidBase<Version>::UuidBase() 
 {
@@ -42,39 +34,49 @@ template<int Version>
 void UuidBase<Version>::GenerateBase(char* id)
 {
     bbt_mac_addr mac;
-    bbt::random::mt_random rand();
+    random::mt_random<uint64_t> rand;
     int offset = 0;
     // 填充mac
     assert(GetAMacAddr(&mac) >= 0);
     memcpy( m_id + offset, 
-            mac, 
+            (char*)&(mac.addr), 
             sizeof(mac));
     offset += sizeof(mac);
     // 填充时间戳
-    auto ns = bbt::timer::clock::now<bbt::timer::ns>().time_since_epoch().count();
+    auto ns = timer::clock::now<timer::ns>().time_since_epoch().count();
     memcpy( m_id + offset,
-            ns, 
+            (char*)&ns, 
             sizeof(ns));
     offset += sizeof(ns);
     // 填充版本号
+    uint16_t ver = Version;
     memcpy( m_id + offset,
-            Version,
-            sizeof(Version));
-    offset += sizeof(Version);
+            (char*)&ver,
+            sizeof(ver));
+    offset += sizeof(ver);
     // 填充随机数 8 字节
     uint64_t randnum = rand();
-    memcpy( m_id + offset
-            randnum,
-            sizeof(randnum));
-    offset += sizeof(random);
-    // 填充拓展位
-    uint64_t ext = 0x0;
     memcpy( m_id + offset,
-            ext,
+            (char*)(&randnum),
+            sizeof(randnum));
+    offset += sizeof(randnum);
+    // 填充拓展位 8 字节
+    // pid  4 字节
+    pid_t pid = getpid();
+    memcpy( m_id + offset,
+            (char*)&pid,
+            sizeof(pid));
+    offset += sizeof(pid);
+    // 拓展位
+    uint32_t ext = UINT32_MAX;
+    memcpy( m_id + offset,
+            (char*)&ext,
             sizeof(ext));
+    offset += sizeof(ext);
 }
 
-int GetLocalMacAddr(const std::string& networkcard, bbt_mac_addr *mac)
+template<int Version>
+int UuidBase<Version>::GetLocalMacAddr(const std::string& networkcard, bbt_mac_addr *mac)
 {
     if ( networkcard.empty() || mac == nullptr )
     {
@@ -85,7 +87,7 @@ int GetLocalMacAddr(const std::string& networkcard, bbt_mac_addr *mac)
     int fd;
     fd = socket(AF_INET, SOCK_STREAM, 0);
     ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name, networkcard.c_str(), 16);
+    strncpy(ifr.ifr_name, networkcard.c_str(), sizeof(ifr.ifr_name));
 
     if (ioctl(fd, SIOCGIFHWADDR, &ifr) != 0 )
         return -1;
@@ -94,15 +96,62 @@ int GetLocalMacAddr(const std::string& networkcard, bbt_mac_addr *mac)
     return 0;
 }
 
-int GetAMacAddr(bbt_mac_addr *mac)
+template<int Version>
+int UuidBase<Version>::GetAMacAddr(bbt_mac_addr *mac)
 {
-    int fd = 0;
-    struct ifconf myconf;
-    struct ifreq  myreq;
-    char szbuf[1<<16] = {0};
-    char* ip;
+	int fd = 0;
+	struct ifconf ifMyConf;
+	struct ifreq tmpreq;
+	char szBuf[20480] = {0};
+    char interface_name[IFNAMSIZ];
+	
+	
+	ifMyConf.ifc_len = 2048;
+	ifMyConf.ifc_buf = szBuf;
+ 
+	if((fd = socket (AF_INET, SOCK_DGRAM, 0)) < 0  )
+	{
+		return -1;
+	}
+ 
+	if(ioctl (fd, SIOCGIFCONF, &ifMyConf))
+	{
+		close(fd);
+		return -1;
+	}
+	
+	struct ifreq *it = ifMyConf.ifc_req;
+	const struct ifreq * const end = it + (ifMyConf.ifc_len / sizeof(struct ifreq));
+ 
+	for(;it != end; ++it)
+	{
+        // 排除环回地址
+        strncpy(interface_name, it->ifr_name, sizeof(interface_name));
+        const std::string loname = "lo";
+        if( interface_name == loname )
+            continue;
+        GetLocalMacAddr(std::string(interface_name, sizeof(interface_name)), mac);
 
-    
+        close(fd);
+        return 0;
+	}
+	close(fd);
+    return -1;
+}
+
+template<int Version>
+std::string UuidBase<Version>::GetRawString()
+{
+    return std::string(m_id, sizeof(m_id));
+}
+
+
+template<int Version>
+UuidMgr::UuidPtr<Version> UuidMgr::CreateUUid()
+{
+    auto id = std::make_shared<UuidBase<Version>>();
+    id->Generate();
+    return id;
 }
 
 }

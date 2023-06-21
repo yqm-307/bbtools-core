@@ -34,7 +34,7 @@ public:
     result_type operator()();
     
 protected:
-    uint32_t _mod_val;
+    uint64_t _mod_val;          // 模数
     std::mt19937_64 _mt19937;   // 线性同余随机数发生器
 };
 
@@ -44,7 +44,7 @@ template<typename result_type,result_type _min,result_type _max>
 mt_random<result_type,_min,_max>::mt_random()
 {
     assert(_min < _max);
-    _mod_val=_max-_min;
+    _mod_val = (result_type)_max - (result_type)_min;
     // 获取随机种子
     auto tp = std::chrono::system_clock::now();
     _mt19937.seed(tp.time_since_epoch().count());

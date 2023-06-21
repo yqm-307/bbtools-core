@@ -8,6 +8,7 @@
  * @copyright Copyright (c) 2023
  * 
  */
+#pragma once
 #include <iostream>
 
 namespace bbt::pool_util

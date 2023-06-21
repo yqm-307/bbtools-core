@@ -9,6 +9,7 @@
  * 
  */
 
+#pragma once
 #ifdef BBT_DEBUG
 #include "bbt/perf/util/objecttracker/ObjectTracker_Debug.hpp"
 #else

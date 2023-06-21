@@ -1,9 +1,22 @@
 #pragma once
+#include "bbt/timer/clock.hpp"
+#include "bbt/random/random.hpp"
 #include <iostream>
-#define BBT_UUID_BASE_LENGTH 32
+#include <cstring>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/ioctl.h>
 
+#define BBT_UUID_BASE_LENGTH 32
 namespace bbt::uuid
 {
+
+class UuidMgr;
+
 
 // 封装mac地址
 struct bbt_mac_addr
@@ -24,12 +37,14 @@ struct bbt_mac_addr
 
 template<int Version>
 class UuidBase{
+friend class UuidMgr;
 public:
     UuidBase();
     ~UuidBase();
 
     bool operator==(const UuidBase& other);
     bool operator!=(const UuidBase& other);
+    std::string GetRawString();
 protected:
     virtual void Generate();
     void GenerateBase(char* id);
@@ -60,11 +75,16 @@ private:
  */
 class UuidMgr
 {
-friend class uuid;
+    template <int Version>
+    using UuidPtr = std::shared_ptr<UuidBase<Version>>;
+
 public:
+    template<int Version>
+    static UuidPtr<Version> CreateUUid();
 private:
 };
 
-#include "detail/uuid_detail.hpp"
-
 }// namespace bbt::uuid
+
+
+#include "detail/uuid_detail.hpp"
