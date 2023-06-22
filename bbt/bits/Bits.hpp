@@ -31,8 +31,8 @@
 // 从bits中取出高n位
 #define BBT_BITS_GetHighOrder(bits,n)    (bits >> (sizeof(bits) - n) << (sizeof(b) - n))
 
-// bits中n位是否为1
-#define BBT_BITS_NIsFull(bits,n)         ((bits & (0x1 << n)))
+// bits中n位是否为1; 此宏结果为0表示第n位是1,此宏结果大于0表示第n位是1
+#define BBT_BITS_NIsFull(bits,n)         (bits & (0x1 << n))
 
-// bits中n位是否为0
-#define BBT_BITS_NIsBlank(bits,n)        ((bits >> n & 1) == 0)
+// bits中n位是否为0; 此宏结果为
+#define BBT_BITS_NIsBlank(bits,n)        (!BBT_BITS_NIsFull(bits,n))

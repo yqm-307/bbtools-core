@@ -1,6 +1,7 @@
-#include "bbt/macro/Bits.hpp"
+#include "bbt/bits/BitUtil.hpp"
 #include "bbt/random/random.hpp"
 #include <iostream>
+#include <cstring>
 
 using namespace bbt::random;
 mt_random<int,0,10> rd;
@@ -21,7 +22,19 @@ void Bits()
     }
 }
 
+void BitToString()
+{
+    int a = 1 << 4;
+    int b = 1 << 12;
+    char p[8];
+    memcpy(p, (char*)&a, 4);
+    memcpy(p + 4, (char*)&b, 4);
+    auto str = bbt::bits::BitUtil::ParseStr2BitStr(p, sizeof(p));
+    printf("比特串: %s\n", str.c_str());
+}
+
 int main(int argc,char* argv[])
 {
-    Bits();
+    // Bits();
+    BitToString();
 }
