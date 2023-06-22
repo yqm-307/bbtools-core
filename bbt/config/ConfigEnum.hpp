@@ -20,11 +20,14 @@ namespace bbt::config
 enum _BBTSysCfg
 {
     BBT_LOG_STDOUT_OPEN = 1,
+    BBT_UUID_VERSION = 200,
 };
 
 static std::unordered_map<_BBTSysCfg,std::string> BBTSysCfg =
 {
     Entry(BBT_LOG_STDOUT_OPEN),
+    // uuid 版本号
+    Entry(BBT_UUID_VERSION),
 };
 
 }

@@ -1,37 +1,31 @@
 #pragma once
+#include "bbt/uuid/Uuid.hpp"
+#include "bbt/config/GlobalConfig.hpp"
+using namespace bbt::uuid;
 
-namespace bbt::uuid
-{
-
-template<int Version>
-UuidBase<Version>::UuidBase() 
+UuidBase::UuidBase() 
 {
     bzero(m_id, sizeof(m_id));
 }
 
-template<int Version>
-UuidBase<Version>::~UuidBase() {}
+UuidBase::~UuidBase() {}
 
-template<int Version>
-bool UuidBase<Version>::operator==(const UuidBase& other)
+bool UuidBase::operator==(const UuidBase& other)
 {
     return (strcmp(m_id, other.m_id) == 0);
 }
 
-template<int Version>
-bool UuidBase<Version>::operator!=(const UuidBase& other)
+bool UuidBase::operator!=(const UuidBase& other)
 {
     return !((*this) == other);
 }
 
-template<int Version>
-void UuidBase<Version>::Generate()
+void UuidBase::Generate()
 {
     GenerateBase(m_id);
 }
 
-template<int Version>
-void UuidBase<Version>::GenerateBase(char* id)
+void UuidBase::GenerateBase(char* id)
 {
     bbt_mac_addr mac;
     random::mt_random<uint64_t> rand;
@@ -49,7 +43,12 @@ void UuidBase<Version>::GenerateBase(char* id)
             sizeof(ns));
     offset += sizeof(ns);
     // 填充版本号 2字节
-    uint16_t ver = Version;
+    auto ptr = config::GlobalConfig::GetInstance()->GetDynamicCfg()->GetEntry<int>(
+        config::BBTSysCfg[config::_BBTSysCfg::BBT_UUID_VERSION]);
+    uint16_t ver = 0;
+    if(ptr != nullptr )
+        ver = *ptr;
+
     memcpy( m_id + offset,
             (char*)&ver,
             sizeof(ver));
@@ -74,8 +73,7 @@ void UuidBase<Version>::GenerateBase(char* id)
     offset += sizeof(ext);
 }
 
-template<int Version>
-int UuidBase<Version>::GetLocalMacAddr(const std::string& networkcard, bbt_mac_addr *mac)
+int UuidBase::GetLocalMacAddr(const std::string& networkcard, bbt_mac_addr *mac)
 {
     if ( networkcard.empty() || mac == nullptr )
     {
@@ -95,8 +93,7 @@ int UuidBase<Version>::GetLocalMacAddr(const std::string& networkcard, bbt_mac_a
     return 0;
 }
 
-template<int Version>
-int UuidBase<Version>::GetAMacAddr(bbt_mac_addr *mac)
+int UuidBase::GetAMacAddr(bbt_mac_addr *mac)
 {
 	int fd = 0;
 	struct ifconf ifMyConf;
@@ -138,19 +135,15 @@ int UuidBase<Version>::GetAMacAddr(bbt_mac_addr *mac)
     return -1;
 }
 
-template<int Version>
-std::string UuidBase<Version>::GetRawString()
+std::string UuidBase::GetRawString()
 {
     return std::string(m_id, sizeof(m_id));
 }
 
 
-template<int Version>
-UuidMgr::UuidPtr<Version> UuidMgr::CreateUUid()
+UuidMgr::UuidPtr UuidMgr::CreateUUid()
 {
-    auto id = std::make_shared<UuidBase<Version>>();
+    auto id = std::make_shared<UuidBase>();
     id->Generate();
     return id;
-}
-
 }

@@ -33,6 +33,10 @@
 
 #define BBT_CONFIG() (bbt::config::GlobalConfig::GetInstance())
 
+#define BBT_CONFIG_QUICK_SET_DYNAMIC_ENTRY(type, value, entry) \
+        (BBT_CONFIG()->GetDynamicCfg()->SetEntry<type>(\
+        bbt::config::BBTSysCfg[entry], value))
+
 /*版本问题、中途觉得设计不合理、可能无用等原因暂时弃用而不删除*/
 #define Deprecate
 

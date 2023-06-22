@@ -36,7 +36,6 @@ struct bbt_mac_addr
  * [ ... 字节]  # 拓展位,继承拓展
  */
 
-template<int Version>
 class UuidBase{
 friend class UuidMgr;
 public:
@@ -76,16 +75,11 @@ private:
  */
 class UuidMgr
 {
-    template <int Version>
-    using UuidPtr = std::shared_ptr<UuidBase<Version>>;
+    using UuidPtr = std::shared_ptr<UuidBase>;
 
 public:
-    template<int Version>
-    static UuidPtr<Version> CreateUUid();
+    static UuidPtr CreateUUid();
 private:
 };
 
 }// namespace bbt::uuid
-
-
-#include "detail/uuid_detail.hpp"
