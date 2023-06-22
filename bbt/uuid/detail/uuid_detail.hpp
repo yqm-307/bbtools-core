@@ -36,19 +36,19 @@ void UuidBase<Version>::GenerateBase(char* id)
     bbt_mac_addr mac;
     random::mt_random<uint64_t> rand;
     int offset = 0;
-    // 填充mac
+    // 填充mac  6 字节
     assert(GetAMacAddr(&mac) >= 0);
     memcpy( m_id + offset, 
             (char*)&(mac.addr), 
             sizeof(mac));
     offset += sizeof(mac);
-    // 填充时间戳
+    // 填充时间戳 8 字节
     auto ns = timer::clock::now<timer::ns>().time_since_epoch().count();
     memcpy( m_id + offset,
             (char*)&ns, 
             sizeof(ns));
     offset += sizeof(ns);
-    // 填充版本号
+    // 填充版本号 2字节
     uint16_t ver = Version;
     memcpy( m_id + offset,
             (char*)&ver,
@@ -60,14 +60,13 @@ void UuidBase<Version>::GenerateBase(char* id)
             (char*)(&randnum),
             sizeof(randnum));
     offset += sizeof(randnum);
-    // 填充拓展位 8 字节
     // pid  4 字节
     pid_t pid = getpid();
     memcpy( m_id + offset,
             (char*)&pid,
             sizeof(pid));
     offset += sizeof(pid);
-    // 拓展位
+    // 拓展位 4 字节
     uint32_t ext = UINT32_MAX;
     memcpy( m_id + offset,
             (char*)&ext,
