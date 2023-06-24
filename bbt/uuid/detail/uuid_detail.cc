@@ -8,6 +8,14 @@ UuidBase::UuidBase()
     bzero(m_id, sizeof(m_id));
 }
 
+UuidBase::UuidBase(const char* uid, size_t len)
+{
+    bzero(m_id, sizeof(m_id));
+    assert(len <= sizeof(m_id));
+    memcpy(m_id, uid, len);
+}
+
+
 UuidBase::~UuidBase() {}
 
 bool UuidBase::operator==(const UuidBase& other)
@@ -141,9 +149,19 @@ std::string UuidBase::GetRawString()
 }
 
 
+
+
 UuidMgr::UuidPtr UuidMgr::CreateUUid()
 {
     auto id = std::make_shared<UuidBase>();
     id->Generate();
+    return id;
+}
+
+UuidMgr::UuidPtr UuidMgr::CreateUUid(const std::string& defaultuid)
+{
+    if( defaultuid.size() != BBT_UUID_BASE_LENGTH )
+        return nullptr;
+    auto id = std::make_shared<UuidBase>(defaultuid.data());
     return id;
 }

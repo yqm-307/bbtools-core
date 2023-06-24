@@ -40,6 +40,7 @@ class UuidBase{
 friend class UuidMgr;
 public:
     UuidBase();
+    UuidBase(const char* uid, size_t len = BBT_UUID_BASE_LENGTH);
     ~UuidBase();
 
     bool operator==(const UuidBase& other);
@@ -79,6 +80,7 @@ class UuidMgr
 
 public:
     static UuidPtr CreateUUid();
+    static UuidPtr CreateUUid(const std::string& defaultuid);
 private:
 };
 
