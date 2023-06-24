@@ -34,7 +34,6 @@ public:
         {
             IntType ret = m_freequeue.front();
             m_freequeue.pop();
-            m_busyqueue.insert(ret);
             m_ids[ret] = IDStatus::busy;
             return {true,ret};
         }
@@ -48,7 +47,6 @@ public:
             assert(m_ids[id] == IDStatus::busy);
             m_ids[id] == IDStatus::free;
             m_freequeue.push(id);
-            m_busyqueue.erase(id);
             return true;
         }
         else
@@ -59,7 +57,6 @@ public:
 
 private:
     std::vector<IDStatus>   m_ids; 
-    std::unordered_set<IntType> m_busyqueue;
     std::queue<IntType> m_freequeue;
     const uint64_t  m_max_id_num;
 };
@@ -83,7 +80,6 @@ public:
         {
             IntType ret = m_freequeue.front();
             m_freequeue.pop();
-            m_busyqueue.insert(ret);
             m_ids[ret] = IDStatus::busy;
             return {true,ret};
         }
@@ -98,7 +94,6 @@ public:
             assert(m_ids[id] == IDStatus::busy);
             m_ids[id] == IDStatus::free;
             m_freequeue.push(id);
-            m_busyqueue.erase(id);
             return true;
         }
         else
@@ -109,7 +104,6 @@ public:
 
 private:
     std::vector<IDStatus>   m_ids; 
-    std::unordered_set<IntType> m_busyqueue;
     std::queue<IntType> m_freequeue;
     const uint64_t  m_max_id_num;
     std::mutex      m_mutex;
