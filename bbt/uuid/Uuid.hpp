@@ -39,6 +39,8 @@ struct bbt_mac_addr
 class UuidBase{
 friend class UuidMgr;
 public:
+    typedef std::shared_ptr<UuidBase> Ptr;
+public:
     UuidBase();
     UuidBase(const char* uid, size_t len = BBT_UUID_BASE_LENGTH);
     ~UuidBase();
@@ -76,7 +78,7 @@ private:
  */
 class UuidMgr
 {
-    using UuidPtr = std::shared_ptr<UuidBase>;
+    typedef UuidBase::Ptr UuidPtr;
 
 public:
     static UuidPtr CreateUUid();
