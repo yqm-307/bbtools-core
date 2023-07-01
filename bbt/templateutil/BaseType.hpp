@@ -7,7 +7,7 @@ public:
     typedef std::shared_ptr<T> SPtr;
     typedef T*  RawPtr;
 
-    typedef const Ptr ConstSPtr;
+    typedef const SPtr ConstSPtr;
     typedef const T*  ConstRawPtr;
 
     typedef T&  Ref;
