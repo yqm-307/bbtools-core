@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include "ConfigEnum.hpp"
-#include "bbt/template_util/noncopyable.hpp"
+#include "bbt/templateutil/Noncopyable.hpp"
 #include "bbt/Define.hpp"
 
 namespace bbt::config

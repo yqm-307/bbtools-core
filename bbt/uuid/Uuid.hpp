@@ -1,6 +1,6 @@
 #pragma once
-#include "bbt/timer/clock.hpp"
-#include "bbt/random/random.hpp"
+#include "bbt/timer/Clock.hpp"
+#include "bbt/random/Random.hpp"
 #include <iostream>
 #include <cstring>
 #include <stdio.h>

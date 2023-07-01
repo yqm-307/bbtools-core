@@ -15,7 +15,7 @@
 #include <memory>
 #include <condition_variable>   //mutex
 #include <functional>
-#include "bbt/template_util/noncopyable.hpp"
+#include "bbt/templateutil/Noncopyable.hpp"
 #include "bbt/Define.hpp"
 
 namespace  bbt::log

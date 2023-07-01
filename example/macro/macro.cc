@@ -1,5 +1,5 @@
 #include "bbt/bits/BitUtil.hpp"
-#include "bbt/random/random.hpp"
+#include "bbt/random/Random.hpp"
 #include <iostream>
 #include <cstring>
 

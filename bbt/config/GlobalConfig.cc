@@ -1,5 +1,5 @@
 #include "bbt/config/GlobalConfig.hpp"
-#include "bbt/assert/bbt_assert.hpp"
+#include "bbt/assert/Assert.hpp"
 
 using namespace bbt::config;
 

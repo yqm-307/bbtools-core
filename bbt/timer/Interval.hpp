@@ -9,7 +9,7 @@
  * 
  */
 #pragma once
-#include "bbt/timer/clock.hpp"
+#include "bbt/timer/Clock.hpp"
 
 
 namespace bbt::timer

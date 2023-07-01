@@ -1,5 +1,5 @@
 #pragma once
-#include "bbt/timer/clock.hpp"
+#include "bbt/timer/Clock.hpp"
 
 inline static const int __bbt_tickonce_ms__ = 5;   // tick once interval
 inline static const int __bbt_slot_num__    = 20;  // a wheel have n slots
