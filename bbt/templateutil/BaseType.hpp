@@ -1,5 +1,8 @@
 #include <memory>
 
+namespace bbt::templateutil
+{
+
 template<class T>
 class BaseType
 {
@@ -13,3 +16,5 @@ public:
     typedef T&  Ref;
     typedef const T& ConstRef;
 };
+
+}
