@@ -85,6 +85,7 @@ private:
     std::function<void ()>  work;
     int _openfd;                    //文件
 #endif
+    /*  */
     bool _stdout_open;
 
 };

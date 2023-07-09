@@ -15,17 +15,30 @@ UuidBase::UuidBase(const char* uid, size_t len)
     memcpy(m_id, uid, len);
 }
 
+UuidBase::UuidBase(std::string uid)
+{
+    bzero(m_id, sizeof(m_id));
+    if(uid.size() <= BBT_UUID_BASE_LENGTH)
+        return;        
+    memcpy(m_id, uid.c_str(), BBT_UUID_BASE_LENGTH);
+}
 
 UuidBase::~UuidBase() {}
 
-bool UuidBase::operator==(const UuidBase& other)
+bool UuidBase::operator==(const UuidBase& other) const 
 {
     return (strcmp(m_id, other.m_id) == 0);
 }
 
-bool UuidBase::operator!=(const UuidBase& other)
+bool UuidBase::operator!=(const UuidBase& other) const
 {
     return !((*this) == other);
+}
+
+bool UuidBase::Empty() const
+{
+    auto len = strlen(m_id);
+    return (len == 0);
 }
 
 void UuidBase::Generate()
@@ -143,7 +156,7 @@ int UuidBase::GetAMacAddr(bbt_mac_addr *mac)
     return -1;
 }
 
-std::string UuidBase::GetRawString()
+std::string UuidBase::GetRawString() const
 {
     return std::string(m_id, sizeof(m_id));
 }

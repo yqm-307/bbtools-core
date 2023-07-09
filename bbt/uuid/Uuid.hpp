@@ -42,12 +42,14 @@ public:
     typedef std::shared_ptr<UuidBase> Ptr;
 public:
     UuidBase();
+    UuidBase(std::string uid);
     UuidBase(const char* uid, size_t len = BBT_UUID_BASE_LENGTH);
     ~UuidBase();
 
-    bool operator==(const UuidBase& other);
-    bool operator!=(const UuidBase& other);
-    std::string GetRawString();
+    bool operator==(const UuidBase& other) const;
+    bool operator!=(const UuidBase& other) const;
+    std::string GetRawString() const;
+    bool Empty() const;
 protected:
     virtual void Generate();
     void GenerateBase(char* id);
