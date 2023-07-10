@@ -56,6 +56,7 @@ bool Thread::Start(std::function<ThreadStatus()> func)
             }
         }
         _running = false;
+        return Stop;
     });
     return true;
 }

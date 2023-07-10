@@ -22,4 +22,5 @@ bool GlobalConfig::DynamicConfig::SetEntry(const std::string& name,const Entry *
         auto inst_it = m_config_entry.insert(std::make_pair(name,static_cast<const void *const>(config)));
         return inst_it.second;
     }
+    return false;
 }
