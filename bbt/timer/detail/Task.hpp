@@ -17,7 +17,7 @@
 #include "bbt/timer/detail/TimeWheel_Def.hpp"
 #include "bbt/poolutil/IDPool.hpp"
 template<typename CallableType>
-class TimeTask_Base final: public bbt::templateutil::comparator<bbt::timer::Timestamp<bbt::timer::ms>>
+class TimeTask_Base final: public bbt::templateutil::comparator<bbt::timer::clock::Timestamp<bbt::timer::clock::ms>>
 {
 public:
     typedef uint32_t TaskID;
@@ -58,7 +58,7 @@ public:
 
     bool Is_Expired() const 
     {
-        return bbt::timer::clock::is_expired<bbt::timer::ms>(it_);
+        return bbt::timer::clock::is_expired<bbt::timer::clock::ms>(it_);
     }
 
     void TickTack()
@@ -70,7 +70,7 @@ public:
         }
         else
         {
-            printf("Tick now:%ld\ttimeout:%ld\n",bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count(),GetTimeOut().time_since_epoch().count());
+            printf("Tick now:%ld\ttimeout:%ld\n",bbt::timer::clock::now<bbt::timer::clock::ms>().time_since_epoch().count(),GetTimeOut().time_since_epoch().count());
             fflush(stdout);
             assert(Is_Expired());
         }
@@ -85,15 +85,15 @@ public:
     TaskID GetTaskID() const
     { return m_id; }
 
-    bbt::timer::Timestamp<bbt::timer::ms> GetTimeOut() const
+    bbt::timer::clock::Timestamp<bbt::timer::clock::ms> GetTimeOut() const
     { return it_;}
 
-    TimeTask_InitStatus Reset(bbt::timer::Timestamp<bbt::timer::ms> timeout_ms)
+    TimeTask_InitStatus Reset(bbt::timer::clock::Timestamp<bbt::timer::clock::ms> timeout_ms)
     {
         TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
         do
         {
-            if (bbt::timer::clock::is_expired<bbt::timer::ms>(timeout_ms))
+            if (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timeout_ms))
             {
                 flag = TimeTask_InitStatus::IS_TimeOut;
                 break;
@@ -106,13 +106,13 @@ public:
         return flag;
     }
 
-    TimeTask_InitStatus Init(CallableType data,bbt::timer::Timestamp<bbt::timer::ms> timeout_ms)
+    TimeTask_InitStatus Init(CallableType data,bbt::timer::clock::Timestamp<bbt::timer::clock::ms> timeout_ms)
     {
 
         TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
         do
         {
-            if (bbt::timer::clock::is_expired<bbt::timer::ms>(timeout_ms))
+            if (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timeout_ms))
             {
                 flag = TimeTask_InitStatus::IS_TimeOut;
                 break;
@@ -126,11 +126,11 @@ public:
         return flag;
     }
 
-    virtual bool operator==(const comparator<bbt::timer::Timestamp<bbt::timer::ms>>& r_value_) const override
+    virtual bool operator==(const comparator<bbt::timer::clock::Timestamp<bbt::timer::clock::ms>>& r_value_) const override
     {
         return ((it_).time_since_epoch().count() == r_value_.GetValue().time_since_epoch().count());
     }
-    virtual bool operator>(const comparator<bbt::timer::Timestamp<bbt::timer::ms>>& r_value_) const override
+    virtual bool operator>(const comparator<bbt::timer::clock::Timestamp<bbt::timer::clock::ms>>& r_value_) const override
     {
         return ((it_).time_since_epoch().count() > r_value_.GetValue().time_since_epoch().count());
     }

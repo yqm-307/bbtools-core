@@ -5,6 +5,19 @@
 namespace bbt::timer
 {
 
+
+// 时间值
+BBT_TIME_CONVERT_TYPE MinOfHour = 60;
+BBT_TIME_CONVERT_TYPE HourOfDay = 24;
+BBT_TIME_CONVERT_TYPE DayOfWeek = 7;
+BBT_TIME_CONVERT_TYPE SecOfMin = 60;
+BBT_TIME_CONVERT_TYPE SecOfHour = SecOfMin * MinOfHour; 
+BBT_TIME_CONVERT_TYPE SecOfDay = SecOfMin * MinOfHour * HourOfDay;
+BBT_TIME_CONVERT_TYPE SecOfWeek = SecOfDay * DayOfWeek;
+
+namespace clock
+{
+
 using namespace std::chrono;
 using namespace std::chrono_literals;
 typedef std::chrono::nanoseconds ns;
@@ -20,32 +33,19 @@ using Timestamp = std::chrono::time_point<std::chrono::system_clock,T>;
 template<typename T = ms>
 using Duration = std::chrono::duration<ms>; 
 
-// 时间值
-BBT_TIME_CONVERT_TYPE MinOfHour = 60;
-BBT_TIME_CONVERT_TYPE HourOfDay = 24;
-BBT_TIME_CONVERT_TYPE DayOfWeek = 7;
-BBT_TIME_CONVERT_TYPE SecOfMin = 60;
-BBT_TIME_CONVERT_TYPE SecOfHour = SecOfMin * MinOfHour; 
-BBT_TIME_CONVERT_TYPE SecOfDay = SecOfMin * MinOfHour * HourOfDay;
-BBT_TIME_CONVERT_TYPE SecOfWeek = SecOfDay * DayOfWeek;
-
-namespace clock
-{
-
-
 
 /**
  * @brief 获取当前时间戳
  * @return Timestamp 时间戳
  */
-template<class timeaccuracy = timer::ms>
+template<class timeaccuracy = ms>
 inline Timestamp<timeaccuracy> utcnow()
 {
     return std::chrono::time_point_cast<timeaccuracy>(std::chrono::system_clock::now());
 }
 
 
-template<class timeaccuracy = timer::ms>
+template<class timeaccuracy = ms>
 inline Timestamp<timeaccuracy> now()
 {
     return std::chrono::time_point_cast<timeaccuracy>(std::chrono::system_clock::now());
@@ -59,7 +59,7 @@ inline Timestamp<timeaccuracy> now()
  * @param interval 加上多久时间（单位ns）
  * @return Timestamp 添加之后的时间戳
  */
-template<class timeaccuracy = timer::ms,class Tsp = Timestamp<timeaccuracy>>
+template<class timeaccuracy = ms, class Tsp = Timestamp<timeaccuracy>>
 inline Tsp nowAfter(timeaccuracy interval)
 { return now<timeaccuracy>() + interval; }
 
@@ -73,7 +73,7 @@ inline Tsp nowAfter(timeaccuracy interval)
  * @param interval 减去的多久时间（单位ns）
  * @return Timestamp 减去之后的时间戳
  */
-template<class timeaccuracy = timer::ms,class Tsp = Timestamp<timeaccuracy>>
+template<class timeaccuracy = ms, class Tsp = Timestamp<timeaccuracy>>
 inline Tsp nowBefore(timeaccuracy interval)
 { return now<timeaccuracy>() - interval; }
 
@@ -253,6 +253,20 @@ static inline int HourOfDay(time_t secs)
     return nhours+1;
 }
 
+/**
+ * @brief ts 是否小于 now
+ * 
+ * @param ts 
+ * @return true ts超时了,false ts未超时
+ */
+template<class type,class Tsp = Timestamp<type>>
+inline bool expired(Tsp ts)
+{
+    if( now<type>() >= ts )
+        return true;
+    else
+        return false;
+}
 
 }// namespace clock
 

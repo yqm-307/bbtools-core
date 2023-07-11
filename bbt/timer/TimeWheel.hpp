@@ -17,7 +17,7 @@
  * 
  */
 #pragma once
-#include "bbt/timer/detail/task.hpp"
+#include "bbt/timer/detail/Task.hpp"
 #include <map>
 namespace bbt::timer
 {
@@ -39,7 +39,7 @@ public:
     bool AddTask(TaskBasePtr task);
     bool CancelTask(TaskID task);
     void Tick();
-    timer::Timestamp<timer::ms> GetNextTickTimestamp();
+    timer::clock::Timestamp<timer::clock::ms> GetNextTickTimestamp();
 
 private:
     // 可以设置：禁用、启用，触发间隔，触发次数，回调，
@@ -76,7 +76,7 @@ private:
         void Init();
         void TickTack();
         bool Add(TaskBasePtr task_ptr);
-        timer::Timestamp<timer::ms> GetNextSlotTimestamp(); // 下一个 slot 全部超时的时间
+        timer::clock::Timestamp<timer::clock::ms> GetNextSlotTimestamp(); // 下一个 slot 全部超时的时间
         size_t Size() const;
         bool Cancel(TaskID id);
 
@@ -86,9 +86,9 @@ private:
         void WheelLv2RotateOnce();  // lv2 从动
         void WheelLv3RotateOnce();  // lv3 从动
         void DelayQueueRotate();    // 从延迟队列重新解析        
-        DelayQueue* GetDelayQueueByTimestamp(timer::Timestamp<timer::ms>);
-        std::tuple<bool,int,int,int> GetIndexsByTimestamp(timer::Timestamp<timer::ms>);
-        void DoDelayQueueToWheelMap(DelayQueue& queue,TimeWheelMap& wheel_index,int slotnum,timer::Timestamp<timer::ms> begin_time,int slot_interval_ms);    // queue 中task映射到对应层
+        DelayQueue* GetDelayQueueByTimestamp(timer::clock::Timestamp<timer::clock::ms>);
+        std::tuple<bool,int,int,int> GetIndexsByTimestamp(timer::clock::Timestamp<timer::clock::ms>);
+        void DoDelayQueueToWheelMap(DelayQueue& queue, TimeWheelMap& wheel_index, int slotnum, timer::clock::Timestamp<timer::clock::ms> begin_time, int slot_interval_ms);    // queue 中task映射到对应层
     private:
         // const int m_tick_interval_ms;   // 每次tick跨度间隔
         // const int m_max_range;          // 最大可记录时间跨度（就是计时器最大一个周期可以记录多大范围的时间）
@@ -106,11 +106,11 @@ private:
         int m_current_index_lv3;
 
         // 上次tick的时间
-        timer::Timestamp<timer::ms> m_current_timestamp;
+        timer::clock::Timestamp<timer::clock::ms> m_current_timestamp;
         
         // 当前时间轮的起始和结束时间
-        timer::Timestamp<timer::ms> m_end_timestamp;
-        timer::Timestamp<timer::ms> m_begin_timestamp;
+        timer::clock::Timestamp<timer::clock::ms> m_end_timestamp;
+        timer::clock::Timestamp<timer::clock::ms> m_begin_timestamp;
         size_t m_size;
     };
 

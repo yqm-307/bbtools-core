@@ -58,7 +58,7 @@ void UuidBase::GenerateBase(char* id)
             sizeof(mac));
     offset += sizeof(mac);
     // 填充时间戳 8 字节
-    auto ns = timer::clock::now<timer::ns>().time_since_epoch().count();
+    auto ns = timer::clock::now<timer::clock::ns>().time_since_epoch().count();
     memcpy( m_id + offset,
             (char*)&ns, 
             sizeof(ns));

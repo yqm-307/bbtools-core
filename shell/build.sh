@@ -14,11 +14,26 @@ clear()
     rm config.json
 }
 
+# 生成头文件目录，并copy到 /usr/local/include
+function generate_head_dir_and_copy_to_dstdir()
+{
+    dstdir=$1
+    cp -rf yrpc rpc_h
+    find rpc_h -name '*.c' -o -name '*cc' -print | xargs rm
+    if [ -d "$dstdir/yrpc" ]
+    then
+        sudo rm -rf $dstdir/yrpc
+    fi
+    sudo mv rpc_h $dstdir/yrpc
+    info_build "copy over! cpp head file copy to ${dstdir}/yrpc"
+    rm -rf rpc_h
+}
+
 build()
 {
     #编译整个项目目录
     #mkdir bin
-    sudo cp -rf bbt /usr/local/include/
+    generate_head_dir_and_copy_to_dstdir /usr/local/include
     cmake .
     make
     sudo cp -rf lib/libybbt.so /usr/lib/x86_64-linux-gnu/
@@ -36,6 +51,8 @@ uninstall()
     sudo rm -rf /usr/lib/x86_64-linux-gnu/libybbt.so
     echo "删除lib /usr/lib/x86_64-linux-gnu/libybbt.so"
 }
+
+cd ..
 
 if [ "${clear}" = "clear" ]
 then

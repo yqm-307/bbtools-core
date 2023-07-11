@@ -1,5 +1,5 @@
-#include "bbt/timer/timewheel.hpp"
-#include "bbt/random/random.hpp"
+#include "bbt/timer/TimeWheel.hpp"
+#include "bbt/random/Random.hpp"
 #include <atomic>
 #include <map>
 using namespace bbt::timer;
@@ -15,10 +15,10 @@ int a=0;
 template<typename T>
 void safe_timer_rotate(TimeWheel<T>& timer,std::mutex& lock)
 {
-    bbt::timer::Timestamp<bbt::timer::ms> next;
+    bbt::timer::clock::Timestamp<bbt::timer::clock::ms> next;
     {
         std::lock_guard<std::mutex> lo(lock);
-        while (bbt::timer::clock::is_expired<bbt::timer::milliseconds>(timer.GetNextTickTimestamp()))
+        while (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timer.GetNextTickTimestamp()))
         {
             timer.Tick();
         }
@@ -75,9 +75,9 @@ void test1()
     auto doprint = new_task();
     doprint->Init([&Ctrl,doprint,&mutex,&timer](){
         Ctrl.print();
-        doprint->Reset(bbt::timer::clock::nowAfter(bbt::timer::seconds(5)));
+        doprint->Reset(bbt::timer::clock::nowAfter(bbt::timer::clock::s(5)));
         timer.AddTask(doprint);
-    },bbt::timer::clock::nowAfter(bbt::timer::seconds(5)));
+    },bbt::timer::clock::nowAfter(bbt::timer::clock::s(5)));
     assert(timer.AddTask(doprint));
 
     for(int i=0;i<10;++i)
@@ -92,14 +92,14 @@ void test1()
                     {
                         auto ptr = new_task();
                         ptr->Init([ptr,&Ctrl](){
-                            auto ds_error_count = (bbt::timer::clock::now<bbt::timer::milliseconds>() - ptr->GetTimeOut()).count();
+                            auto ds_error_count = (bbt::timer::clock::now<bbt::timer::clock::ms>() - ptr->GetTimeOut()).count();
                             Ctrl.sub_error_ms+=abs(ds_error_count);
                             if (abs(ds_error_count) > 5)
                             {
                                 Ctrl.error_times++;
                             }
                             Ctrl.trigger_times++;
-                        },bbt::timer::clock::nowAfter(bbt::timer::milliseconds(rd())));
+                        },bbt::timer::clock::nowAfter(bbt::timer::clock::ms(rd())));
                         if (!timer.AddTask(ptr))
                         {
                             Ctrl.register_error++;
@@ -107,7 +107,7 @@ void test1()
                         Ctrl.alltimes++;
                     }
                 }
-                std::this_thread::sleep_for(bbt::timer::seconds(1));
+                std::this_thread::sleep_for(bbt::timer::clock::s(1));
             }
         });
     }
@@ -142,21 +142,21 @@ void test2()
             Ctrl.trigger++;
             // Ctrl.map.insert(std::make_pair(ptr->TaskID(),ptr));
             Ctrl.map.erase(ptr->GetTaskID());
-        },bbt::timer::clock::nowAfter(bbt::timer::milliseconds(rd())));
+        },bbt::timer::clock::nowAfter(bbt::timer::clock::ms(rd())));
         if (wheel.AddTask(ptr))
         {
             Ctrl.allcount += 1;
             Ctrl.map.insert(std::make_pair(ptr->GetTaskID(),ptr));
         }
         else
-            printf("%ld %ld\n",ptr->GetTimeOut().time_since_epoch().count(),bbt::timer::clock::now<bbt::timer::milliseconds>().time_since_epoch().count());
+            printf("%ld %ld\n",ptr->GetTimeOut().time_since_epoch().count(),bbt::timer::clock::now<bbt::timer::clock::ms>().time_since_epoch().count());
     }
     auto ptr = new_task();
     ptr->Init([&Ctrl,ptr,&wheel](){
         Ctrl.print();
-        ptr->Reset(bbt::timer::clock::nowAfter(bbt::timer::milliseconds(5000)));
+        ptr->Reset(bbt::timer::clock::nowAfter(bbt::timer::clock::ms(5000)));
         wheel.AddTask(ptr);
-    },bbt::timer::clock::nowAfter(bbt::timer::milliseconds(5000)));
+    },bbt::timer::clock::nowAfter(bbt::timer::clock::ms(5000)));
     wheel.AddTask(ptr);
 
     while(1)
