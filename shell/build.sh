@@ -18,15 +18,15 @@ clear()
 function generate_head_dir_and_copy_to_dstdir()
 {
     dstdir=$1
-    cp -rf yrpc rpc_h
-    find rpc_h -name '*.c' -o -name '*cc' -print | xargs rm
-    if [ -d "$dstdir/yrpc" ]
+    cp -rf bbt bbt_h
+    find bbt_h -name '*.c' -o -name '*cc' -print | xargs rm
+    if [ -d "$dstdir/bbt" ]
     then
-        sudo rm -rf $dstdir/yrpc
+        sudo rm -rf $dstdir/bbt
     fi
-    sudo mv rpc_h $dstdir/yrpc
-    info_build "copy over! cpp head file copy to ${dstdir}/yrpc"
-    rm -rf rpc_h
+    sudo mv bbt_h $dstdir/bbt
+    info_build "copy over! cpp head file copy to ${dstdir}/bbt"
+    rm -rf bbt_h
 }
 
 build()
