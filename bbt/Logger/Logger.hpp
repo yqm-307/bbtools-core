@@ -41,7 +41,7 @@ static const char* LeveL[6]{
 };
 
 //缓冲日志
-class Logger:noncopyable
+class Logger: templateutil::noncopyable
 {
 public:
     // 创建前调用

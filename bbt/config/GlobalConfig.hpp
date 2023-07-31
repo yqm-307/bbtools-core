@@ -10,7 +10,7 @@
 namespace bbt::config
 {
 
-class GlobalConfig : noncopyable
+class GlobalConfig : templateutil::noncopyable
 {
 /**
  * @brief 系统初始化开始时,先设置配置信息.系统开始初始化则根据GlobalConfig获取配置数据

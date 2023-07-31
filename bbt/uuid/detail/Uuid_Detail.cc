@@ -1,4 +1,3 @@
-#pragma once
 #include "bbt/uuid/Uuid.hpp"
 #include "bbt/config/GlobalConfig.hpp"
 using namespace bbt::uuid;
