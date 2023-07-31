@@ -1,6 +1,6 @@
 #pragma once
 // #ifndef Deprecate
-namespace bbt
+namespace bbt::templateutil
 {
 
 class noncopyable 
