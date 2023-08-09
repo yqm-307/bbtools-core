@@ -25,7 +25,7 @@ function generate_head_dir_and_copy_to_dstdir()
         sudo rm -rf $dstdir/bbt
     fi
     sudo mv bbt_h $dstdir/bbt
-    info_build "copy over! cpp head file copy to ${dstdir}/bbt"
+    # info_build "copy over! cpp head file copy to ${dstdir}/bbt"
     rm -rf bbt_h
 }
 
@@ -34,7 +34,11 @@ build()
     #编译整个项目目录
     #mkdir bin
     generate_head_dir_and_copy_to_dstdir /usr/local/include
-    cmake .
+    if [ ! -d "build" ];then
+        mkdir build
+    fi
+    cd build
+    cmake ..
     make
     sudo cp -rf lib/libybbt.so /usr/lib/x86_64-linux-gnu/
     echo "代码拷贝到/usr/local/include/"
