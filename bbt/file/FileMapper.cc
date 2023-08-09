@@ -14,7 +14,7 @@ FileMapper_Impl::FileMapper_Impl(int fd,int prot, int offset)
     bbt_assert( fd > 0, printf, "fd can`t less then 0");
     m_length = BBT_PAGE_SIZE; 
     void *start = mmap(NULL,m_length,PROT_WRITE | PROT_READ,MAP_SHARED,fd,0);
-    bbt_assert( start != MAP_FAILED, printf, log::format("syscall mmap error! errno:%d", errno).c_str());
+    // bbt_assert( start != MAP_FAILED, printf, log::format("syscall mmap error! errno:%d", errno).c_str());
     m_file_head = start;
 }
 
