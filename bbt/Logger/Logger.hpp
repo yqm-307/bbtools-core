@@ -105,5 +105,13 @@ std::string format_blue(const char* str,size_t len);
 #define ERROR(fmt, ...)     bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_ERROR, bbt::log::format(fmt,##__VA_ARGS__))
 #define FATAL(fmt, ...)     bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_FATAL, bbt::log::format(fmt,##__VA_ARGS__))
 
+// 带 文件、函数名、行数的log
+#define LOG_WITH_FUNCINFO(fmt, ...)   (bbt::log::format("[%s:%d] [function:%s] ", __FILE__, __LINE__, __FUNCTION__) + bbt::log::format(fmt, ##__VA_ARGS__))
+#define BBT_FULL_LOG_TRACE(fmt, ...)    bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_TRACE, LOG_WITH_FUNCINFO(fmt,##__VA_ARGS__))
+#define BBT_FULL_LOG_DEBUG(fmt, ...)    bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_DEBUG, LOG_WITH_FUNCINFO(fmt,##__VA_ARGS__))
+#define BBT_FULL_LOG_INFO(fmt, ...)     bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_INFO,  LOG_WITH_FUNCINFO(fmt,##__VA_ARGS__))
+#define BBT_FULL_LOG_WARN(fmt, ...)     bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_WARN,  LOG_WITH_FUNCINFO(fmt,##__VA_ARGS__))
+#define BBT_FULL_LOG_ERROR(fmt, ...)    bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_ERROR, LOG_WITH_FUNCINFO(fmt,##__VA_ARGS__))
+#define BBT_FULL_LOG_FATAL(fmt, ...)    bbt::log::Logger::GetInstance()->Log(bbt::log::LOG_FATAL, LOG_WITH_FUNCINFO(fmt,##__VA_ARGS__))
 
 }
