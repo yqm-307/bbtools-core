@@ -1,12 +1,12 @@
 #include "bbt/poolutil/IDPool.hpp"
-#include "bbt/threadpool/ThreadPool.hpp"
+#include "bbt/thread/ThreadPool.hpp"
 #include <set>
 #include <mutex>
 #include <iostream>
 #include <thread>
 #include <chrono>
 using namespace bbt::pool_util;
-using namespace bbt::threadpool;
+using namespace bbt::thread::pool;
 
 #define IDPool_MaxId 65535
 

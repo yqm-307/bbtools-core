@@ -10,7 +10,7 @@
 #include "../Logger/Logger.hpp"
 
 
-namespace bbt::threadpool
+namespace bbt::thread::pool
 {
 
 enum ThreadPoolErrnoCode{
@@ -43,7 +43,7 @@ private:
 
 	const int _threadnum;					//初始线程数量
 	const int _initqueuesize;				//初始队列长度，不是硬性的
-	typedef std::vector<Thread*> ThreadList;	//加锁
+	typedef std::vector<thread::Thread*> ThreadList;	//加锁
 	std::atomic_bool _pool_is_in_run;		//是否正在运行
 	ThreadList _threads;					//线程
 	std::queue<TaskFunc> _taskqueue;		//任务队列
@@ -54,10 +54,10 @@ private:
 
 
 
-#include "bbt/threadpool/detail/ThreadPool_detail.hpp"
 
 }
 
+#include "bbt/thread/detail/ThreadPool_detail.hpp"
 
 
 

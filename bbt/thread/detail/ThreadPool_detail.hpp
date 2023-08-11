@@ -1,10 +1,9 @@
 #pragma once
-#include "bbt/threadpool/ThreadPool.hpp"
-// template<typename T>
-// class ThreadPool;
+#include "bbt/thread/ThreadPool.hpp"
 
 
-
+namespace bbt::thread::pool
+{
 
 template<typename TaskFunc>
 ThreadPool<TaskFunc>::ThreadPool(int thnum,int maxqueuesize,const ThreadInitCallback& cb)
@@ -144,3 +143,6 @@ bool ThreadPool<TaskFunc>::WakeUpOne()
     }
     return false;
 }
+
+
+}// namespace end

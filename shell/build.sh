@@ -33,6 +33,7 @@ build()
 {
     #编译整个项目目录
     #mkdir bin
+    cd ..
     generate_head_dir_and_copy_to_dstdir /usr/local/include
     if [ ! -d "build" ];then
         mkdir build
@@ -56,7 +57,6 @@ uninstall()
     echo "删除lib /usr/lib/x86_64-linux-gnu/libybbt.so"
 }
 
-cd ..
 
 if [ "${clear}" = "clear" ]
 then

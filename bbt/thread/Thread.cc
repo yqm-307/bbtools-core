@@ -1,7 +1,7 @@
-#include "bbt/threadpool/Thread.hpp"
+#include "bbt/thread/Thread.hpp"
 #include <unistd.h>
 
-using namespace bbt::threadpool;
+using namespace bbt::thread;
 
 Thread::Thread()
     :_run(false),

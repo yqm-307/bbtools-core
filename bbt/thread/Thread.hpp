@@ -15,7 +15,7 @@
 
 
 
-namespace bbt::threadpool
+namespace bbt::thread
 {
 enum ThreadStatus
 {
