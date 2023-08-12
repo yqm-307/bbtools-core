@@ -3,6 +3,7 @@
 #include <atomic>
 #include <thread>
 #include <time.h>
+#include <stdlib.h>
 #include "bbt/templateutil/Noncopyable.hpp"
 
 namespace bbt::thread::lock
