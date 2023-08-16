@@ -31,7 +31,14 @@ public:
     mt_random();
     virtual ~mt_random(){}
 
+    /* 设置随机数种子并应用到 */
+    void SetSeed(time_t seed);
+
     result_type operator()();
+    /* 获取随机数上届 */
+    result_type Max();
+    /* 获取随机数下届 */
+    result_type Min();
     
 protected:
     uint64_t _mod_val;          // 模数
@@ -40,25 +47,8 @@ protected:
 
 
 
-template<typename result_type,result_type _min,result_type _max>
-mt_random<result_type,_min,_max>::mt_random()
-{
-    assert(_min < _max);
-    _mod_val = (result_type)_max - (result_type)_min;
-    // 获取随机种子
-    auto tp = std::chrono::system_clock::now();
-    _mt19937.seed(tp.time_since_epoch().count());
-}
+
+}// namespace end
 
 
-
-
-template<typename result_type,result_type _min,result_type _max>
-result_type mt_random<result_type,_min,_max>::operator()()
-{
-    return _min + _mt19937()%_mod_val;
-}
-
-}
-
-
+#include "bbt/random/RandomTpl.hpp"
