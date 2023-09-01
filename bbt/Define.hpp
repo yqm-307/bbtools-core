@@ -54,7 +54,7 @@ namespace bbt
 
 #define BBT_DEBUG
 
-namespace bbt::log
+namespace log
 { 
 #ifndef BBT_LOG_ASYNC_OPEN
 #define BBT_LOG_ASYNC_OPEN 0
@@ -71,7 +71,7 @@ namespace bbt::log
 }// namespace bbt::log
 
 
-namespace bbt::file
+namespace file
 {
 #define BBT_PAGE_SIZE 4096
 
