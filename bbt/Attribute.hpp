@@ -72,6 +72,14 @@
 #error "not exist attribute [__deprecated__]"
 #endif
 
+
+//---------------------------- 通用注解 ----------------------------//
 /**
  * //TODO gcc还有一些很有用的attribute，比如内存检测、套接字检测等。
  */
+#if __glibc_has_attribute(unused) >= 0
+#define BBTATTR_COMM_Unused         __attribute__((unused))
+#else
+#error "not exist attribute [unused]"
+#endif
+
