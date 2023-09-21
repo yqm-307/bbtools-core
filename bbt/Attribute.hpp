@@ -73,6 +73,18 @@
 #endif
 
 
+/**
+ * @brief 此函数的作用是将构造函数标记为隐藏的。
+ * 
+ * 如果显式调用会报错，隐式调用不会，其实只能从一部分避免问题的发生
+ * 
+ */
+#if __glibc_has_attribute(__deprecated__) >= 0
+#define BBTATTR_FUNC_Ctor_Hidden    BBTATTR_FUNC_DeprecatedMsg("此函数的构造函数被隐藏，不可以直接调用")
+#else
+#error "not exist attribute [BBTATTR_FUNC_DeprecatedMsg]"
+#endif
+
 //---------------------------- 通用注解 ----------------------------//
 /**
  * //TODO gcc还有一些很有用的attribute，比如内存检测、套接字检测等。
