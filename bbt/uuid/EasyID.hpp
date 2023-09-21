@@ -110,6 +110,7 @@ class MistID
 #define Increas_Shift (Salt_Bit + Salt_Shift)
 
 public:
+template<int>
 static int64_t GetID_Mist()
 {
     static std::atomic_int64_t increas{0}; // 增长数
