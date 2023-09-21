@@ -16,15 +16,15 @@ class Buffer
 public:
     static const int headSize;  //可以插入消息id或者长度
     static const int initSize;
-    Buffer(size_t initsize = initSize);
+    explicit Buffer(size_t initsize = initSize);
     ~Buffer(){
         // DEBUG("this: 0x%x  m_bytes:0x%x\t",this,&*m_bytes.begin());
     }
 
     Buffer(const Buffer& rval);
     Buffer(Buffer&& rval);
-    Buffer(const char* m_bytes , size_t len);
-    Buffer(const std::string& bytes);
+    explicit Buffer(const char* m_bytes , size_t len);
+    explicit Buffer(const std::string& bytes);
     // Buffer(std::string&& bytes);
 
     Buffer& operator=(Buffer&&);
