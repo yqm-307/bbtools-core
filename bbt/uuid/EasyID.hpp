@@ -19,8 +19,11 @@ namespace bbt::uuid
 #define Minute_MS (Second_MS*60)
 #define Hours_MS  (Minute_MS*60)
 
-
-class GenerateID
+/**
+ * @brief 特制雪花ID，非原算法的组成，使用时间戳加自增键完成一段时间内的无冲突
+ * 
+ */
+class SnowFlake
 {
 public:
 
@@ -103,28 +106,67 @@ static uint32_t GetIDuint32_unsafe()
 
 };
 
-class MistID
-{
+
+
+
+
+
+
+
 #define Salt_Bit 0x8
 #define Salt_Shift 0x8
 #define Increas_Shift (Salt_Bit + Salt_Shift)
+/**
+ * @brief 薄雾算法的ID，生成一个永远大于等于0的id，并且可以使用300年以上
+ * 
+ * @tparam IsSafe 是否线程安全
+ * @tparam Diff 为了做区分，使函数拥有多个实例，其实是无损的编译期实例化
+ *  而非内存中对类的实例化
+ */
+template<bool IsSafe,int Diff>
+class MistID{};
 
-public:
-template<int>
-static int64_t GetID_Mist()
+
+template<bool IsSafe,int Diff>
+class MistID<true, Diff>
 {
-    static std::atomic_int64_t increas{0}; // 增长数
-    static int64_t saltA{0};   // 盐A
-    static int64_t saltB{0};   // 盐B
-    static bbt::random::mt_random<int64_t, 0, 255> rand;
-    int64_t inc = ++increas;
-    int64_t msit = 0;
+public:
+    template<int>
+    static int64_t GenerateID()
+    {
+        static std::atomic_int64_t increas{0}; // 增长数
+        static int64_t saltA{0};   // 盐A
+        static int64_t saltB{0};   // 盐B
+        static bbt::random::mt_random<int64_t, 0, 255> rand;
+        int64_t inc = ++increas;
+        int64_t msit = 0;
 
-    saltA = rand();
-    saltB = rand();
-    msit = int64_t( (inc << Increas_Shift) | (saltA << Salt_Shift) | saltB );
-    return msit;
-}
+        saltA = rand();
+        saltB = rand();
+        msit = int64_t( (inc << Increas_Shift) | (saltA << Salt_Shift) | saltB );
+        return msit;
+    }
+};
+
+template<bool IsSafe, int Diff>
+class MistID<false, Diff>
+{
+public:
+    template<int>
+    static int64_t GenerateID()
+    {
+        static int64_t increas{0}; // 增长数
+        static int64_t saltA{0};   // 盐A
+        static int64_t saltB{0};   // 盐B
+        static bbt::random::mt_random<int64_t, 0, 255> rand;
+        int64_t inc = ++increas;
+        int64_t msit = 0;
+
+        saltA = rand();
+        saltB = rand();
+        msit = int64_t( (inc << Increas_Shift) | (saltA << Salt_Shift) | saltB );
+        return msit;
+    }
 };
 
 } // namespace end
