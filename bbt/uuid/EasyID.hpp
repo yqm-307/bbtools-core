@@ -127,11 +127,10 @@ template<bool IsSafe,int Diff>
 class MistID{};
 
 
-template<bool IsSafe,int Diff>
+template<int Diff>
 class MistID<true, Diff>
 {
 public:
-    template<int>
     static int64_t GenerateID()
     {
         static std::atomic_int64_t increas{0}; // 增长数
@@ -148,11 +147,10 @@ public:
     }
 };
 
-template<bool IsSafe, int Diff>
+template<int Diff>
 class MistID<false, Diff>
 {
 public:
-    template<int>
     static int64_t GenerateID()
     {
         static int64_t increas{0}; // 增长数
