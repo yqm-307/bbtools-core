@@ -32,3 +32,5 @@ target_link_libraries(ybbt
 # 编译例程
 add_subdirectory(example)
 # add_subdirectory(example/test) ## 
+enable_testing()
+add_subdirectory(unit_test)

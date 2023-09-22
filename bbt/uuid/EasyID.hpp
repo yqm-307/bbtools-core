@@ -110,12 +110,22 @@ static uint32_t GetIDuint32_unsafe()
 
 
 
+#pragma region "唯一ID"
 
-
+/**
+ * @brief EasyId 类型
+ * 
+ */
+enum emEasyID {
+    EM_AUTO_INCREMENT       = 1,
+    EM_AUTO_INCREMENT_SAFE  = 2,
+};
 
 #define Salt_Bit 0x8
 #define Salt_Shift 0x8
 #define Increas_Shift (Salt_Bit + Salt_Shift)
+
+
 /**
  * @brief 薄雾算法的ID，生成一个永远大于等于0的id，并且可以使用300年以上
  * 
@@ -123,47 +133,33 @@ static uint32_t GetIDuint32_unsafe()
  * @tparam Diff 为了做区分，使函数拥有多个实例，其实是无损的编译期实例化
  *  而非内存中对类的实例化
  */
-template<bool IsSafe,int Diff>
-class MistID{};
+template<emEasyID Type,int Diff>
+class EasyID{
+    static_assert(
+        Type == EM_AUTO_INCREMENT_SAFE || 
+        Type == EM_AUTO_INCREMENT);
+};
 
 
 template<int Diff>
-class MistID<true, Diff>
+class EasyID<EM_AUTO_INCREMENT_SAFE, Diff>
 {
 public:
     static int64_t GenerateID()
     {
         static std::atomic_int64_t increas{0}; // 增长数
-        static int64_t saltA{0};   // 盐A
-        static int64_t saltB{0};   // 盐B
-        static bbt::random::mt_random<int64_t, 0, 255> rand;
-        int64_t inc = ++increas;
-        int64_t msit = 0;
-
-        saltA = rand();
-        saltB = rand();
-        msit = int64_t( (inc << Increas_Shift) | (saltA << Salt_Shift) | saltB );
-        return msit;
+        return ++increas;
     }
 };
 
 template<int Diff>
-class MistID<false, Diff>
+class EasyID<EM_AUTO_INCREMENT, Diff>
 {
 public:
     static int64_t GenerateID()
     {
         static int64_t increas{0}; // 增长数
-        static int64_t saltA{0};   // 盐A
-        static int64_t saltB{0};   // 盐B
-        static bbt::random::mt_random<int64_t, 0, 255> rand;
-        int64_t inc = ++increas;
-        int64_t msit = 0;
-
-        saltA = rand();
-        saltB = rand();
-        msit = int64_t( (inc << Increas_Shift) | (saltA << Salt_Shift) | saltB );
-        return msit;
+        return ++increas;
     }
 };
 
