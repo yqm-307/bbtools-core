@@ -1,3 +1,4 @@
+#pragma once
 #include <bbt/timer/Clock.hpp>
 #include <bbt/random/Random.hpp>
 #include <atomic>
