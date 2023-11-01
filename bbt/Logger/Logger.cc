@@ -204,7 +204,10 @@ void Logger::Log(LOGLEVEL level ,const std::string str)
         switch (level)
         {
         case LOGLEVEL::LOG_TRACE:
+            line = format_l_white(log, len);
         case LOGLEVEL::LOG_DEBUG:
+            line = format_l_cyan(log, len);
+            break;
         case LOGLEVEL::LOG_INFO:
             line = format_green(log, len);
             break;
@@ -282,24 +285,54 @@ std::string bbt::log::format(const char* fmt, ...)
 std::string bbt::log::format_red(const char* str,size_t len)
 {
     std::string string(len + 20,'\0');
-    snprintf(string.data(),string.size(),"\033[0m\033[1;31m%s\033[0m",str);
+    snprintf(string.data(),string.size(),"\033[0m\033[0;31m%s\033[0m",str);
+    return string;
+}
+std::string bbt::log::format_l_green(const char* str,size_t len)
+{
+    std::string string(len + 20, '\0');
+    snprintf(string.data(), string.size(), "\033[0m\033[2;32m%s\033[0m", str);
     return string;
 }
 std::string bbt::log::format_green(const char* str,size_t len)
 {
     std::string string(len + 20,'\0');
-    snprintf(string.data(),string.size(),"\033[0m\033[1;32m%s\033[0m",str);
+    snprintf(string.data(),string.size(),"\033[0m\033[0;32m%s\033[0m",str);
     return string;
 }
 std::string bbt::log::format_yellow(const char* str,size_t len)
 {
     std::string string(len + 20,'\0');
-    snprintf(string.data(),string.size(),"\033[0m\033[1;33m%s\033[0m",str);
+    snprintf(string.data(),string.size(),"\033[0m\033[0;33m%s\033[0m",str);
     return string;
 }
 std::string bbt::log::format_blue(const char* str,size_t len)
 {
     std::string string(len + 20,'\0');
     snprintf(string.data(),string.size(),"\033[0m\033[1;34m%s\033[0m",str);
+    return string;
+}
+std::string bbt::log::format_cyan(const char* str, size_t len)
+{
+    std::string string(len + 20, '\0');
+    snprintf(string.data(), string.size(), "\033[0m\033[1;36m%s\033[0m", str);
+    return string;
+}
+std::string bbt::log::format_l_cyan(const char* str, size_t len)
+{
+    std::string string(len + 20, '\0');
+    snprintf(string.data(), string.size(), "\033[0m\033[2;36m%s\033[0m", str);
+    return string;
+}
+std::string bbt::log::format_white(const char* str, size_t len)
+{
+    std::string string(len + 20, '\0');
+    snprintf(string.data(), string.size(), "\033[0m\033[0;30m%s\033[0m", str);
+    return string;
+}
+std::string bbt::log::format_l_white(const char* str, size_t len)
+{
+    std::string string(len + 20, '\0');
+    snprintf(string.data(), string.size(), "\033[0m\033[2;30m%s\033[0m", str);
     return string;
 }

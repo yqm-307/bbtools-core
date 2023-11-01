@@ -91,10 +91,16 @@ private:
 };
 
 std::string format(const char* fmt, ...);
-std::string format_red(const char* str,size_t len);
-std::string format_green(const char* str,size_t len);
-std::string format_yellow(const char* str,size_t len);
-std::string format_blue(const char* str,size_t len);
+std::string format_red(const char* str, size_t len);
+std::string format_l_green(const char* str, size_t len);
+std::string format_green(const char* str, size_t len);
+std::string format_yellow(const char* str, size_t len);
+std::string format_blue(const char* str, size_t len);
+std::string format_cyan(const char* str, size_t len);
+std::string format_l_cyan(const char* str, size_t len);
+std::string format_white(const char* str, size_t len);
+std::string format_l_white(const char* str, size_t len);
+
 
 
 
