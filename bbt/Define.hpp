@@ -78,3 +78,7 @@ namespace file
 }// namespace bbt::file
 
 }// namespace bbt
+
+
+/* 可以考虑做成自动修改 */
+#define BBT_INCLUDE_ROOT_PATH "/home/yqm/Git/owner/biangbiangtools/bbt"
