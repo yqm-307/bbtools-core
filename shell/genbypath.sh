@@ -1,6 +1,7 @@
 #!/bin/bash
 
 includepath=$1
+definepath=$2
 
 if [ ! -e "$1" ];
 then
@@ -8,6 +9,7 @@ then
     exit
 fi
 
-echo `sed "s/${includepath}//" `
+path1=${includepath//\/\\\/}
+path2=${path1//\//\\/}
 
-echo `sed -r "s/define\s+(BBT_INCLUDE_ROOT_PATH).*\".*\"/define BBT_INCLUDE_ROOT_PATH \"${includepath}\"/" ..//bbt/Define.hpp`
+echo `sed -r -i "s/define\s+(BBT_INCLUDE_ROOT_PATH).*\".*\"/define BBT_INCLUDE_ROOT_PATH \"${path2}\"/" ${2}`

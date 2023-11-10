@@ -45,6 +45,8 @@ build()
     echo "代码拷贝到/usr/local/include/"
     echo "库文件拷贝到/usr/lib/x86_64-linux-gnu/"
     echo "install over"
+    ./../shell/genbypath.sh /usr/local/include/bbt /usr/local/include/bbt/Define.hpp
+    echo "Define.hpp 文本替换"
 }
 
 #卸载
