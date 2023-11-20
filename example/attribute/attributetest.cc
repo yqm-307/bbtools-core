@@ -38,7 +38,7 @@ int main()
     test1();  
     void*(*fptr)(int) = noclone;
     noclone1(noclone); 
-    nodiscord();
+    // nodiscord();
 }
 
 int nodiscord()

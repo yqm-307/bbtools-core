@@ -27,6 +27,7 @@ file(GLOB_RECURSE BBT_SRCS
 add_library(ybbt SHARED ${BBT_SRCS})
 target_link_libraries(ybbt 
     pthread
+    lua
 )
 
 # 编译例程
