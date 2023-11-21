@@ -13,7 +13,7 @@ namespace bbt::file
  * @return true 
  * @return false 
  */
-static bool Exist(const std::string& path);
+bool Exist(const std::string& path);
 
 
 /**
@@ -22,7 +22,16 @@ static bool Exist(const std::string& path);
  * @param folder_path 
  * @return std::vector<std::string> 
  */
-static std::vector<std::string> GetFileByFolder(const std::string& folder_path, bool is_abs_path);
+std::vector<std::string> GetFileByFolder(const std::string& folder_path, bool is_abs_path);
+
+/**
+ * @brief 获取文件夹下面的所有文件（筛选文件拓展名）
+ * 
+ * @param folder_path 
+ * @param is_abs_path 
+ * @return std::vector<std::string> 
+ */
+std::vector<std::string> GetFileByFolder(const std::string& folder_path, bool is_abs_path, std::vector<std::string> ext_names);
 
 /**
  * @brief 获取工作路径
@@ -30,6 +39,6 @@ static std::vector<std::string> GetFileByFolder(const std::string& folder_path, 
  * @param path 
  * @return int 
  */
-static std::string GetWorkPath(); 
+std::string GetWorkPath(); 
 
 }

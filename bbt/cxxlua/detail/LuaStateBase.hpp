@@ -17,3 +17,5 @@ private:
 };
 
 } // namespace bbt::cxxlua::detail
+
+#include "LuaStateBase_Def.hpp"

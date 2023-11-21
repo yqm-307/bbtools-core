@@ -1,3 +1,4 @@
+#pragma once
 #include "LuaStateBase.hpp"
 
 namespace bbt::cxxlua::detail

@@ -3,6 +3,10 @@
 #include <lua.hpp>
 #include <memory>
 #include <functional>
+#include <optional>
+
+// 对外 api flag
+#define CXXLUA_API
 
 namespace bbt::cxxlua::detail
 {

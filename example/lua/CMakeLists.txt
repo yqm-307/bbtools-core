@@ -1,0 +1,5 @@
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin/test/lua)
+
+add_executable(luatest luatest.cc)
+target_link_libraries(luatest ybbt lua)
