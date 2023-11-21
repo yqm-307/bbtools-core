@@ -14,6 +14,11 @@ enum ERRCODE
     ErrParams = 3,  // 参数错误
     ErrSyntax = 4,  // 语法错误
     ErrMem    = 5,  // 内存分配错误
+
+    // lua type assert
+    Type_NotTable   = 10, // 目标不是表
+    Type_NotInt     = 11, // 目标不是integer
+    Type_IsNil      = 12, // 目标是空表
 };
 
 namespace detail

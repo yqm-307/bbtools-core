@@ -77,5 +77,22 @@ std::optional<LuaErr> LuaVM::LoadFolder(const std::string& folder_path)
     return std::nullopt;
 }
 
+std::optional<LuaErr> LuaVM::CallLuaFunction(const std::string& funcname)
+{
 
+}
+
+template<typename ...Args>
+std::optional<LuaErr> LuaVM::CallLuaFunctionEx<Args...>(const std::string& funcname, Args... params)
+{
+
+}
+
+template<typename ...Args>
+std::optional<LuaErr> __CallLuaFunction(int param_idx, Args... params);
+
+template<typename T, typename ...Args>
+std::optional<LuaErr> __CallLuaFunction(int param_idx, T param, Args... params);
+
+std::optional<LuaErr> __CallLuaFunction(int param_idx);
 }
