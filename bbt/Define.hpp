@@ -80,5 +80,9 @@ namespace file
 }// namespace bbt
 
 
+#if __cplusplus < 201103L || __cplusplus > 201703L
+#error "versions greater than c++17 and smaller c++11 are not supported!"
+#endif
+
 /* 可以考虑做成自动修改 */
 #define BBT_INCLUDE_ROOT_PATH "/home/yqm/Git/owner/biangbiangtools/bbt"

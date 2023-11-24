@@ -16,9 +16,10 @@ enum ERRCODE
     ErrMem    = 5,  // 内存分配错误
 
     // lua type assert
-    Type_NotTable   = 10, // 目标不是表
-    Type_NotInt     = 11, // 目标不是integer
-    Type_IsNil      = 12, // 目标是空表
+    Type_UnExpected = 10, // 操作值是非预期类型
+    Type_NotTable   = 11, // 目标不是表
+    Type_NotInt     = 12, // 目标不是integer
+    Type_IsNil      = 13, // 目标是空表
 };
 
 namespace detail
@@ -33,7 +34,10 @@ public:
         m_traceback_err(cstr), m_errcode(code) {}
     LuaErr(LuaErr&& other):
         m_traceback_err(std::move(other.m_traceback_err)),
-        m_errcode(m_errcode){}
+        m_errcode(other.m_errcode){}
+    LuaErr(const LuaErr& other):
+        m_traceback_err(other.m_traceback_err),
+        m_errcode(other.m_errcode){}
     ~LuaErr() {}
 
     void Clear(){m_traceback_err.value().clear(); m_errcode = bbt::cxxlua::ERRCODE::Default;}

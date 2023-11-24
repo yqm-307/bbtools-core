@@ -4,12 +4,13 @@
 #include <memory>
 #include <functional>
 #include <optional>
+#include <type_traits>
 
 // 对外 api flag
 #define CXXLUA_API
 
 #define CXXLUAInvalidType(type) \
-    ( type <= bbt::cxxlua::detail::LUATYPE::Nil  || \
+    ( type <= bbt::cxxlua::detail::LUATYPE::None  || \
       type >= bbt::cxxlua::detail::LUATYPE::Other)
 
 
@@ -35,4 +36,5 @@ enum LUATYPE
     Thread      = LUA_TTHREAD,
     Other,
 };
-}
+
+} // namespace bbt::cxxlua::detail
