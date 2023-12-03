@@ -8,12 +8,13 @@ namespace bbt::cxxlua
 enum ERRCODE
 {
     Default = 0, 
-    Succes  = 1,
-    Failed  = 2,
+    Comm_Succes  = 1,
+    Comm_Failed  = 2,
     // lua vm
-    ErrParams = 3,  // 参数错误
-    ErrSyntax = 4,  // 语法错误
-    ErrMem    = 5,  // 内存分配错误
+    VM_ErrParams = 3,  // 参数错误
+    VM_ErrSyntax = 4,  // 语法错误
+    VM_ErrMem    = 5,  // 内存分配错误
+    VM_ErrLuaRuntime = 6, // lua runtime 错误
 
     // lua type assert
     Type_UnExpected = 10, // 操作值是非预期类型

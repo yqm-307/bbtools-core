@@ -33,10 +33,10 @@ LuaErr LuaVM::ParseLuaLoadErr(int lua_errcode)
     LuaErr err;
     switch(lua_errcode) {
     case LUA_ERRSYNTAX:
-        err.Reset(lua_tostring(m_ctx->Context(), -1), ERRCODE::ErrSyntax);
+        err.Reset(lua_tostring(m_ctx->Context(), -1), ERRCODE::VM_ErrSyntax);
         break;
     case LUA_ERRMEM:
-        err.Reset("", ERRCODE::ErrMem);
+        err.Reset("", ERRCODE::VM_ErrMem);
         break;
     default:
         err.Reset("", ERRCODE::Default);
@@ -62,7 +62,7 @@ std::optional<LuaErr> LuaVM::LoadFile(const std::string& file_path)
 std::optional<LuaErr> LuaVM::LoadFolder(const std::string& folder_path)
 {
     if(folder_path.empty() || !file::Exist(folder_path))
-        return LuaErr("", ERRCODE::ErrParams);
+        return LuaErr("", ERRCODE::VM_ErrParams);
 
     auto file_list = file::GetFileByFolder(folder_path, false, {"lua"});
 
@@ -83,16 +83,22 @@ std::optional<LuaErr> LuaVM::CallLuaFunction(const std::string& funcname)
 }
 
 template<typename ...Args>
-std::optional<LuaErr> LuaVM::CallLuaFunctionEx<Args...>(const std::string& funcname, Args... params)
+std::optional<LuaErr> LuaVM::CallLuaFunctionEx(const std::string& funcname, Args... params)
 {
-
+    /* 寻找并压入函数 */
+    return __CallLuaFunction<Args ...>(sizeof ...(params), params ...);
 }
 
-template<typename ...Args>
-std::optional<LuaErr> __CallLuaFunction(int param_idx, Args... params);
-
 template<typename T, typename ...Args>
-std::optional<LuaErr> __CallLuaFunction(int param_idx, T param, Args... params);
+std::optional<LuaErr> __CallLuaFunction(int param_idx, T param, Args... params)
+{
+    return __CallLuaFunction<Args ...>(param_idx, params ...);
+}
 
-std::optional<LuaErr> __CallLuaFunction(int param_idx);
+std::optional<LuaErr> __CallLuaFunction(int param_idx)
+{
+    /* 调用函数 */
+    // lua_pcall
+    return std::nullopt;
+}
 }
