@@ -79,11 +79,12 @@ public:
     std::optional<LuaErr> SetGlobalValue(const std::string& value_name, T value);
 
     template<typename ... Args>
-    std::optional<LuaErr> CallLuaFunction(
-        const std::string& funcname,
-        int return_nums,
-        const LuaParseReturnCallback& parse_handler,
+    std::optional<LuaErr> LuaCall(
+        int nparam,
+        int nresult,
         Args... args);
+
+    std::optional<LuaErr> LoadLuaLib();
 
 protected:
     /* 将找到的值压入栈顶 */
@@ -104,10 +105,9 @@ protected:
 
     template<typename T, typename ... Args>
     void PushMany(T arg, Args ...args);
-    
-
 
     lua_State* Context(){ return lua; }
+
     /**
      * @brief 将一个全局变量压入栈顶并返回其类型
      * 
@@ -144,15 +144,18 @@ protected:
     LuaErr __ParseLuaLoadErr(int lua_errcode);
 
 
-
-    std::optional<LuaErr> __CallLuaFunction(int params, int returns);
+    /**
+     * @brief CallLuaFunction 展开终止函数
+     * @return std::optional<LuaErr> 
+     */
+    std::optional<LuaErr> __CallLuaFunction(int nparam, int nresult);
 
     /**
      * @brief CallLuaFunction 展开辅助函数
      * @return std::optional<LuaErr> 
      */
-    template<typename T, typename ... Args>
-    std::optional<LuaErr> __CallLuaFunction(int params, int returns, T arg, Args... args);
+    template<typename ... Args>
+    std::optional<LuaErr> __CallLuaFunction(int nparam, int nresult, Args... args);
 
 private:
     lua_State* lua;

@@ -9,10 +9,10 @@ template<typename T>
 constexpr bool CheckIsCanTransfromToLuaType()
 {
     if constexpr(
-        std::is_same_v<std::remove_cvref<T>, int> ||
-        std::is_same_v<std::remove_cvref<T>, std::string> ||
-        std::is_same_v<std::remove_cvref<T>, double> ||
-        std::is_same_v<std::remove_cvref<T>, char*> ||
+        std::is_same_v<bbt::type::remove_cvref<T>, int> ||
+        std::is_same_v<bbt::type::remove_cvref<T>, std::string> ||
+        std::is_same_v<bbt::type::remove_cvref<T>, double> ||
+        std::is_same_v<bbt::type::remove_cvref<T>, char*>
     ) {
         return true;
     } else {

@@ -7,7 +7,7 @@ namespace bbt::cxxlua::detail
 {
 
 LuaVM::LuaVM()
-    :m_stack(std::make_unique<LuaStack>())
+    :m_stack(std::make_unique<LuaStack>(luaL_newstate()))
 {
 }
 
@@ -43,28 +43,29 @@ std::optional<LuaErr> LuaVM::LoadFolder(const std::string& folder_path)
     return m_stack->LoadFolder(folder_path);
 }
 
-std::optional<LuaErr> LuaVM::CallLuaFunction(const std::string& funcname)
-{
 
+template<typename ... Args>
+std::optional<LuaErr> LuaVM::CallLuaFunction(
+    const std::string&              funcname,
+    int                             return_nums,
+    const LuaParseReturnCallback&   parse_handler,
+    Args                            ...args)
+{
+    auto [err, type] = m_stack->CheckGlobalValue<bbt::cxxlua::detail::LUATYPE::Function>(funcname);
+    if(err != std::nullopt)
+        return err;
+
+    auto luacall_err = m_stack->LuaCall(sizeof ...(args), return_nums, args ...);
+    if(luacall_err != std::nullopt)
+        return luacall_err;
+
+    return parse_handler(m_stack);
 }
 
-template<typename ...Args>
-std::optional<LuaErr> LuaVM::CallLuaFunctionEx(const std::string& funcname, Args... params)
+std::optional<LuaErr> LuaVM::LoadLuaLibrary()
 {
-    /* 寻找并压入函数 */
-    return __CallLuaFunction<Args ...>(sizeof ...(params), params ...);
+    return m_stack->LoadLuaLib();
 }
 
-template<typename T, typename ...Args>
-std::optional<LuaErr> __CallLuaFunction(int param_idx, T param, Args... params)
-{
-    return __CallLuaFunction<Args ...>(param_idx, params ...);
-}
 
-std::optional<LuaErr> __CallLuaFunction(int param_idx)
-{
-    /* 调用函数 */
-    // lua_pcall
-    return std::nullopt;
-}
 }

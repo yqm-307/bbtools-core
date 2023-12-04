@@ -33,7 +33,7 @@ enum LUATYPE
     Nil         = LUA_TNIL,
     Bool        = LUA_TBOOLEAN,
     LightUserData = LUA_TLIGHTUSERDATA,
-    Double      = LUA_TNUMBER,
+    Number      = LUA_TNUMBER,
     CString     = LUA_TSTRING,
     LuaTable    = LUA_TTABLE,
     Function    = LUA_TFUNCTION,

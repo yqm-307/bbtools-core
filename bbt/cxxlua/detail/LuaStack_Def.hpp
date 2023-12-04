@@ -69,7 +69,6 @@ std::optional<LuaErr> LuaStack::LoadFolder(const std::string& folder_path)
 template<LUATYPE LuaType>
 std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::CheckGlobalValue(const std::string& value_name)
 {
-    static_assert(CheckIsCanTransfromToLuaType<LuaType>());
     static_assert(( LuaType > LUATYPE::None &&
                     LuaType < LUATYPE::Other && 
                     LuaType != LUATYPE::Nil),
@@ -91,7 +90,7 @@ std::optional<LuaErr> LuaStack::SetGlobalValue(const std::string& value_name, T 
     static_assert(CheckIsCanTransfromToLuaType<LuaType>());
     static_assert(( LuaType > LUATYPE::None &&
                     LuaType < LUATYPE::Other && 
-                    LuaType != LUATYPE::Nil &&
+                    LuaType != LUATYPE::Nil
                     ),
     "TValue LuaType is not a right type.");
 
@@ -184,22 +183,32 @@ std::optional<LuaErr> LuaStack::__SetGlobalValue<const std::string&>(const std::
 
 LUATYPE LuaStack::Push(int value)
 {
-    return LUATYPE::Nil;
+    lua_pushinteger(Context(), value);
+    return LUATYPE::Number;
 }
 
 LUATYPE LuaStack::Push(double value)
 {
-    return LUATYPE::Nil;
+    lua_pushnumber(Context(), value);
+    return LUATYPE::Number;
 }
 
 LUATYPE LuaStack::Push(const std::string& value)
 {
-    return LUATYPE::Nil;
+    const char* ret = lua_pushstring(Context(), value.c_str());
+    if(ret == NULL) {
+        return LUATYPE::Nil;
+    }
+    return LUATYPE::CString;
 }
 
 LUATYPE LuaStack::Push(const char* value)
 {
-    return LUATYPE::Nil;
+    const char* ret = lua_pushstring(Context(), value);
+    if(ret == NULL) {
+        return LUATYPE::Nil;
+    }
+    return LUATYPE::CString;
 }
 
 void LuaStack::PushMany() {}
@@ -216,24 +225,19 @@ void LuaStack::PushMany(T arg, Args ...args)
 #pragma region "call lua function"
 
 template<typename ... Args>
-std::optional<LuaErr> LuaStack::CallLuaFunction(
-    const std::string&  funcname,
-    int                 return_nums,
-    const LuaParseReturnCallback& parse_handler,
-    Args...             args)
+std::optional<LuaErr> LuaStack::LuaCall(
+    int                 nparam,
+    int                 nresult,
+    Args                ...args)
 {
-    auto err = __CallLuaFunction(sizeof ...(args), return_nums, args ...);
-    if(!err)
-        return err;
-
-    return parse_handler(m_stack);
+    return __CallLuaFunction(nparam, nresult, args ...);
 }
 
-template<typename T, typename ... Args>
-std::optional<LuaErr> LuaStack::__CallLuaFunction(int params, int returns, T arg, Args... args)
+template<typename ... Args>
+std::optional<LuaErr> LuaStack::__CallLuaFunction(int params, int returns, Args... args)
 {
     /* 递归插入所有值 */
-    PushMany();
+    PushMany(args...);
 
     int ret = lua_pcall(Context(), params, returns, 0);
     switch (ret)
@@ -247,7 +251,6 @@ std::optional<LuaErr> LuaStack::__CallLuaFunction(int params, int returns, T arg
     }
 
     return std::nullopt;
-    return ;
 }
 
 std::optional<LuaErr> LuaStack::__CallLuaFunction(int params, int returns)
@@ -267,5 +270,12 @@ std::optional<LuaErr> LuaStack::__CallLuaFunction(int params, int returns)
 }
 
 #pragma endregion
+
+std::optional<LuaErr> LuaStack::LoadLuaLib()
+{
+    luaL_openlibs(Context());
+    return std::nullopt;
+}
+
 
 }
