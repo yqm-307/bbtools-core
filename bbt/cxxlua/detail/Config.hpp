@@ -17,10 +17,15 @@
 namespace bbt::cxxlua::detail
 {
 
+class LuaErr;
 class LuaState;
 class LuaVM;
+class __CallLuaHelperEnd;
+class LuaStack;
 
 typedef std::function<void(std::unique_ptr<LuaState>&)> LuaFunction;
+/* cxx 调用 lua ，lua 返回值解析函数 */
+typedef std::function<std::optional<LuaErr>(std::unique_ptr<LuaStack>&)> LuaParseReturnCallback;
 
 enum LUATYPE
 {

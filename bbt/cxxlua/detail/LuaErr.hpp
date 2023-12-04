@@ -33,6 +33,8 @@ public:
         m_traceback_err(std::nullopt), m_errcode(ERRCODE::Default) {}
     LuaErr(const char* cstr, bbt::cxxlua::ERRCODE code):
         m_traceback_err(cstr), m_errcode(code) {}
+    LuaErr(const std::string& str, bbt::cxxlua::ERRCODE code):
+        m_traceback_err(str), m_errcode(code) {}
     LuaErr(LuaErr&& other):
         m_traceback_err(std::move(other.m_traceback_err)),
         m_errcode(other.m_errcode){}

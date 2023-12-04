@@ -1,10 +1,70 @@
 #pragma once
 #include "./LuaStack.hpp"
 #include "bbt/cxxlua/detail/TypeHelper.hpp"
+#include "bbt/file/FileHelper.hpp"
 
 
 namespace bbt::cxxlua::detail
 {
+
+LuaErr LuaStack::__ParseLuaLoadErr(int lua_errcode)
+{
+    LuaErr err;
+    switch(lua_errcode) {
+    case LUA_ERRSYNTAX:
+        err.Reset(lua_tostring(Context(), -1), ERRCODE::VM_ErrSyntax);
+        break;
+    case LUA_ERRMEM:
+        err.Reset("", ERRCODE::VM_ErrMem);
+        break;
+    default:
+        err.Reset("", ERRCODE::Default);
+        break;
+    }
+
+    return err;
+}
+
+std::optional<LuaErr> LuaStack::DoScript(const std::string& script)
+{
+    if(luaL_dostring(Context(), script.c_str()) != 0) {
+        return LuaErr(lua_tostring(Context(), -1), ERRCODE::VM_ErrLuaRuntime);
+    }
+    
+    return std::nullopt;
+}
+
+
+std::optional<LuaErr> LuaStack::LoadFile(const std::string& file_path)
+{
+    int err = luaL_loadfile(Context(), file_path.c_str());
+    if(err != LUA_OK) {
+        return __ParseLuaLoadErr(err);
+    }
+
+    lua_pcall(Context(), 0, 0, 0);
+
+    return std::nullopt;
+}
+
+
+std::optional<LuaErr> LuaStack::LoadFolder(const std::string& folder_path)
+{
+    if(folder_path.empty() || !file::Exist(folder_path))
+        return LuaErr("", ERRCODE::VM_ErrParams);
+
+    auto file_list = file::GetFileByFolder(folder_path, false, {"lua"});
+
+    for (auto &&filename : file_list)
+    {
+        auto err = LoadFile(filename);
+        if(err != std::nullopt) {
+            return err;
+        }
+    }
+
+    return std::nullopt;
+}
 
 template<LUATYPE LuaType>
 std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::CheckGlobalValue(const std::string& value_name)
@@ -120,5 +180,92 @@ std::optional<LuaErr> LuaStack::__SetGlobalValue<const std::string&>(const std::
     return std::nullopt;
 }
 
+#pragma region "stack operation"
+
+LUATYPE LuaStack::Push(int value)
+{
+    return LUATYPE::Nil;
+}
+
+LUATYPE LuaStack::Push(double value)
+{
+    return LUATYPE::Nil;
+}
+
+LUATYPE LuaStack::Push(const std::string& value)
+{
+    return LUATYPE::Nil;
+}
+
+LUATYPE LuaStack::Push(const char* value)
+{
+    return LUATYPE::Nil;
+}
+
+void LuaStack::PushMany() {}
+
+template<typename T, typename ... Args>
+void LuaStack::PushMany(T arg, Args ...args)
+{
+    Push(arg);
+    PushMany(args...);
+}
+
+#pragma endregion
+
+#pragma region "call lua function"
+
+template<typename ... Args>
+std::optional<LuaErr> LuaStack::CallLuaFunction(
+    const std::string&  funcname,
+    int                 return_nums,
+    const LuaParseReturnCallback& parse_handler,
+    Args...             args)
+{
+    auto err = __CallLuaFunction(sizeof ...(args), return_nums, args ...);
+    if(!err)
+        return err;
+
+    return parse_handler(m_stack);
+}
+
+template<typename T, typename ... Args>
+std::optional<LuaErr> LuaStack::__CallLuaFunction(int params, int returns, T arg, Args... args)
+{
+    /* 递归插入所有值 */
+    PushMany();
+
+    int ret = lua_pcall(Context(), params, returns, 0);
+    switch (ret)
+    {
+    case LUA_OK:
+        break;    
+    case LUA_ERRRUN:
+        return LuaErr(lua_tostring(Context(), -1), ERRCODE::VM_ErrLuaRuntime);
+    default:
+        return LuaErr(std::to_string(ret), ERRCODE::Default);
+    }
+
+    return std::nullopt;
+    return ;
+}
+
+std::optional<LuaErr> LuaStack::__CallLuaFunction(int params, int returns)
+{
+    int ret = lua_pcall(Context(), params, returns, 0);
+    switch (ret)
+    {
+    case LUA_OK:
+        break;    
+    case LUA_ERRRUN:
+        return LuaErr(lua_tostring(Context(), -1), ERRCODE::VM_ErrLuaRuntime);
+    default:
+        return LuaErr(std::to_string(ret), ERRCODE::Default);
+    }
+
+    return std::nullopt;
+}
+
+#pragma endregion
 
 }
