@@ -5,6 +5,7 @@
 #include <functional>
 #include <optional>
 #include <type_traits>
+#include <unordered_map>
 
 // 对外 api flag
 #define CXXLUA_API
@@ -20,8 +21,8 @@ namespace bbt::cxxlua::detail
 class LuaErr;
 class LuaState;
 class LuaVM;
-class __CallLuaHelperEnd;
 class LuaStack;
+class LuaClass;
 
 typedef std::function<void(std::unique_ptr<LuaState>&)> LuaFunction;
 /* cxx 调用 lua ，lua 返回值解析函数 */

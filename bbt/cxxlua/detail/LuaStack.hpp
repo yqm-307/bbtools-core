@@ -6,7 +6,6 @@ namespace bbt::cxxlua::detail
 
 class LuaStack
 {
-    friend class __CallLuaHelperEnd;
 public:
     LuaStack(lua_State* l):lua(l){}
     ~LuaStack(){}

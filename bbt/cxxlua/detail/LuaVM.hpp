@@ -23,7 +23,6 @@ public:
     CXXLUA_API std::optional<LuaErr> LoadFiles(const std::vector<std::string>& file_path_arr);
     CXXLUA_API std::optional<LuaErr> LoadFolder(const std::string& folder_path);
 
-
     template<typename ... Args>
     CXXLUA_API std::optional<LuaErr> CallLuaFunction(
         const std::string&              funcname,
