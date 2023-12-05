@@ -30,14 +30,6 @@ public:
         int                             return_nums,
         const LuaParseReturnCallback&   parse_handler,
         Args                            ...args);
-
-    /**
-     * @brief 获取一个全局表
-     * 
-     * @param tablename 
-     * @return CXXLUA_API 
-     */
-    CXXLUA_API std::optional<LuaErr> GetGlobalTable(const std::string& tablename);
     
 protected: /* 表操作 */
     CXXLUA_API std::optional<LuaErr> ExistGlobalFunc(const std::string& funcname);

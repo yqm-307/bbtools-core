@@ -9,6 +9,7 @@ namespace bbt::net
 
 void InitAddress(sockaddr_in& addr ,int port,std::string ip="",int opt = INADDR_ANY)
 {
+	memset(&addr, '\0', sizeof(addr));
 	bzero(&addr,sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);

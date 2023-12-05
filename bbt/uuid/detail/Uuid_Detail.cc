@@ -4,19 +4,19 @@ using namespace bbt::uuid;
 
 UuidBase::UuidBase() 
 {
-    bzero(m_id, sizeof(m_id));
+    memset(m_id, '\0', sizeof(m_id));
 }
 
 UuidBase::UuidBase(const char* uid, size_t len)
 {
-    bzero(m_id, sizeof(m_id));
+    memset(m_id, '\0', sizeof(m_id));
     assert(len <= sizeof(m_id));
     memcpy(m_id, uid, len);
 }
 
 UuidBase::UuidBase(std::string uid)
 {
-    bzero(m_id, sizeof(m_id));
+    memset(m_id, '\0', sizeof(m_id));
     if(uid.size() <= BBT_UUID_BASE_LENGTH)
         return;        
     memcpy(m_id, uid.c_str(), BBT_UUID_BASE_LENGTH);
@@ -90,7 +90,6 @@ void UuidBase::GenerateBase(char* id)
     memcpy( m_id + offset,
             (char*)&ext,
             sizeof(ext));
-    offset += sizeof(ext);
 }
 
 int UuidBase::GetLocalMacAddr(const std::string& networkcard, bbt_mac_addr *mac)

@@ -145,7 +145,7 @@ protected:
     
 private:
     CallableType    m_data;
-    Status          m_status{Status:Uninitialized};
+    Status          m_status{Status::Uninitialized};
     TaskID        m_id;   // 初始化确定,存在期间不会改变
     static bbt::pool_util::IDPool<uint32_t,true>*    
                     m_id_pool;
