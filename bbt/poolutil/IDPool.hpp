@@ -92,7 +92,7 @@ public:
         if (m_ids.size() >= ( id + 1 ))
         {
             assert(m_ids[id] == IDStatus::busy);
-            m_ids[id] == IDStatus::free;
+            m_ids[id] = IDStatus::free;
             m_freequeue.push(id);
             return true;
         }

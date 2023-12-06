@@ -66,7 +66,7 @@ public:
     std::pair<std::optional<LuaErr>, LUATYPE> CheckGlobalValue(const std::string& value_name);
 
     /**
-     * @brief 设置一个全局变量
+     * @brief 将一个c++变量直接插入到lua全局表中
      * 
      * @tparam LuaType 
      * @tparam T 
@@ -77,14 +77,49 @@ public:
     template<LUATYPE LuaType, typename T>
     std::optional<LuaErr> SetGlobalValue(const std::string& value_name, T value);
 
-    template<typename ... Args>
-    std::optional<LuaErr> LuaCall(
-        int nparam,
-        int nresult,
-        Args... args);
+    /* 将栈中idx处元素压入global table */
+    std::optional<LuaErr> Push2GTable(const std::string& value_name, int idx);
 
+    /**
+     * @brief 调用lua函数
+     * 
+     * @tparam Args 
+     * @param nparam 
+     * @param nresult 
+     * @param args 
+     * @return std::optional<LuaErr> 
+     */
+    template<typename ... Args>
+    std::optional<LuaErr> LuaCall(int nparam, int nresult, Args... args);
+
+    /**
+     * @brief 加载lua lib
+     * 
+     * @return std::optional<LuaErr> 
+     */
     std::optional<LuaErr> LoadLuaLib();
 
+    /**
+     * @brief 向栈顶的table（默认栈顶元素是table）插入一个key，value（ps:会覆盖）
+     * 
+     * @tparam KeyType 
+     * @tparam ValueType 
+     * @param key 键  
+     * @param value 值 
+     * @return std::optional<LuaErr> 
+     */
+    template<typename KeyType, typename ValueType>
+    std::optional<LuaErr> Insert2Table(KeyType key, ValueType value);
+
+    /* 创建一个lua table并压入栈顶 */
+    void NewLuaTable();
+    /* 返回0说明元表已经存在，否则返回1并压入栈顶 */
+    int NewMetatable(const std::string& name);
+    int SetMetatable(int idx);
+    /* 将idx处元素拷贝，并压入栈顶 */
+    void Copy2Top(int idx);
+    /* 获取栈顶元素的idx */
+    int GetTop();
 protected:
     /* 将找到的值压入栈顶 */
     std::optional<LuaErr> PushAFunction();
@@ -93,17 +128,21 @@ protected:
 
     /* 栈操作 */
     LUATYPE Push(int value);
-
     LUATYPE Push(double value);
-
     LUATYPE Push(const std::string& value);
-
     LUATYPE Push(const char* value);
+    LUATYPE Push(lua_CFunction cfunc);
 
     void PushMany();
 
     template<typename T, typename ... Args>
     void PushMany(T arg, Args ...args);
+
+    void Push2LuaGlobal();
+
+    template<typename KeyType, typename ValueType>
+    void __Insert(KeyType key, ValueType value);
+
 
     lua_State* Context(){ return lua; }
 

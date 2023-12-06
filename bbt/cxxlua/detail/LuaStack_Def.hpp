@@ -107,6 +107,11 @@ std::optional<LuaErr> LuaStack::SetGlobalValue(const std::string& value_name, T 
     return std::nullopt;
 }
 
+std::optional<LuaErr> Push2GTable(const std::string& value_name, int idx)
+{
+
+}
+
 std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::Pop(int index_value)
 {
     return __CheckTable(index_value);
@@ -142,7 +147,7 @@ std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::__CheckTable(int index_value
 
     lua_pushinteger(Context(), index_value);
     int err = lua_gettable(Context(), -2);
-    if(lua_gettable(Context(), -2)) {
+    if(err != LUA_OK) {
         return {LuaErr(lua_tostring(Context(), -1), ERRCODE::VM_ErrLuaRuntime), (LUATYPE)type};
     }
 
@@ -211,6 +216,13 @@ LUATYPE LuaStack::Push(const char* value)
     return LUATYPE::CString;
 }
 
+LUATYPE LuaStack::Push(lua_CFunction cfunc)
+{
+    lua_pushcfunction(Context(), cfunc);
+    return LUATYPE::Function;
+}
+
+
 void LuaStack::PushMany() {}
 
 template<typename T, typename ... Args>
@@ -218,6 +230,59 @@ void LuaStack::PushMany(T arg, Args ...args)
 {
     Push(arg);
     PushMany(args...);
+}
+
+
+template<typename KeyType, typename ValueType>
+void LuaStack::__Insert(KeyType key, ValueType value) 
+{
+    Push(key);
+    Push(value);
+    lua_settable(Context(), -3);
+}
+
+template<typename KeyType, typename ValueType>
+std::optional<LuaErr> LuaStack::Insert2Table(KeyType key, ValueType value)
+{
+    int top_type = lua_type(Context(), -1);
+    int value_type = GetTypeEnum<bbt::type::remove_cvref<ValueType>>::type;
+
+    /* check 插入值的类型是否为合法的类型 */
+    if (top_type != LUATYPE::LuaTable ||
+        CXXLUAInvalidType(value_type) ||
+        !CheckIsCanTransfromToLuaType<ValueType>()) 
+    {
+        return LuaErr("", ERRCODE::Type_UnExpected);
+    }
+
+    /* 确保类型正确，执行此操作必定成功 */
+    __Insert(key, value);
+    return std::nullopt;
+}
+
+void LuaStack::NewLuaTable()
+{
+    lua_newtable(Context());
+}
+
+int LuaStack::NewMetatable(const std::string& name)
+{
+    return luaL_newmetatable(Context(), name.c_str());
+}
+
+int LuaStack::SetMetatable(int idx)
+{
+    return lua_setmetatable(Context(), idx);
+}
+
+void LuaStack::Copy2Top(int idx)
+{
+    lua_pushvalue(Context(), idx);
+}
+
+int LuaStack::GetTop()
+{
+    return lua_gettop(Context());
 }
 
 #pragma endregion

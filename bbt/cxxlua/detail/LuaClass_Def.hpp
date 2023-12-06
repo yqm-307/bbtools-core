@@ -1,78 +1,50 @@
 #pragma once
 #include "./LuaClass.hpp"
 
-
 namespace bbt::cxxlua::detail
 {
-
-std::unique_ptr<LuaClass>&& NewLuaClass(const std::string& class_name)
-{
-    return std::unique_ptr<LuaClass>(new LuaClass(class_name));
-}
-
-LuaClass::LuaClass(const std::string& class_name)
+template<typename CXXClassType>
+LuaClass<CXXClassType>::LuaClass(const std::string class_name)
     :m_class_name(class_name)
 {
 }
 
-bool LuaClass::AddGeter(const std::string& value_name, const MemberFunc& geter_func)
+template<typename CXXClassType>
+LuaClass<CXXClassType>::~LuaClass()
 {
-    return __AddFunc("Get" + value_name, geter_func);
 }
 
-bool LuaClass::AddSeter(const std::string& value_name, const MemberFunc& seter_func)
+template<typename CXXClassType>
+bool LuaClass<CXXClassType>::InitFuncs(std::initializer_list<std::pair<FuncsMap::key_type, FuncsMap::value_type>> list)
 {
-    return __AddFunc("Set" + value_name, seter_func);
-}
-
-bool LuaClass::__AddFunc(const std::string& func_name, const MemberFunc& mem_func)
-{
-    if(func_name.empty()) {
-        return false;
+    for (auto &&pair : list) {
+        auto [it, succ] = m_funcs.insert(std::move(pair));
+        if (!succ) {
+            m_funcs.clear();
+            return false;
+        }
     }
-
-    if(m_member_functions.find(func_name) != m_member_functions.end()) {
-        return false;
-    }
-
-    m_member_functions.insert(std::make_pair(func_name, mem_func));
-    return __RegistFunc(func_name);
-}
-
-bool LuaClass::__RegistFunc(const std::string& func_name)
-{
+    
+    return true;
 }
 
 
-
-LuaClass& LuaClass::BeginClass()
+template<typename CXXClassType>
+bool LuaClass<CXXClassType>::Register(std::unique_ptr<LuaStack>& stack)
 {
-    /* 这里预留，可以在未来拓展一些功能 */
-    return *this;
-}
+    //TODO 插入所有类
+    stack->NewLuaTable(); // 新建一个 cxx table;
+    int table_idx = stack->GetTop();
 
-std::optional<LuaErr> LuaClass::EndClass()
-{
-    /* 处理一下metatable */
+    stack->NewMetatable();
+    int mt_table_idx = stack->GetTop();
 
-    if(!m_regist_failed) {
-        return std::nullopt;
-    }
+    /* 将cxx table压入栈顶来对其进行操作 */
+    stack->Copy2Top(table_idx);
 
-    return LuaErr("", ERRCODE::Default);
-}
-
-LuaClass& LuaClass::RegMemberFunc(const std::string& func_name, const MemberFunc& warpper_func)
-{
-}
-
-LuaClass& LuaClass::RegConstructor(const std::string& func_name, const MemberFunc& warpper_func)
-{
-
-}
-
-LuaClass& LuaClass::RegDestructor(const std::string& func_name, const MemberFunc& warpper_func)
-{
+    // stack->Insert2Table(LUA_GLOBAL);
+    stack->SetGlobalValue(m_class_name, );
+    // stack->Insert2Table();
 
 }
 

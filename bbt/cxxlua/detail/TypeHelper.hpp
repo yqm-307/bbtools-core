@@ -20,4 +20,28 @@ constexpr bool CheckIsCanTransfromToLuaType()
     }
 }
 
+template<typename T>
+struct GetTypeEnum
+{ static const LUATYPE type = LUATYPE::None; };
+
+template<>
+struct GetTypeEnum<std::string>
+{ static const LUATYPE type = LUATYPE::CString; };
+
+template<>
+struct GetTypeEnum<char*>
+{ static const LUATYPE type = LUATYPE::CString; };
+
+template<>
+struct GetTypeEnum<int>
+{ static const LUATYPE type = LUATYPE::Number; };
+
+template<>
+struct GetTypeEnum<double>
+{ static const LUATYPE type = LUATYPE::Number; };
+
+template<>
+struct GetTypeEnum<lua_CFunction>
+{ static const LUATYPE type = LUATYPE::Function; };
+
 } // namespace bbt::cxxlua::detail
