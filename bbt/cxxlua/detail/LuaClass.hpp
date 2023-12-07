@@ -20,6 +20,8 @@ public:
     explicit LuaClass(const std::string class_name);
     ~LuaClass();
 
+    static int lua_to_string(lua_State* l);
+    static int lua_destructor(lua_State* l);
 protected:
     /* 给派生类用来注册函数 */
     bool InitFuncs(std::initializer_list<std::pair<FuncsMap::key_type, FuncsMap::value_type>> list);

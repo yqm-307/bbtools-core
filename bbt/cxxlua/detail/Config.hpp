@@ -7,8 +7,11 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include "bbt/Attribute.hpp"
+
 // 对外 api flag
-#define CXXLUA_API
+#define CXXLUA_API BBTATTR_FUNC_RetVal
+#define LOW_LEVEL
 
 #define CXXLUAInvalidType(type) \
     ( type <= bbt::cxxlua::detail::LUATYPE::None  || \

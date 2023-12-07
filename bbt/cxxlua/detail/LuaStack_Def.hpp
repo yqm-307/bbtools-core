@@ -84,40 +84,41 @@ std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::CheckGlobalValue(const std::
     return {std::nullopt, (LUATYPE)type};  
 }
 
-template<LUATYPE LuaType, typename T>
+template<typename T>
 std::optional<LuaErr> LuaStack::SetGlobalValue(const std::string& value_name, T value)
 {
-    static_assert(CheckIsCanTransfromToLuaType<LuaType>());
+    /* 类型检测 */
+    static_assert(CheckIsCanTransfromToLuaType<T>());
     static_assert(( LuaType > LUATYPE::None &&
                     LuaType < LUATYPE::Other && 
                     LuaType != LUATYPE::Nil
                     ),
     "TValue LuaType is not a right type.");
 
-    auto [err, _] = CheckGlobalValue<LuaType>(value_name);
-    if(err != std::nullopt) {
-        return err;
+    if(Push(value) != GetTypeEnum<T>::type) {
+        return LuaErr("not a lua function", ERRCODE::Type_UnExpected);
     }
 
-    err = __SetGlobalValue<T>(value);
-    if(err != std::nullopt) {
-        return err;
+    return __SetGlobalValue(value);
+}
+
+std::optional<LuaErr> LuaStack::SetGlobalValueByIndex(const std::string& value_name, const LuaRef& index)
+{
+    if(value_name.empty()) {
+        return LuaErr("value name is invalid!", ERRCODE::VM_ErrParams);
     }
 
+    Copy2Top(index);
+    lua_setglobal(Context(), value_name.c_str());
     return std::nullopt;
 }
 
-std::optional<LuaErr> Push2GTable(const std::string& value_name, int idx)
-{
-
-}
-
-std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::Pop(int index_value)
+std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::Pop4Table(int index_value)
 {
     return __CheckTable(index_value);
 }
 
-std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::Pop(const std::string&  field_name)
+std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::Pop4Table(const std::string&  field_name)
 {
     return __CheckTable(field_name);
 }
@@ -170,17 +171,9 @@ LUATYPE LuaStack::__GetGlobalValue(const std::string& value_name)
     return (LUATYPE)type;
 }
 
-template<typename T>
-std::optional<LuaErr> LuaStack::__SetGlobalValue(T value)
+std::optional<LuaErr> LuaStack::__SetGlobalValue(const std::string& name)
 {
-    /* lua可以支持的基本类型直接调用接口 */
-    return std::nullopt;
-}
-
-template<>
-std::optional<LuaErr> LuaStack::__SetGlobalValue<const std::string&>(const std::string& value)
-{
-    /* lua不支持的c++字符串类型特化 */
+    lua_setglobal(Context(), name.c_str());
     return std::nullopt;
 }
 
@@ -189,13 +182,13 @@ std::optional<LuaErr> LuaStack::__SetGlobalValue<const std::string&>(const std::
 LUATYPE LuaStack::Push(int value)
 {
     lua_pushinteger(Context(), value);
-    return LUATYPE::Number;
+    return GetType(g_lua_top_ref);
 }
 
 LUATYPE LuaStack::Push(double value)
 {
     lua_pushnumber(Context(), value);
-    return LUATYPE::Number;
+    return GetType(g_lua_top_ref);
 }
 
 LUATYPE LuaStack::Push(const std::string& value)
@@ -204,7 +197,7 @@ LUATYPE LuaStack::Push(const std::string& value)
     if(ret == NULL) {
         return LUATYPE::Nil;
     }
-    return LUATYPE::CString;
+    return GetType(g_lua_top_ref);
 }
 
 LUATYPE LuaStack::Push(const char* value)
@@ -213,14 +206,21 @@ LUATYPE LuaStack::Push(const char* value)
     if(ret == NULL) {
         return LUATYPE::Nil;
     }
-    return LUATYPE::CString;
+    return GetType(g_lua_top_ref);
 }
 
 LUATYPE LuaStack::Push(lua_CFunction cfunc)
 {
     lua_pushcfunction(Context(), cfunc);
-    return LUATYPE::Function;
+    return GetType(g_lua_top_ref);
 }
+
+LUATYPE LuaStack::Push(const LuaRef& lua_ref)
+{
+    lua_pushvalue(Context(), lua_ref.GetIndex());
+    return GetType(g_lua_top_ref);
+}
+
 
 
 void LuaStack::PushMany() {}
@@ -234,11 +234,27 @@ void LuaStack::PushMany(T arg, Args ...args)
 
 
 template<typename KeyType, typename ValueType>
-void LuaStack::__Insert(KeyType key, ValueType value) 
+std::optional<LuaErr> LuaStack::__Insert(KeyType key, ValueType value) 
 {
     Push(key);
     Push(value);
     lua_settable(Context(), -3);
+
+    return std::nullopt;
+}
+
+template<typename KeyType>
+std::optional<LuaErr> LuaStack::__Insert<KeyType, const LuaRef&>(KeyType key, const LuaRef& lua_ref)
+{
+    if (!IsSafeRef(lua_ref)) {
+        return LuaErr("", ERRCODE::Stack_ErrIndex);
+    }
+    
+    Push(key);
+    Push(lua_ref);
+    lua_settable(Context(), -3);
+
+    return std::nullopt;
 }
 
 template<typename KeyType, typename ValueType>
@@ -275,15 +291,46 @@ int LuaStack::SetMetatable(int idx)
     return lua_setmetatable(Context(), idx);
 }
 
-void LuaStack::Copy2Top(int idx)
+std::optional<LuaErr> LuaStack::Copy2Top(const LuaRef& ref)
 {
-    lua_pushvalue(Context(), idx);
+    int index = ref.GetIndex();
+    if(index > Size()) {
+        return LuaErr("", ERRCODE::Stack_ErrIndex);
+    }
+
+    lua_pushvalue(Context(), index);
+    return std::nullopt;
 }
 
-int LuaStack::GetTop()
+bool LuaStack::IsSafeRef(const LuaRef& ref)
+{
+    if(lua_gettop(Context()) > ref.GetIndex()) {
+        return false;
+    }
+
+    return true;
+}
+
+size_t LuaStack::Size()
 {
     return lua_gettop(Context());
 }
+
+bool LuaStack::Empty()
+{
+    return (Size() == 0);
+}
+
+LuaRef LuaStack::GetTop()
+{
+    return LuaRef(lua_gettop(Context()), GetType(g_lua_top_ref));
+}
+
+LUATYPE LuaStack::GetType(const LuaRef& ref)
+{
+    return (LUATYPE)lua_type(Context(), ref.GetIndex());
+}
+
 
 #pragma endregion
 

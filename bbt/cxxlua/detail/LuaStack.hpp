@@ -1,5 +1,6 @@
 #pragma once
 #include "./LuaErr.hpp"
+#include "./LuaRef.hpp"
 
 namespace bbt::cxxlua::detail
 {
@@ -41,7 +42,7 @@ public:
      * @param index_value 键值
      * @return std::pair<std::optional<LuaErr>, LUATYPE> 
      */
-    std::pair<std::optional<LuaErr>, LUATYPE> Pop(int index_value);
+    std::pair<std::optional<LuaErr>, LUATYPE> Pop4Table(int index_value);
 
     /**
      * @brief 用 field_name 索引栈顶的表，并将索引到的
@@ -50,7 +51,7 @@ public:
      * @param field_name 键值
      * @return std::pair<std::optional<LuaErr>, LUATYPE> 
      */
-    std::pair<std::optional<LuaErr>, LUATYPE> Pop(const std::string&  field_name);
+    std::pair<std::optional<LuaErr>, LUATYPE> Pop4Table(const std::string&  field_name);
 
 
 
@@ -70,15 +71,21 @@ public:
      * 
      * @tparam LuaType 
      * @tparam T 
-     * @param value_name 
-     * @param value 
+     * @param value_name lua中全局变量的名字
+     * @param value 变量的值
      * @return std::optional<LuaErr> 
      */
-    template<LUATYPE LuaType, typename T>
+    template<typename T>
     std::optional<LuaErr> SetGlobalValue(const std::string& value_name, T value);
 
-    /* 将栈中idx处元素压入global table */
-    std::optional<LuaErr> Push2GTable(const std::string& value_name, int idx);
+    /**
+     * @brief 将栈中index初位置的元素插入到全局表中，并命名为value_name
+     * 
+     * @param value_name lua中全局变量的名字
+     * @param index 变量的引用
+     * @return std::optional<LuaErr> 
+     */
+    std::optional<LuaErr> SetGlobalValueByIndex(const std::string& value_name, const LuaRef& index);
 
     /**
      * @brief 调用lua函数
@@ -117,9 +124,15 @@ public:
     int NewMetatable(const std::string& name);
     int SetMetatable(int idx);
     /* 将idx处元素拷贝，并压入栈顶 */
-    void Copy2Top(int idx);
+    std::optional<LuaErr> Copy2Top(const LuaRef& ref);
     /* 获取栈顶元素的idx */
-    int GetTop();
+    LuaRef GetTop();
+    /* 获取栈上idx处元素类型 */
+    LUATYPE GetType(const LuaRef& idx);
+
+    size_t Size();
+    bool Empty();
+    bool IsSafeRef(const LuaRef& ref);
 protected:
     /* 将找到的值压入栈顶 */
     std::optional<LuaErr> PushAFunction();
@@ -132,6 +145,7 @@ protected:
     LUATYPE Push(const std::string& value);
     LUATYPE Push(const char* value);
     LUATYPE Push(lua_CFunction cfunc);
+    LUATYPE Push(const LuaRef& lua_ref);
 
     void PushMany();
 
@@ -141,8 +155,10 @@ protected:
     void Push2LuaGlobal();
 
     template<typename KeyType, typename ValueType>
-    void __Insert(KeyType key, ValueType value);
+    std::optional<LuaErr> __Insert(KeyType key, ValueType value);
 
+    template<typename KeyType>
+    std::optional<LuaErr> __Insert(KeyType key, const LuaRef& lua_ref);
 
     lua_State* Context(){ return lua; }
 
@@ -154,8 +170,8 @@ protected:
      */
     LUATYPE __GetGlobalValue(const std::string& value_name);
 
-    template<typename T>
-    std::optional<LuaErr> __SetGlobalValue(T value);
+    /* 将栈顶的值压入全局表中，并以value_name命名该变量，使其可以在lua中访问到 */
+    std::optional<LuaErr> __SetGlobalValue(const std::string& value_name);
 
     /**
      * @brief 弹出栈顶表的一个键值对，并将值压入栈顶，返回其类型
@@ -196,7 +212,7 @@ protected:
     std::optional<LuaErr> __CallLuaFunction(int nparam, int nresult, Args... args);
 
 private:
-    lua_State* lua;
+    lua_State* lua{nullptr};
 };
 
 }

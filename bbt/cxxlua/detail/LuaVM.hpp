@@ -14,6 +14,8 @@ public:
     LuaVM();
     ~LuaVM();
 
+public: /* high level api */
+
     /* 加载 lua 库函数 */
     CXXLUA_API std::optional<LuaErr> LoadLuaLibrary();
     CXXLUA_API std::optional<LuaErr> DoScript(const std::string& script);
@@ -29,7 +31,12 @@ public:
         int                             return_nums,
         const LuaParseReturnCallback&   parse_handler,
         Args                            ...args);
+
+public: /* low level api */
     
+    
+    template<typename KeyType>
+    CXXLUA_API LOW_LEVEL std::optional<LuaErr> Insert2Table();
 protected: /* 表操作 */
     CXXLUA_API std::optional<LuaErr> ExistGlobalFunc(const std::string& funcname);
 

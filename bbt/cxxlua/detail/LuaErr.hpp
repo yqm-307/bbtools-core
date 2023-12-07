@@ -10,6 +10,7 @@ enum ERRCODE
     Default = 0, 
     Comm_Succes  = 1,
     Comm_Failed  = 2,
+
     // lua vm
     VM_ErrParams = 3,  // 参数错误
     VM_ErrSyntax = 4,  // 语法错误
@@ -21,6 +22,9 @@ enum ERRCODE
     Type_NotTable   = 11, // 目标不是表
     Type_NotInt     = 12, // 目标不是integer
     Type_IsNil      = 13, // 目标是空表
+
+    // lua stack
+    Stack_ErrIndex  = 14, // 错误的栈下标
 };
 
 namespace detail
