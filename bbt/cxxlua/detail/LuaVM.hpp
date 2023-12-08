@@ -32,6 +32,8 @@ public: /* high level api */
         const LuaParseReturnCallback&   parse_handler,
         Args                            ...args);
 
+    template<typename CXXClass>
+    CXXLUA_API void RegistClass() { CXXClass::CXXLuaInit(m_stack); }
 public: /* low level api */
     
     

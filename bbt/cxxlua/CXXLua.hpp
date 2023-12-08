@@ -17,22 +17,12 @@ namespace bbt::cxxlua
 {
 
 typedef bbt::cxxlua::detail::LuaVM LuaVM;
-typedef bbt::cxxlua::detail::LuaClass LuaClass;
+
+template<typename CXXClass>
+using LuaClass = bbt::cxxlua::detail::LuaClass<CXXClass>;
 
 typedef bbt::cxxlua::detail::LuaErr LuaErr;
 typedef bbt::cxxlua::detail::LUATYPE LUATYPE;
-
-typedef LuaClass&(*NewLuaClass)(const std::string&);
-
-/**
- * @brief lua class 注册 helper
- * 
- * @param class_name 
- * @return LuaClass& luaclass临时对象
- */
-static inline std::unique_ptr<LuaClass>&& LuaClassHelper(const std::string& class_name)
-{ return bbt::cxxlua::detail::NewLuaClass(class_name); }
-
 
 
 } // namespace bbt::cxxlua

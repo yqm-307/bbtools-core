@@ -7,6 +7,7 @@ namespace bbt::cxxlua::detail
 
 class LuaStack
 {
+    template<typename T> friend class LuaClass;
 public:
     LuaStack(lua_State* l):lua(l){}
     ~LuaStack(){}
@@ -133,6 +134,14 @@ public:
     size_t Size();
     bool Empty();
     bool IsSafeRef(const LuaRef& ref);
+
+    bool IsSafeValue(const LuaRef& ref) { return IsSafeRef(ref); }
+    bool IsSafeValue(int ref) { return true; }
+    bool IsSafeValue(double ref) { return true; }
+    bool IsSafeValue(const std::string& ref) { return (!ref.empty()); }
+    bool IsSafeValue(lua_CFunction ref) { return (ref != nullptr); }
+
+    void Pop(int n);
 protected:
     /* 将找到的值压入栈顶 */
     std::optional<LuaErr> PushAFunction();
@@ -156,9 +165,6 @@ protected:
 
     template<typename KeyType, typename ValueType>
     std::optional<LuaErr> __Insert(KeyType key, ValueType value);
-
-    template<typename KeyType>
-    std::optional<LuaErr> __Insert(KeyType key, const LuaRef& lua_ref);
 
     lua_State* Context(){ return lua; }
 

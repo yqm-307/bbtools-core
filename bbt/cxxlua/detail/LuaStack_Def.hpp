@@ -88,14 +88,15 @@ template<typename T>
 std::optional<LuaErr> LuaStack::SetGlobalValue(const std::string& value_name, T value)
 {
     /* 类型检测 */
+    constexpr LUATYPE tp = GetTypeEnum<T>::type;
     static_assert(CheckIsCanTransfromToLuaType<T>());
-    static_assert(( LuaType > LUATYPE::None &&
-                    LuaType < LUATYPE::Other && 
-                    LuaType != LUATYPE::Nil
+    static_assert(( tp > LUATYPE::None &&
+                    tp < LUATYPE::Other && 
+                    tp != LUATYPE::Nil
                     ),
     "TValue LuaType is not a right type.");
 
-    if(Push(value) != GetTypeEnum<T>::type) {
+    if(Push(value) != tp) {
         return LuaErr("not a lua function", ERRCODE::Type_UnExpected);
     }
 
@@ -236,22 +237,12 @@ void LuaStack::PushMany(T arg, Args ...args)
 template<typename KeyType, typename ValueType>
 std::optional<LuaErr> LuaStack::__Insert(KeyType key, ValueType value) 
 {
-    Push(key);
-    Push(value);
-    lua_settable(Context(), -3);
-
-    return std::nullopt;
-}
-
-template<typename KeyType>
-std::optional<LuaErr> LuaStack::__Insert<KeyType, const LuaRef&>(KeyType key, const LuaRef& lua_ref)
-{
-    if (!IsSafeRef(lua_ref)) {
+    if (!IsSafeValue(value)) {
         return LuaErr("", ERRCODE::Stack_ErrIndex);
     }
-    
+
     Push(key);
-    Push(lua_ref);
+    Push(value);
     lua_settable(Context(), -3);
 
     return std::nullopt;
@@ -329,6 +320,11 @@ LuaRef LuaStack::GetTop()
 LUATYPE LuaStack::GetType(const LuaRef& ref)
 {
     return (LUATYPE)lua_type(Context(), ref.GetIndex());
+}
+
+void LuaStack::Pop(int n)
+{
+    lua_pop(Context(), n);
 }
 
 

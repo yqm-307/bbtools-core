@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lua.hpp>
+#include <cassert>
 #include <memory>
 #include <functional>
 #include <optional>

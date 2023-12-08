@@ -17,8 +17,9 @@ public:
     typedef int(*RegistFunction)(lua_State*);
     typedef std::unordered_map<std::string, lua_CFunction> FuncsMap;
     typedef std::function<CXXClassType*(lua_State*)> ConstructFunction;
+    typedef int(CXXClassType::*MemberFunc)(lua_State*);
 
-    explicit LuaClass(const std::string class_name);
+    LuaClass();
     ~LuaClass();
 
     static int cxx2lua_to_string(lua_State* l);
@@ -27,21 +28,29 @@ public:
     static int cxx2lua_call(lua_State* l);
 protected:
     /* 给派生类用来注册函数 */
-    bool InitFuncs(std::initializer_list<std::pair<FuncsMap::key_type, FuncsMap::value_type>> list);
+    static bool InitFuncs(std::initializer_list<FuncsMap::value_type> list);
+    static bool InitClass(const std::string& classname);
+    static bool InitConstructor(const ConstructFunction& constructor);
 
-    bool Register(std::unique_ptr<LuaStack>& stack);
-
-    /* 如果gc为false，luagc时不会释放此内存 */
-    bool PushAUserdata(lua_State* l, CXXClassType* obj, bool gc=false);
+    static bool Register(std::unique_ptr<LuaStack>& stack);
 private:
     /**
      * 特殊函数:
      * init lua类构造函数
      */
-    FuncsMap        m_funcs;
-    ConstructFunction m_construct_func{nullptr};
-    std::string     m_class_name{""};
+    static FuncsMap                 m_funcs;
+    static ConstructFunction        m_construct_func;
+    static std::string              m_class_name;
 };
+
+template<typename T>
+std::string LuaClass<T>::m_class_name{""};
+
+template<typename T>
+typename LuaClass<T>::ConstructFunction LuaClass<T>::m_construct_func = nullptr;
+
+template<typename T>
+typename LuaClass<T>::FuncsMap LuaClass<T>::m_funcs{};
 
 
 } // namespace bbt::cxxlua::detail

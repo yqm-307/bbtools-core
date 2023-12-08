@@ -44,4 +44,8 @@ template<>
 struct GetTypeEnum<lua_CFunction>
 { static const LUATYPE type = LUATYPE::Function; };
 
+template<>
+struct GetTypeEnum<LuaRef>
+{ static const LUATYPE type = LUATYPE::Other; };
+
 } // namespace bbt::cxxlua::detail

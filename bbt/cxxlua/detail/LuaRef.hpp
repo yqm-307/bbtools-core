@@ -7,9 +7,10 @@ namespace bbt::cxxlua::detail
 class LuaRef
 {
     friend class LuaStack;
+    template<typename T> friend class LuaClass;
 public:
     explicit LuaRef(int index, LUATYPE type):m_index(index), m_type(type) {}
-    explicit LuaRef(const LuaRef& other):m_index(other.m_index), m_type(other.m_type) {}
+    LuaRef(const LuaRef& other):m_index(other.m_index), m_type(other.m_type) {}
     ~LuaRef() {}
 
 protected:
