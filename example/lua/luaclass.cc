@@ -1,11 +1,13 @@
 #include <bbt/cxxlua/CXXLua.hpp>
 #include <optional>
+#include <iostream>
+#include <thread>
 
 class Player : public bbt::cxxlua::LuaClass<Player>
 {
 public:
     Player() {
-        printf("player construct!\n");
+        printf("player construct! base: %p\n", this);
     }
     ~Player() {
         printf("player destruct!\n");
@@ -13,10 +15,10 @@ public:
 
     static void CXXLuaInit(std::unique_ptr<bbt::cxxlua::detail::LuaStack>& stack) {
         InitFuncs({
-            {"GetId", (lua_CFunction)(&Player::cxx2lua_GetId)},
-            {"SetId", (lua_CFunction)(&Player::cxx2lua_SetId)},
-            {"GetName", (lua_CFunction)(&Player::cxx2lua_GetName)},
-            {"SetName", (lua_CFunction)(&Player::cxx2lua_SetName)}
+            {"GetId", &Player::cxx2lua_GetId},
+            {"SetId", &Player::cxx2lua_SetId},
+            {"GetName", &Player::cxx2lua_GetName},
+            {"SetName", &Player::cxx2lua_SetName}
         });
 
         InitClass("Player");
@@ -26,8 +28,9 @@ public:
         Register(stack);
     }
 
-private:
+public:
     int cxx2lua_GetId(lua_State* l) {
+        auto a = m_id;
         lua_pushinteger(l, m_id);
         return 1;
     }
@@ -50,8 +53,8 @@ private:
     }
 
     static Player* cxx2lua_construct(lua_State* l) {
-        auto name = lua_tostring(l, -1);
-        auto id = lua_tointeger(l, -2);
+        auto id = lua_tointeger(l, -1);
+        auto name = lua_tostring(l, -2);
         auto player = new Player;
         player->InitArgs(id, name);
         return player;
@@ -67,16 +70,25 @@ private:
     std::string m_name;
 };
 
-class A{
-public:
-    int a(int) {}
-};
-typedef int(A::*FuncMem)(int);
 
 int main()
 {
     bbt::cxxlua::LuaVM vm;
 
     vm.RegistClass<Player>();
+    assert( vm.LoadLuaLibrary() == std::nullopt);
+    assert(vm.LoadFile("example/lua/script/luaclass/luaclass.lua") == std::nullopt);
     
+    
+
+    for (size_t i = 0; i < 10; i++)
+    {
+        auto err = vm.CallLuaFunction("Main", 0, nullptr);
+        if (err != std::nullopt) {
+            printf("%s\n", err.value().What().c_str());
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+    
+
 }

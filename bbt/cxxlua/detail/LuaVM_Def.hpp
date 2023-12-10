@@ -52,14 +52,17 @@ std::optional<LuaErr> LuaVM::CallLuaFunction(
     Args                            ...args)
 {
     auto [err, type] = m_stack->CheckGlobalValue<bbt::cxxlua::detail::LUATYPE::Function>(funcname);
-    if(err != std::nullopt)
+    if (err != std::nullopt)
         return err;
 
     auto luacall_err = m_stack->LuaCall(sizeof ...(args), return_nums, args ...);
-    if(luacall_err != std::nullopt)
+    if (luacall_err != std::nullopt)
         return luacall_err;
 
-    return parse_handler(m_stack);
+    if (parse_handler)
+        return parse_handler(m_stack);
+
+    return std::nullopt;
 }
 
 std::optional<LuaErr> LuaVM::LoadLuaLibrary()

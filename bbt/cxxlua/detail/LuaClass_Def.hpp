@@ -4,30 +4,6 @@
 namespace bbt::cxxlua::detail
 {
 
-void setweak(lua_State* l, const char* mode)
-{
-    lua_newtable(l);
-    lua_pushvalue(l, -1);  // table is its own metatable
-    lua_setmetatable(l, -2);
-    lua_pushliteral(l, "__mode");
-    lua_pushstring(l, mode);
-    lua_settable(l, -3);   // metatable.__mode = mode
-}
-
-void subtable(lua_State* l, int tindex, const char* name, const char* mode)
-{
-    lua_pushstring(l, name);
-    lua_gettable(l, tindex);
-    if (lua_isnil(l, -1)) {
-        lua_pop(l, -1);
-        lua_checkstack(l, 3);
-        setweak(l, mode);
-        lua_pushstring(l, name);
-        lua_pushvalue(l, -2);
-        lua_settable(l, tindex);
-    }
-}
-
 template<typename CXXClassType>
 LuaClass<CXXClassType>::LuaClass() {}
 
@@ -35,7 +11,7 @@ template<typename CXXClassType>
 LuaClass<CXXClassType>::~LuaClass() {}
 
 template<typename CXXClassType>
-bool LuaClass<CXXClassType>::InitFuncs(std::initializer_list<FuncsMap::value_type> list)
+bool LuaClass<CXXClassType>::InitFuncs(std::initializer_list<FuncsMapEntry> list)
 {
     for (auto &&pair : list) {
         auto [it, succ] = m_funcs.insert(pair);
@@ -69,44 +45,53 @@ bool LuaClass<CXXClassType>::InitConstructor(const ConstructFunction& constructo
 template<typename CXXClassType>
 bool LuaClass<CXXClassType>::Register(std::unique_ptr<LuaStack>& stack)
 {
-    /* 在lua中托管类模板的lua table */
-    stack->NewLuaTable(); // 新建一个 indextable;
-    auto class_table_ref = stack->GetTop();
+    /**
+     * 下面的操作类似于lua中的（效果类似）：
+     * 
+     * Class = {}   -- 全局表名：classname
+     * local mt = {
+     *      "__metatable" = Class,
+     *      "__index"     = Class,
+     *      "__tostring"  = cxx2lua_to_string,
+     *      "__gc"        = cxx2lua_destructor,
+     * }
+     * 
+     * Class.new = cxx2lua_constructor
+     * 
+     * local Funcs = {
+     *      "new" = ...,    -- 必定存在
+     *      ...,            -- 派生类补充
+     * }
+     * 
+     * for szName, fnMemFunc in pairs(Funcs) do
+     *      Class[szName] = fnMemFunc
+     * end
+     */
 
-    /* 用做类元数据的元表，我们把元表设置好，初始化新的object的时候，只需要setmetable并做初始化操作即可 */
+    stack->NewLuaTable();
+    auto opts_index_table = stack->GetTop();
+
     stack->NewMetatable(m_class_name.c_str());
     auto mt_table_ref = stack->GetTop();
 
-    if (stack->SetGlobalValueByIndex(m_class_name, class_table_ref)) { // 将 cxx table 压入全局表
+    if (stack->SetGlobalValueByIndex(m_class_name, opts_index_table)) {
         return false;
     }
 
-    /**
-     *  设置元表一般需要设置 __index、__tostring，
-     *  因为是在c中也需要注册 __gc，同时设置 __metatable，防止被破坏
-     *  在元表中设置一个 new 方法，可以让我们通过元表创建对象
-     * 
-     *  classname = {}
-     *  classname["__metatable"] = indextable
-     *  classname["__index"] = indextable
-     *  classname["__tostring"] = cxx2lua_to_string
-     *  classname["__gc"] = cxx2lua_destructor
-     *  classname["new"] = cxx2lua_constructor
-     */
-    stack->Copy2Top(mt_table_ref); // 把 metatable 压入栈顶，开始设置这个表
-    stack->Insert2Table("__metatable", class_table_ref); // 设置metatable
-    stack->Insert2Table("__index", class_table_ref);
-    stack->Insert2Table("__tostring", cxx2lua_to_string);
-    stack->Insert2Table("__gc", cxx2lua_destructor);
-    stack->Insert2Table("new", cxx2lua_constructor);
+    stack->Copy2Top(mt_table_ref);
+    assert(stack->Insert2Table("__metatable",   opts_index_table) == std::nullopt);
+    assert(stack->Insert2Table("__index",       opts_index_table) == std::nullopt);
+    assert(stack->Insert2Table("__tostring",    cxx2lua_to_string) == std::nullopt);
+    assert(stack->Insert2Table("__gc",          cxx2lua_destructor) == std::nullopt);
 
-    stack->Copy2Top(class_table_ref);
-    for (auto&& mem_func : m_funcs) {
+    stack->Copy2Top(opts_index_table);
+    assert(stack->Insert2Table("new",           cxx2lua_constructor) == std::nullopt);
+    for (auto&& func : m_funcs) {
         auto l = stack->Context();
-        lua_pushstring(l, mem_func.first.c_str());
-        lua_pushlightuserdata(l, (void*)mem_func.second);
+        lua_pushstring(l, func.first.c_str());
+        lua_pushlightuserdata(l, (void*)(&func));
         lua_pushcclosure(l, cxx2lua_call, 1);
-        lua_settable(l, class_table_ref.GetIndex());
+        lua_settable(l, opts_index_table.GetIndex());
     }
 
     stack->Pop(-2);
@@ -118,16 +103,17 @@ template<typename CXXClassType>
 int LuaClass<CXXClassType>::cxx2lua_call(lua_State* l)
 {
     CXXClassType** userdata = static_cast<CXXClassType**>(luaL_checkudata(l, -1, m_class_name.c_str()));
-    if (!userdata) {
+    if (userdata == nullptr) {
         luaL_typeerror(l, 1, m_class_name.c_str());
         return 0;
     }
 
-    CXXClassType* obj = *userdata;
-    lua_remove(l, 1);
-    MemberFunc cfunc = bbt::type::Void2CFunc<MemberFunc>(lua_touserdata(l, lua_upvalueindex(1)));
-    // auto* cfunc = (MemberFunc)(lua_touserdata(l, lua_upvalueindex(1)));
-    return (obj->*cfunc)(l);
+    CXXClassType* obj = static_cast<CXXClassType*>(*userdata);
+    void* upvalue = lua_touserdata(l, lua_upvalueindex(1));
+    assert(upvalue != nullptr);
+    typename FuncsMap::value_type* pair = static_cast<typename FuncsMap::value_type*>(upvalue);
+    int ret = ((obj)->*(pair->second))(l);
+    return ret;
 }
 
 
@@ -172,14 +158,15 @@ int LuaClass<CXXClassType>::cxx2lua_constructor(lua_State* l)
      *  end
      */
 
-    luaL_getmetatable(l, m_class_name.c_str());
-    assert(!lua_isnil(l, -1));
+    int type = luaL_getmetatable(l, m_class_name.c_str());
+    assert(type != LUATYPE::Nil);
     int mt = lua_gettop(l);
 
     CXXClassType** userdata = static_cast<CXXClassType**>(lua_newuserdata(l, sizeof(CXXClassType*)));    
     *userdata = obj;
 
-    lua_setmetatable(l, mt);
+    lua_pushvalue(l, mt);
+    lua_setmetatable(l, -2);
     return 1;
 }
 

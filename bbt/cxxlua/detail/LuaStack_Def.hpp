@@ -252,7 +252,7 @@ template<typename KeyType, typename ValueType>
 std::optional<LuaErr> LuaStack::Insert2Table(KeyType key, ValueType value)
 {
     int top_type = lua_type(Context(), -1);
-    int value_type = GetTypeEnum<bbt::type::remove_cvref<ValueType>>::type;
+    int value_type = GetTypeEnum<bbt::type::remove_cvref_t<ValueType>>::type;
 
     /* check 插入值的类型是否为合法的类型 */
     if (top_type != LUATYPE::LuaTable ||
@@ -295,7 +295,8 @@ std::optional<LuaErr> LuaStack::Copy2Top(const LuaRef& ref)
 
 bool LuaStack::IsSafeRef(const LuaRef& ref)
 {
-    if(lua_gettop(Context()) > ref.GetIndex()) {
+    size_t size = Size();
+    if(size < ref.GetIndex()) {
         return false;
     }
 

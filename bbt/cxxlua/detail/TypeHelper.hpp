@@ -1,5 +1,7 @@
 #pragma once
 #include "bbt/type/type_traits.hpp"
+#include <string>
+#include "./Config.hpp"
 
 namespace bbt::cxxlua::detail
 {
@@ -9,10 +11,12 @@ template<typename T>
 constexpr bool CheckIsCanTransfromToLuaType()
 {
     if constexpr(
-        std::is_same_v<bbt::type::remove_cvref<T>, int> ||
-        std::is_same_v<bbt::type::remove_cvref<T>, std::string> ||
-        std::is_same_v<bbt::type::remove_cvref<T>, double> ||
-        std::is_same_v<bbt::type::remove_cvref<T>, char*>
+        std::is_same_v<bbt::type::remove_cvref_t<T>, int> ||
+        std::is_same_v<bbt::type::remove_cvref_t<T>, std::string> ||
+        std::is_same_v<bbt::type::remove_cvref_t<T>, double> ||
+        std::is_same_v<bbt::type::remove_cvref_t<T>, char*> ||
+        std::is_same_v<bbt::type::remove_cvref_t<T>, bbt::cxxlua::detail::LuaRef> ||
+        std::is_same_v<bbt::type::remove_cvref_t<T>, lua_CFunction>
     ) {
         return true;
     } else {
@@ -45,7 +49,19 @@ struct GetTypeEnum<lua_CFunction>
 { static const LUATYPE type = LUATYPE::Function; };
 
 template<>
-struct GetTypeEnum<LuaRef>
-{ static const LUATYPE type = LUATYPE::Other; };
+struct GetTypeEnum<bbt::cxxlua::detail::LuaRef>
+{ static const LUATYPE type = LUATYPE::StackRef; };
+
+void DbgLuaStack(lua_State* l) {
+    int type;
+    fprintf(stderr, "-----------> top <-----------\n");
+    fprintf(stderr, "索引\t类型\t值\n");
+    for (int i = lua_gettop(l); i > 0; --i) {
+        type = lua_type(l, i);
+        fprintf(stderr, "(%d)\t%s\t%s\n", i, lua_typename(l, type), lua_tostring(l, i));
+    }
+    fprintf(stderr, "-----------> bottom <-----------\n");
+
+}
 
 } // namespace bbt::cxxlua::detail
