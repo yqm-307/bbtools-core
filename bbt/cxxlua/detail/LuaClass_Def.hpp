@@ -159,7 +159,7 @@ int LuaClass<CXXClassType>::cxx2lua_constructor(lua_State* l)
      */
 
     int type = luaL_getmetatable(l, m_class_name.c_str());
-    assert(type != LUATYPE::Nil);
+    assert(type != LUATYPE::LUATYPE_NIL);
     int mt = lua_gettop(l);
 
     CXXClassType** userdata = static_cast<CXXClassType**>(lua_newuserdata(l, sizeof(CXXClassType*)));    

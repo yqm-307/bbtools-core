@@ -26,31 +26,31 @@ constexpr bool CheckIsCanTransfromToLuaType()
 
 template<typename T>
 struct GetTypeEnum
-{ static const LUATYPE type = LUATYPE::None; };
+{ static const LUATYPE type = LUATYPE::LUATYPE_NONE; };
 
 template<>
 struct GetTypeEnum<std::string>
-{ static const LUATYPE type = LUATYPE::CString; };
+{ static const LUATYPE type = LUATYPE::LUATYPE_CSTRING; };
 
 template<>
 struct GetTypeEnum<char*>
-{ static const LUATYPE type = LUATYPE::CString; };
+{ static const LUATYPE type = LUATYPE::LUATYPE_CSTRING; };
 
 template<>
 struct GetTypeEnum<int>
-{ static const LUATYPE type = LUATYPE::Number; };
+{ static const LUATYPE type = LUATYPE::LUATYPE_NUMBER; };
 
 template<>
 struct GetTypeEnum<double>
-{ static const LUATYPE type = LUATYPE::Number; };
+{ static const LUATYPE type = LUATYPE::LUATYPE_NUMBER; };
 
 template<>
 struct GetTypeEnum<lua_CFunction>
-{ static const LUATYPE type = LUATYPE::Function; };
+{ static const LUATYPE type = LUATYPE::LUATYPE_FUNCTION; };
 
 template<>
 struct GetTypeEnum<bbt::cxxlua::detail::LuaRef>
-{ static const LUATYPE type = LUATYPE::StackRef; };
+{ static const LUATYPE type = LUATYPE::LUATYPE_STACKREF; };
 
 void DbgLuaStack(lua_State* l) {
     int type;

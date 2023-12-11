@@ -19,9 +19,9 @@ protected:
     LUATYPE GetType() const { return m_type; }
 private:
     int m_index{0};
-    LUATYPE m_type{LUATYPE::None};
+    LUATYPE m_type{LUATYPE::LUATYPE_NONE};
 };
 
-static const LuaRef g_lua_top_ref = LuaRef(-1, LUATYPE::None);
+static const LuaRef g_lua_top_ref = LuaRef(-1, LUATYPE::LUATYPE_NONE);
 
 } // namespace bbt::cxxlua::detail

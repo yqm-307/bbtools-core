@@ -69,16 +69,16 @@ std::optional<LuaErr> LuaStack::LoadFolder(const std::string& folder_path)
 template<LUATYPE LuaType>
 std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::CheckGlobalValue(const std::string& value_name)
 {
-    static_assert(( LuaType > LUATYPE::None &&
+    static_assert(( LuaType > LUATYPE::LUATYPE_NONE &&
                     LuaType < LUATYPE::Other && 
-                    LuaType != LUATYPE::Nil),
+                    LuaType != LUATYPE::LUATYPE_NIL),
     "TValue LuaType is not a right type.");
 
     LUATYPE type = __GetGlobalValue(value_name);
-    if(type == LUATYPE::None) {
-        return {LuaErr("", ERRCODE::VM_ErrParams), LUATYPE::None};
+    if(type == LUATYPE::LUATYPE_NONE) {
+        return {LuaErr("", ERRCODE::VM_ErrParams), LUATYPE::LUATYPE_NONE};
     }else if (type != LuaType) {
-        return {LuaErr("", ERRCODE::Type_UnExpected), LUATYPE::None};
+        return {LuaErr("", ERRCODE::Type_UnExpected), LUATYPE::LUATYPE_NONE};
     }
 
     return {std::nullopt, (LUATYPE)type};  
@@ -90,9 +90,9 @@ std::optional<LuaErr> LuaStack::SetGlobalValue(const std::string& value_name, T 
     /* 类型检测 */
     constexpr LUATYPE tp = GetTypeEnum<T>::type;
     static_assert(CheckIsCanTransfromToLuaType<T>());
-    static_assert(( tp > LUATYPE::None &&
+    static_assert(( tp > LUATYPE::LUATYPE_NONE &&
                     tp < LUATYPE::Other && 
-                    tp != LUATYPE::Nil
+                    tp != LUATYPE::LUATYPE_NIL
                     ),
     "TValue LuaType is not a right type.");
 
@@ -161,12 +161,12 @@ std::pair<std::optional<LuaErr>, LUATYPE> LuaStack::__CheckTable(int index_value
 LUATYPE LuaStack::__GetGlobalValue(const std::string& value_name)
 {
     if(value_name.empty()) {
-        return LUATYPE::None; // params error
+        return LUATYPE::LUATYPE_NONE; // params error
     }
 
     int type = lua_getglobal(Context(), value_name.c_str());
     if(CXXLUAInvalidType(type)) {
-        return LUATYPE::Nil;
+        return LUATYPE::LUATYPE_NIL;
     }
 
     return (LUATYPE)type;
@@ -196,7 +196,7 @@ LUATYPE LuaStack::Push(const std::string& value)
 {
     const char* ret = lua_pushstring(Context(), value.c_str());
     if(ret == NULL) {
-        return LUATYPE::Nil;
+        return LUATYPE::LUATYPE_NIL;
     }
     return GetType(g_lua_top_ref);
 }
@@ -205,7 +205,7 @@ LUATYPE LuaStack::Push(const char* value)
 {
     const char* ret = lua_pushstring(Context(), value);
     if(ret == NULL) {
-        return LUATYPE::Nil;
+        return LUATYPE::LUATYPE_NIL;
     }
     return GetType(g_lua_top_ref);
 }
@@ -255,7 +255,7 @@ std::optional<LuaErr> LuaStack::Insert2Table(KeyType key, ValueType value)
     int value_type = GetTypeEnum<bbt::type::remove_cvref_t<ValueType>>::type;
 
     /* check 插入值的类型是否为合法的类型 */
-    if (top_type != LUATYPE::LuaTable ||
+    if (top_type != LUATYPE::LUATYPE_LUATABLE ||
         CXXLUAInvalidType(value_type) ||
         !CheckIsCanTransfromToLuaType<ValueType>()) 
     {

@@ -32,8 +32,12 @@ public: /* high level api */
         const LuaParseReturnCallback&   parse_handler,
         Args                            ...args);
 
+    /* 在lua中注册 c++ class */
     template<typename CXXClass>
-    CXXLUA_API void RegistClass() { CXXClass::CXXLuaInit(m_stack); }
+    CXXLUA_API std::optional<LuaErr> RegistClass();
+
+    /* 注册一个全局表（函数和字段的结合体） */
+    CXXLUA_API void RegistGlobalTable(std::shared_ptr<LuaTable> table);
 public: /* low level api */
     
     

@@ -51,7 +51,7 @@ std::optional<LuaErr> LuaVM::CallLuaFunction(
     const LuaParseReturnCallback&   parse_handler,
     Args                            ...args)
 {
-    auto [err, type] = m_stack->CheckGlobalValue<bbt::cxxlua::detail::LUATYPE::Function>(funcname);
+    auto [err, type] = m_stack->CheckGlobalValue<bbt::cxxlua::detail::LUATYPE::LUATYPE_FUNCTION>(funcname);
     if (err != std::nullopt)
         return err;
 
@@ -70,5 +70,10 @@ std::optional<LuaErr> LuaVM::LoadLuaLibrary()
     return m_stack->LoadLuaLib();
 }
 
+template<typename CXXClass>
+std::optional<LuaErr> LuaVM::RegistClass()
+{ 
+    return CXXClass::CXXLuaInit(m_stack);
+}
 
 }

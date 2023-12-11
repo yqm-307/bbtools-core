@@ -7,6 +7,7 @@
 #include <optional>
 #include <type_traits>
 #include <unordered_map>
+#include <string>
 
 #include "bbt/Attribute.hpp"
 
@@ -15,7 +16,7 @@
 #define LOW_LEVEL
 
 #define CXXLUAInvalidType(type) \
-    ( type <= bbt::cxxlua::detail::LUATYPE::None  || \
+    ( type <= bbt::cxxlua::detail::LUATYPE::LUATYPE_NONE  || \
       type >= bbt::cxxlua::detail::LUATYPE::Other)
 
 
@@ -27,6 +28,7 @@ class LuaState;
 class LuaVM;
 class LuaStack;
 class LuaRef;
+class LuaTable;
 
 typedef std::function<void(std::unique_ptr<LuaState>&)> LuaFunction;
 /* cxx 调用 lua ，lua 返回值解析函数 */
@@ -34,18 +36,18 @@ typedef std::function<std::optional<LuaErr>(std::unique_ptr<LuaStack>&)> LuaPars
 
 enum LUATYPE
 {
-    None        = LUA_TNONE,
-    Nil         = LUA_TNIL,
-    Bool        = LUA_TBOOLEAN,
-    LightUserData = LUA_TLIGHTUSERDATA,
-    Number      = LUA_TNUMBER,
-    CString     = LUA_TSTRING,
-    LuaTable    = LUA_TTABLE,
-    Function    = LUA_TFUNCTION,
-    UserData    = LUA_TUSERDATA,
-    Thread      = LUA_TTHREAD,
+    LUATYPE_NONE        = LUA_TNONE,
+    LUATYPE_NIL         = LUA_TNIL,
+    LUATYPE_BOOL        = LUA_TBOOLEAN,
+    LUATYPE_LIGHTUSERDATA = LUA_TLIGHTUSERDATA,
+    LUATYPE_NUMBER      = LUA_TNUMBER,
+    LUATYPE_CSTRING     = LUA_TSTRING,
+    LUATYPE_LUATABLE    = LUA_TTABLE,
+    LUATYPE_FUNCTION    = LUA_TFUNCTION,
+    LUATYPE_USERDATA    = LUA_TUSERDATA,
+    LUATYPE_THREAD      = LUA_TTHREAD,
     /* cxxlua 内置类型 */
-    StackRef      = Thread + 1, // 栈元素引用
+    LUATYPE_STACKREF      = LUATYPE_THREAD + 1, // 栈元素引用
     Other,
 };
 
