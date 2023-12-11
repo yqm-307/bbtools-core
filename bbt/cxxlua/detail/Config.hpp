@@ -13,6 +13,9 @@
 
 // 对外 api flag
 #define CXXLUA_API BBTATTR_FUNC_RetVal
+// lua table 相关（标签，用于标识函数）
+#define LABEL_LUATABLE 
+// lua 低级api（标签，用于标识函数）
 #define LOW_LEVEL
 
 #define CXXLUAInvalidType(type) \

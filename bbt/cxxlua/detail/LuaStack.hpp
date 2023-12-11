@@ -5,7 +5,8 @@
 namespace bbt::cxxlua::detail
 {
 
-class LuaStack
+class LuaStack:
+    std::enable_shared_from_this<LuaStack>
 {
     template<typename T> friend class LuaClass;
 public:
@@ -78,6 +79,7 @@ public:
      */
     template<typename T>
     std::optional<LuaErr> SetGlobalValue(const std::string& value_name, T value);
+    std::optional<LuaErr> SetGlobalValue(const std::string& value_name, const LuaRef& value);
 
     /**
      * @brief 将栈中index初位置的元素插入到全局表中，并命名为value_name
@@ -120,6 +122,8 @@ public:
     std::optional<LuaErr> Insert2Table(KeyType key, ValueType value);
 
     std::optional<LuaErr> RegistLuaTable(std::shared_ptr<LuaTable> table);
+
+    std::optional<LuaErr> Push2GlobalByName(const std::string& template_name, const std::string& global_name);
 
     /* 创建一个lua table并压入栈顶 */
     void NewLuaTable();

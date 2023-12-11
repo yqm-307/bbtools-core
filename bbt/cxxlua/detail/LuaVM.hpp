@@ -32,12 +32,20 @@ public: /* high level api */
         const LuaParseReturnCallback&   parse_handler,
         Args                            ...args);
 
+public: /* LuaClass 相关接口 */
+
     /* 在lua中注册 c++ class */
     template<typename CXXClass>
     CXXLUA_API std::optional<LuaErr> RegistClass();
+public: /* LuaTable 相关接口 */
 
-    /* 注册一个全局表（函数和字段的结合体） */
-    CXXLUA_API std::optional<LuaErr> RegistATableTemplate(std::shared_ptr<LuaTable> table);
+    CXXLUA_API LABEL_LUATABLE std::optional<LuaErr> RegistATableTemplate(std::shared_ptr<LuaTable> table);
+
+    /* 将一个已经存在的表，push到lua vm的全局表中，并以global_table_name命名 */
+    CXXLUA_API LABEL_LUATABLE std::optional<LuaErr> PushAGlobalTableByName(
+        const std::string& table_template_name,
+        const std::string& global_table_name);
+
 public: /* low level api */
     
     

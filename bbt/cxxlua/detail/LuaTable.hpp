@@ -20,7 +20,7 @@ public:
     typedef std::unordered_map<std::string, LUATYPE> FieldSet;
     /* lua表的函数集合，因为已经有LuaClass所以这里只支持c function */
     typedef std::unordered_map<std::string, lua_CFunction> FuncSet;
-    typedef std::function<std::optional<LuaErr>(std::unique_ptr<LuaStack>&)> TableInitFunction;
+    typedef std::function<std::optional<LuaErr>(std::unique_ptr<LuaStack>)> TableInitFunction;
 
 public:
     LuaTable();

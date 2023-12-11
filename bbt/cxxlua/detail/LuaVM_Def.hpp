@@ -76,7 +76,7 @@ std::optional<LuaErr> LuaVM::RegistClass()
     return CXXClass::CXXLuaInit(m_stack);
 }
 
-CXXLUA_API std::optional<LuaErr> LuaVM::RegistATableTemplate(std::shared_ptr<LuaTable> table)
+std::optional<LuaErr> LuaVM::RegistATableTemplate(std::shared_ptr<LuaTable> table)
 {
     if (!table) {
         return LuaErr("table is null!", ERRCODE::Comm_Failed);
@@ -85,5 +85,18 @@ CXXLUA_API std::optional<LuaErr> LuaVM::RegistATableTemplate(std::shared_ptr<Lua
     return m_stack->RegistLuaTable(table);
 }
 
+
+std::optional<LuaErr> LuaVM::PushAGlobalTableByName(
+    const std::string& table_template_name,
+    const std::string& global_table_name)
+{
+    auto err = m_stack->Push2GlobalByName(table_template_name, global_table_name);
+
+    if (err != std::nullopt) {
+        return err;
+    }
+
+    return std::nullopt;
+}
 
 }

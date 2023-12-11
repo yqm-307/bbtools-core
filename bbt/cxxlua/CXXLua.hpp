@@ -23,6 +23,7 @@ using LuaClass = bbt::cxxlua::detail::LuaClass<CXXClass>;
 
 typedef bbt::cxxlua::detail::LuaErr LuaErr;
 typedef bbt::cxxlua::detail::LUATYPE LUATYPE;
+typedef bbt::cxxlua::detail::LuaTable LuaTable;
 
 
 } // namespace bbt::cxxlua

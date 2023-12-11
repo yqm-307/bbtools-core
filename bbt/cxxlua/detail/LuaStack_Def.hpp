@@ -97,11 +97,23 @@ std::optional<LuaErr> LuaStack::SetGlobalValue(const std::string& value_name, T 
     "TValue LuaType is not a right type.");
 
     if(Push(value) != tp) {
-        return LuaErr("not a lua function", ERRCODE::Type_UnExpected);
+        return LuaErr("", ERRCODE::Type_UnExpected);
     }
 
-    return __SetGlobalValue(value);
+    return __SetGlobalValue(value_name);
 }
+
+std::optional<LuaErr> LuaStack::SetGlobalValue(const std::string& value_name, const LuaRef& value)
+{
+    LUATYPE tp = value.GetType();
+
+    if(Push(value) != tp) {
+        return LuaErr("", ERRCODE::Type_UnExpected);
+    }
+
+    return __SetGlobalValue(value_name);
+}
+
 
 std::optional<LuaErr> LuaStack::SetGlobalValueByIndex(const std::string& value_name, const LuaRef& index)
 {
@@ -386,6 +398,8 @@ std::optional<LuaErr> LuaStack::LoadLuaLib()
     return std::nullopt;
 }
 
+#pragma region "LuaTable 相关"
+
 std::optional<LuaErr> LuaStack::RegistLuaTable(std::shared_ptr<LuaTable> table)
 {
     auto [it, ok] = m_table_template_map.insert(std::make_pair(table->m_table_name, table));
@@ -396,6 +410,43 @@ std::optional<LuaErr> LuaStack::RegistLuaTable(std::shared_ptr<LuaTable> table)
 
     return std::nullopt;
 }
+
+std::optional<LuaErr> LuaStack::Push2GlobalByName(const std::string& template_name, const std::string& global_name)
+{
+    auto it = m_table_template_map.find(template_name);    
+    if (it == m_table_template_map.end()) {
+        return LuaErr("key not found!", ERRCODE::Comm_Failed);
+    }
+
+    auto table = it->second;
+    
+    /* 创建一个lua table */
+    NewLuaTable();
+    auto ref = GetTop();
+
+    if (!table->m_cfunction_set.empty()) {
+        for (auto&& pair : table->m_cfunction_set) {
+            Insert2Table(pair.first.c_str(), pair.second);
+        }
+    }
+
+    if (!table->m_field_set.empty()) {
+        for (auto&& pair : table->m_field_set) {
+            Insert2Table(pair.first.c_str(), pair.second);
+        }
+    }
+
+    SetGlobalValue(table->m_table_name, ref);
+
+    if (table->m_table_init_func) {
+        return table->m_table_init_func(std::unique_ptr<LuaStack>(this));
+    }
+
+    return std::nullopt;
+}
+
+
+#pragma endregion
 
 
 }

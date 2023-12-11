@@ -7,3 +7,6 @@ target_link_libraries(luatest ybbt lua)
 
 add_executable(luaclass luaclass.cc)
 target_link_libraries(luaclass ybbt lua)
+
+add_executable(luatable luatable.cc)
+target_link_libraries(luatable ybbt lua)
