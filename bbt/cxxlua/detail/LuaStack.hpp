@@ -119,7 +119,7 @@ public:
     template<typename KeyType, typename ValueType>
     std::optional<LuaErr> Insert2Table(KeyType key, ValueType value);
 
-    std::optional<LuaErr> RegistLuaTable(const LuaTable* table);
+    std::optional<LuaErr> RegistLuaTable(std::shared_ptr<LuaTable> table);
 
     /* 创建一个lua table并压入栈顶 */
     void NewLuaTable();
@@ -221,7 +221,7 @@ protected:
 
 private:
     lua_State* lua{nullptr};
-    std::unordered_map<std::string, LuaTable*> m_table_template_map;
+    std::unordered_map<std::string, std::shared_ptr<LuaTable>> m_table_template_map;
 };
 
 }

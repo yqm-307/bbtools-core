@@ -76,4 +76,14 @@ std::optional<LuaErr> LuaVM::RegistClass()
     return CXXClass::CXXLuaInit(m_stack);
 }
 
+CXXLUA_API std::optional<LuaErr> LuaVM::RegistATableTemplate(std::shared_ptr<LuaTable> table)
+{
+    if (!table) {
+        return LuaErr("table is null!", ERRCODE::Comm_Failed);
+    }
+
+    return m_stack->RegistLuaTable(table);
+}
+
+
 }

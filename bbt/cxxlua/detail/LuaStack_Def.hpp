@@ -2,7 +2,7 @@
 #include "./LuaStack.hpp"
 #include "bbt/cxxlua/detail/TypeHelper.hpp"
 #include "bbt/file/FileHelper.hpp"
-
+#include "LuaTable.hpp"
 
 namespace bbt::cxxlua::detail
 {
@@ -383,6 +383,17 @@ std::optional<LuaErr> LuaStack::__CallLuaFunction(int params, int returns)
 std::optional<LuaErr> LuaStack::LoadLuaLib()
 {
     luaL_openlibs(Context());
+    return std::nullopt;
+}
+
+std::optional<LuaErr> LuaStack::RegistLuaTable(std::shared_ptr<LuaTable> table)
+{
+    auto [it, ok] = m_table_template_map.insert(std::make_pair(table->m_table_name, table));
+
+    if (!ok) {
+        return LuaErr("table already existed!", ERRCODE::Comm_Failed);
+    }
+
     return std::nullopt;
 }
 

@@ -37,7 +37,7 @@ public: /* high level api */
     CXXLUA_API std::optional<LuaErr> RegistClass();
 
     /* 注册一个全局表（函数和字段的结合体） */
-    CXXLUA_API void RegistGlobalTable(std::shared_ptr<LuaTable> table);
+    CXXLUA_API std::optional<LuaErr> RegistATableTemplate(std::shared_ptr<LuaTable> table);
 public: /* low level api */
     
     

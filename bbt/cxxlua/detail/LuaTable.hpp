@@ -14,6 +14,7 @@ namespace bbt::cxxlua::detail
 class LuaTable:
     std::enable_shared_from_this<LuaTable>
 {
+    friend class LuaStack;
 public:
     /* lua表的字段集合 */
     typedef std::unordered_map<std::string, LUATYPE> FieldSet;
@@ -26,26 +27,23 @@ public:
     explicit LuaTable(const LuaTable& other);
     ~LuaTable();
 
-    /* 注册到vm中 */
-    void RegistToVM(const LuaVM& vm);
     /* 用table覆盖自己 */
     void CopyFrom(const LuaTable* table);
 
     /* 注册table初始化函数，调用此函数时，保证栈顶元素是new的table */
     std::optional<LuaErr> RegistFieldInitFunc(const TableInitFunction& table_init_func);
-
 protected:
-    /* 向vm中创建一个新的table，并push到stack中 */
-    void Create2VM(const LuaVM& vm);
-    /* 将当前table注册到lua全局表中，并以global_table_name命名 */
-    bool InitGlobalTable(const std::string& global_table_name);
-    bool InitFields(const FieldSet& fields);
-    bool InitCFunctions(const FuncSet& funcs);
+    std::optional<LuaErr> InitFields(const FieldSet& fields);
+    std::optional<LuaErr> InitCFunctions(const FuncSet& funcs);
+    std::optional<LuaErr> InitTableName(const std::string& name);
 private:
     FieldSet        m_field_set{};
     /* m_cfunction_set 是 m_field_set 的子集，用来寻找调用函数 */
     FuncSet         m_cfunction_set{};
     TableInitFunction m_table_init_func{nullptr};
+    std::string     m_table_name{""};
 };
 
 } // namespace bbt::cxxlua::detail
+
+#include "LuaTable_Def.hpp"

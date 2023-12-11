@@ -27,13 +27,15 @@ function NewPlayer()
     -- print(Player)
     -- print(type(Player))
     -- print(" tree ex: ")
-    Tree(Player)
+    -- Tree(Player)
     return Player:new("小明", 10)
 end
 
 function Test1()
     local pPlayer = NewPlayer()
-    Tree(pPlayer)
+    -- print(pPlayer:SetId(11))
+    print(pPlayer:GetId())
+    print(pPlayer:GetName())
 end
 
 function Main()
