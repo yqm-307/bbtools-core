@@ -102,15 +102,16 @@ bool LuaClass<CXXClassType>::Register(std::unique_ptr<LuaStack>& stack)
 template<typename CXXClassType>
 int LuaClass<CXXClassType>::cxx2lua_call(lua_State* l)
 {
-    CXXClassType** userdata = static_cast<CXXClassType**>(luaL_checkudata(l, -1, m_class_name.c_str()));
+    CXXClassType** userdata = static_cast<CXXClassType**>(luaL_checkudata(l, 1, m_class_name.c_str()));
+    luaL_argcheck(l, userdata != nullptr, 1, "invalid user data!");
     if (userdata == nullptr) {
-        luaL_typeerror(l, 1, m_class_name.c_str());
         return 0;
     }
 
     CXXClassType* obj = static_cast<CXXClassType*>(*userdata);
     void* upvalue = lua_touserdata(l, lua_upvalueindex(1));
     assert(upvalue != nullptr);
+
     typename FuncsMap::value_type* pair = static_cast<typename FuncsMap::value_type*>(upvalue);
     int ret = ((obj)->*(pair->second))(l);
     return ret;
@@ -121,7 +122,7 @@ template<typename CXXClassType>
 int LuaClass<CXXClassType>::cxx2lua_to_string(lua_State* l)
 {
     char buff[128];
-    CXXClassType** userdata = static_cast<CXXClassType**>(luaL_checkudata(l, -1, m_class_name.c_str()));
+    CXXClassType** userdata = static_cast<CXXClassType**>(luaL_checkudata(l, 1, m_class_name.c_str()));
     CXXClassType* obj = *userdata;
     sprintf(buff, "%p", (void*)obj);
     lua_pushfstring(l, "%s (%s)", m_class_name.c_str(), buff);
@@ -158,15 +159,14 @@ int LuaClass<CXXClassType>::cxx2lua_constructor(lua_State* l)
      *  end
      */
 
-    int type = luaL_getmetatable(l, m_class_name.c_str());
-    assert(type != LUATYPE::LUATYPE_NIL);
-    int mt = lua_gettop(l);
 
     CXXClassType** userdata = static_cast<CXXClassType**>(lua_newuserdata(l, sizeof(CXXClassType*)));    
     *userdata = obj;
 
-    lua_pushvalue(l, mt);
+    int type = luaL_getmetatable(l, m_class_name.c_str());
+    assert(type != LUATYPE::LUATYPE_NIL);
     lua_setmetatable(l, -2);
+
     return 1;
 }
 

@@ -7,10 +7,8 @@ class Player : public bbt::cxxlua::LuaClass<Player>
 {
 public:
     Player() {
-        printf("player construct! base: %p\n", this);
     }
     ~Player() {
-        printf("player destruct!\n");
     }
 
     static std::optional<bbt::cxxlua::LuaErr> CXXLuaInit(std::unique_ptr<bbt::cxxlua::detail::LuaStack>& stack) {
@@ -79,17 +77,15 @@ int main()
     assert( vm.RegistClass<Player>()    == std::nullopt);
     assert( vm.LoadLuaLibrary()         == std::nullopt);
     assert( vm.LoadFile("example/lua/script/luaclass/luaclass.lua") == std::nullopt);
-    
-    
 
-    // for (size_t i = 0; i < 10; i++)
-    // {
-        auto err = vm.CallLuaFunction("Main", 0, nullptr);
-        if (err != std::nullopt) {
-            printf("%s\n", err.value().What().c_str());
-        }
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    // }
-    
+    auto err = vm.CallLuaFunction("Main", 0, nullptr);
+    if (err != std::nullopt) {
+        printf("%s\n", err.value().What().c_str());
+    }
+
+    auto err2 = vm.DoScript("print(\" do script once \") Main()");
+    if (err2 != std::nullopt) {
+        printf("%s\n", err.value().What().c_str());
+    }
 
 }
