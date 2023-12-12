@@ -28,17 +28,38 @@ template<typename CallableType>
 class TimeWheel 
 {
 public:
-    typedef TimeTask_Base<CallableType> Timer;
-    typedef std::shared_ptr<Timer> TaskBasePtr;
-    typedef typename Timer::TaskID   TaskID;
-    struct TaskNode {TaskBasePtr m_ptr;TaskNode* m_next;};
+    typedef TimeTask_Base<CallableType>     Timer;
+    typedef std::shared_ptr<Timer>          TaskBasePtr;
+    typedef typename Timer::TaskID          TaskID;
 
 public:
     TimeWheel();
     
+    /**
+     * @brief 向TimeWheel中添加一个定时任务
+     * 
+     * @param task 定时任务
+     * @return true 
+     * @return false 
+     */
     bool AddTask(TaskBasePtr task);
+    
+    /**
+     * @brief 从TimeWheel中删除一个定时任务
+     * 
+     * @param task 定时任务
+     * @return true 
+     * @return false 
+     */
     bool CancelTask(TaskID task);
+
+    /**
+     * @brief 使时间轮滴答一次
+     * 推动整个时间轮向前推进一个"最小时间间隔"，并
+     * 执行超时任务
+     */
     void Tick();
+
     timer::clock::Timestamp<timer::clock::ms> GetNextTickTimestamp();
 
 private:
@@ -120,8 +141,8 @@ private:
 
 
 
-#include "bbt/timer/detail/TimeWheel_Impl.hpp"
 }
 
 
+#include "bbt/timer/detail/TimeWheel_Impl.hpp"
 #include "bbt/timer/detail/TimeWheel_Detail.hpp"

@@ -1,6 +1,9 @@
 #pragma once
 #include "bbt/timer/TimeWheel.hpp"
 
+namespace bbt::timer
+{
+
 #define BBT_TW_LV1_Slot_MS   (__bbt_tickonce_ms__)
 #define BBT_TW_LV2_Slot_MS   (BBT_TW_LV1_Slot_MS*__bbt_slot_num__)
 #define BBT_TW_LV3_Slot_MS   (BBT_TW_LV2_Slot_MS*__bbt_slot_num__)
@@ -288,6 +291,7 @@ bool TimeWheel<CallableType>::TimeWheel_Impl::Cancel(TaskID id)
     return true;
 }
 
+} // namespace bbt::timer
 
 #undef BBT_TW_LV1_Slot_MS
 #undef BBT_TW_LV2_Slot_MS

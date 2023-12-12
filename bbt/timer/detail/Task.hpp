@@ -16,6 +16,10 @@
 #include "bbt/templateutil/Comparator.hpp"
 #include "bbt/timer/detail/TimeWheel_Def.hpp"
 #include "bbt/poolutil/IDPool.hpp"
+
+namespace bbt::timer
+{
+
 template<typename CallableType>
 class TimeTask_Base final: public bbt::templateutil::comparator<bbt::timer::clock::Timestamp<bbt::timer::clock::ms>>
 {
@@ -152,4 +156,6 @@ private:
 };
 
 template<typename T>
-bbt::pool_util::IDPool<uint32_t,true>* TimeTask_Base<T>::m_id_pool = new bbt::pool_util::IDPool<uint32_t,true>(65535);
+bbt::pool_util::IDPool<uint32_t,true>* TimeTask_Base<T>::m_id_pool = new bbt::pool_util::IDPool<uint32_t,true>(655350);
+
+} // namespace bbt::timer
