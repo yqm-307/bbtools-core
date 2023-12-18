@@ -26,7 +26,7 @@ void InitAddress(sockaddr_in& addr ,int port,std::string ip="",int opt = INADDR_
 
 //客户端用
 IPAddress::IPAddress(std::string ip,int port)
-        :m_ip(ip),
+        :m_ip(ip == "localhost" ? "127.0.0.1" : ip),
         m_port(port)
 {
     InitAddress(m_addr,port,ip);
@@ -102,5 +102,27 @@ const socklen_t IPAddress::getsocklen() const
 {   
     return sizeof(m_addr);
 }
+
+IPAddress& IPAddress::operator=(const IPAddress& it)
+{
+	m_ip = it.m_ip;
+	m_port = it.m_port;
+	m_addr = it.m_addr;
+}
+
+void IPAddress::Clear()
+{
+	m_ip = "";
+	m_port = -1;
+	memset(&m_addr, '\0', sizeof(m_addr));
+}
+
+void IPAddress::Swap(IPAddress& it)
+{
+	auto tmp = it;
+	it = (*this);
+	(*this) = tmp;
+}
+
 
 } // namespace bbt::net
