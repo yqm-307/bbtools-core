@@ -108,6 +108,7 @@ IPAddress& IPAddress::operator=(const IPAddress& it)
 	m_ip = it.m_ip;
 	m_port = it.m_port;
 	m_addr = it.m_addr;
+	return *this;
 }
 
 void IPAddress::Clear()
