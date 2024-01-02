@@ -141,18 +141,10 @@ public:
     bool Empty();
     bool IsSafeRef(const LuaRef& ref);
 
-    bool IsSafeValue(const LuaRef& ref) { return IsSafeRef(ref); }
-    bool IsSafeValue(int ref) { return true; }
-    bool IsSafeValue(double ref) { return true; }
-    bool IsSafeValue(const std::string& ref) { return (!ref.empty()); }
-    bool IsSafeValue(lua_CFunction ref) { return (ref != nullptr); }
 
     void Pop(int n);
 protected:
-    /* 将找到的值压入栈顶 */
-    std::optional<LuaErr> PushAFunction();
-    std::optional<LuaErr> PushAInt();
-    std::optional<LuaErr> PushAString();
+    lua_State* Context(){ return lua; }
 
     /* 栈操作 */
     LUATYPE Push(int value);
@@ -167,12 +159,23 @@ protected:
     template<typename T, typename ... Args>
     void PushMany(T arg, Args ...args);
 
-    void Push2LuaGlobal();
+    /**
+     * @brief 判断值是否为安全的可入栈的
+     * 
+     * @param ref 
+     * @return true 
+     * @return false 
+     */
+    bool __IsSafeValue(const LuaRef& ref) { return IsSafeRef(ref); }
+    bool __IsSafeValue(int ref) { return true; }
+    bool __IsSafeValue(double ref) { return true; }
+    bool __IsSafeValue(const std::string& ref) { return (!ref.empty()); }
+    bool __IsSafeValue(lua_CFunction ref) { return (ref != nullptr); }
+
 
     template<typename KeyType, typename ValueType>
     std::optional<LuaErr> __Insert(KeyType key, ValueType value);
 
-    lua_State* Context(){ return lua; }
 
     /**
      * @brief 将一个全局变量压入栈顶并返回其类型

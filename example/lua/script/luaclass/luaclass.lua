@@ -40,6 +40,32 @@ function Test1()
     print("id ,name", pPlayer:GetId(), pPlayer:GetName())
 end
 
+ObjectPool = {}
+
+function GenerateObj()
+    for i = 1, math.random(10000), 1 do
+        table.insert(ObjectPool, NewPlayer())
+    end
+end
+
+function ClearObj()
+    ObjectPool = {}
+end
+
+function Test_GC()
+
+    for i = 1, 100, 1 do
+        GenerateObj()
+        local nBytes = collectgarbage("count") * 1024
+        print("", nBytes)
+        ClearObj()
+        collectgarbage("collect")
+    end
+end
+
 function Main()
     Test1()
+    print("--- 当前使用总量 ---")
+    Test_GC()
 end
+

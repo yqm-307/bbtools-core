@@ -249,7 +249,7 @@ void LuaStack::PushMany(T arg, Args ...args)
 template<typename KeyType, typename ValueType>
 std::optional<LuaErr> LuaStack::__Insert(KeyType key, ValueType value) 
 {
-    if (!IsSafeValue(value)) {
+    if (!__IsSafeValue(value)) {
         return LuaErr("", ERRCODE::Stack_ErrIndex);
     }
 
