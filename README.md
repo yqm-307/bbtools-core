@@ -29,3 +29,10 @@ linux专业工具库
 #### （8）threadpool
 
 #### （9）timer
+
+
+### 三、安装
+
+cd shell
+
+./build.sh
