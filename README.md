@@ -4,9 +4,9 @@
 
 
 
-### 一、biangbiangtools是什么? 是工具库(警撅)
+### 一、biangbiangtools是什么?
 
-做个伴生法宝,成长过程中花时间滋润一下(笑)
+linux专业工具库
 
 
 
