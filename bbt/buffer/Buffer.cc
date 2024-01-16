@@ -47,7 +47,7 @@ Buffer::Buffer(Buffer&& rval)
 Buffer::Buffer(const char* begin, size_t len)
     :m_bytes(initSize),
     _readIndex(0),
-    _writeIndex(len)
+    _writeIndex(0)
 {
     WriteString(begin,len);
     assert( m_bytes.size() >= DataSize() );
