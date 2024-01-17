@@ -41,9 +41,9 @@ build()
     cd build
     cmake ..
     make
-    sudo cp -rf lib/libybbt.so /usr/lib/x86_64-linux-gnu/
+    sudo cp -rf lib/libybbt.so /usr/local/lib/
     echo "代码拷贝到/usr/local/include/"
-    echo "库文件拷贝到/usr/lib/x86_64-linux-gnu/"
+    echo "库文件拷贝到/usr/local/lib"
     echo "install over"
     ./../shell/genbypath.sh /usr/local/include/bbt /usr/local/include/bbt/Define.hpp
     echo "Define.hpp 文本替换"
@@ -52,11 +52,10 @@ build()
 #卸载
 uninstall()
 {
-    sudo rm -rf /usr/include/bbt
     sudo rm -rf /usr/local/include/bbt
     echo "删除src /usr/include/bbt /usr/local/include/bbt"
-    sudo rm -rf /usr/lib/x86_64-linux-gnu/libybbt.so
-    echo "删除lib /usr/lib/x86_64-linux-gnu/libybbt.so"
+    sudo rm -rf /usr/local/lib/libybbt.so
+    echo "删除lib /usr/local/lib/libybbt.so"
 }
 
 
