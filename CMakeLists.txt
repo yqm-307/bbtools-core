@@ -24,8 +24,19 @@ file(GLOB_RECURSE BBT_SRCS
 )
 # message("begin" ${BBT_SRCS} "end")
 
+add_library(ybbt_static STATIC ${BBT_SRCS})
+
+
+set_target_properties(ybbt_static PROPERTIES OUTPUT_NAME "ybbt")
+set_target_properties(ybbt_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+
+
 add_library(ybbt SHARED ${BBT_SRCS})
-target_link_libraries(ybbt 
+set_target_properties(ybbt PROPERTIES OUTPUT_NAME "ybbt")
+set_target_properties(ybbt PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+
+
+target_link_libraries(ybbt
     pthread
     dl
 )
