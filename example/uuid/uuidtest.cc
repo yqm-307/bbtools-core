@@ -1,5 +1,5 @@
-#include "bbt/uuid/Uuid.hpp"
-#include "bbt/bits/BitUtil.hpp"
+#include "bbt/base/uuid/Uuid.hpp"
+#include "bbt/base/bits/BitUtil.hpp"
 
 
 int main()

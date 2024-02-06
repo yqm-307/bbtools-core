@@ -1,4 +1,4 @@
-#include <bbt/cxxlua/CXXLua.hpp>
+#include <bbt/base/cxxlua/CXXLua.hpp>
 #include <queue>
 
 class MsgQueue:

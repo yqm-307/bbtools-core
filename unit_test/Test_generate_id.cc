@@ -2,7 +2,7 @@
 #define BOOST_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
 
-#include "bbt/uuid/EasyID.hpp"
+#include "bbt/base/uuid/EasyID.hpp"
 
 
 BOOST_AUTO_TEST_SUITE(ID_TEST)

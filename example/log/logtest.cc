@@ -1,6 +1,6 @@
 #include <iostream>
-#include <bbt/Logger/Logger.hpp>
-#include <bbt/config/GlobalConfig.hpp>
+#include <bbt/base/Logger/Logger.hpp>
+#include <bbt/base/config/GlobalConfig.hpp>
 
 using namespace bbt::config;
 int main()

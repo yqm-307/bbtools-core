@@ -3,6 +3,7 @@
 clear="$*" #获取环境变量
 
 installpath="/usr/local/include"
+libpath="/usr/local/lib"
 
 #清除cmake文件
 clear()
@@ -21,7 +22,7 @@ function generate_head_dir_and_copy_to_dstdir()
 {
     dstdir=$1
     # 拷贝名字
-    cp -rf bbt bbt_h
+    cp -rf bbt/base bbt_h
     find bbt_h -name '*.c' -o -name '*cc' -print | xargs rm
     
     if [ ! -d "$dstdir/bbt" ];then
@@ -49,21 +50,17 @@ build()
     cd build
     cmake ..
     make -j4
-    sudo cp -rf lib/libybbt.so $installpath
-    sudo cp -rf lib/libybbt.a  $installpath
-    echo "代码拷贝到$installpath"
-    echo "install over"
-    echo "Define.hpp 文本替换"
+    sudo cp -rf lib/libybbt.so $libpath/
+    echo "代码拷贝成功"
 }
 
 #卸载
 uninstall()
 {
-    sudo rm -rf /usr/local/include/bbt
-    echo "删除src /usr/include/bbt/base /usr/local/include/bbt/base"
-    sudo rm -rf /usr/local/lib/libybbt.so
-    sudo rm -rf /usr/local/lib/libybbt.a
-    echo "删除libybbt.so libybbt.a "
+    sudo rm -rf $installpath/bbt/base
+    echo "源代码删除成功"
+    sudo rm -rf $libpath/libybbt.so
+    echo "库文件删除成功"
 }
 
 

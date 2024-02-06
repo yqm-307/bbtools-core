@@ -2,7 +2,7 @@
 #define BOOST_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
 
-#include "bbt/cxxlua/CXXLua.hpp"
+#include "bbt/base/cxxlua/CXXLua.hpp"
 
 class Object:
     bbt::cxxlua::LuaClass<Object>

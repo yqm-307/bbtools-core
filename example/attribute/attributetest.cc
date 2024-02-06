@@ -1,6 +1,6 @@
-#include "bbt/Attribute.hpp"
+#include "bbt/base/Attribute.hpp"
 #include <stdio.h>
-#include "bbt/timer/Interval.hpp"
+#include "bbt/base/timer/Interval.hpp"
 void ColdFunc() BBTATTR_FUNC_Cold;
 
 // void foo1() BBTATTR_FUNC_DeprecatedMsg("foo1不好");
