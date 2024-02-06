@@ -11,17 +11,19 @@ public:
     Errcode();
     explicit Errcode(const std::string& msg, ErrType type);
     Errcode(const Errcode& other);
+    Errcode(Errcode&& other);
     virtual ~Errcode();
 
 protected:
     /* 设置信息文本 */
-    void SetMsg(const std::string& msg);
-    void SetMsg(std::string&& msg);
+    void                SetMsg(const std::string& msg);
+    void                SetMsg(std::string&& msg);
     /* 设置err type */
-    void SetErrType(ErrType err_type);
+    void                SetErrType(ErrType err_type);
 
-    const std::string& GetMsg()  const;
-    const ErrType& GetErrType() const;
+    const std::string&  GetMsg()        const;
+    const char*         GetCMsg()       const;
+    const ErrType&      GetErrType()    const;
 private:
     ErrType    m_err_type;
     std::string m_err_msg{""};
