@@ -4,26 +4,26 @@
 
 
 
-#define bbt_assert_debug(expr,outputfunc,info)    _detail_bbt_assert_debug(expr,outputfunc,info)
-#define bbt_assert(expr,outputfunc,info)          _detail_bbt_assert(expr,outputfunc,info)
-
-/**
- * 携带调试信息的运行时断言
-*/
-
-#define _detail_bbt_assert(expr,outputfunc,debug_info)\
-{\
-    if (bbt_unlikely(!static_cast<bool>(expr)))\
-    {\
-        outputfunc(debug_info);\
-        assert(expr);\
-    }\
-}
-
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
 #ifdef BBT_DEBUG
-#define _detail_bbt_assert_debug(expr,func,debug_info) _detail_bbt_assert(expr,func,debug_info)
+#define DebugAssertWithInfo(expr, info) \
+    assert( (expr) && (info) )
 #else
-#define _detail_bbt_assert_debug(expression,...)
+#define DebugAssertWithInfo(expr, info) {}
 #endif
 
+#ifdef BBT_DEBUG
+#define DebugAssert(expr) \
+    assert( expr )
+#else
+#define DebugAssert(expr) {}
+#endif
+
+#define Assert(expr) \
+    assert( expr )
+
+#define AssertWithInfo(expr, info) \
+    assert( (expr) && (info) )
