@@ -20,7 +20,7 @@ namespace bbt::net
 
 class Util
 {
-
+public:
 static int CreateListen(const char* ip, short port, bool noblock)
 {
     int                 fd  = -1;
