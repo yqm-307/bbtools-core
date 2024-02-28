@@ -72,6 +72,21 @@ static int SetFdReuseable(int fd)
     return evutil_make_listen_socket_reuseable(fd);
 }
 
+static int CreateConnect(const char* ip, short port, bool noblock)
+{
+    int socket = -1;
+    socket = ::socket(AF_INET, SOCK_STREAM, 0);
+    if (socket < 0)
+        return -1;
+
+    if (noblock) {
+        if (0 > SetFdNoBlock(socket))
+            return -1;
+    }
+
+    return socket;
+}
+
 };
 
 
