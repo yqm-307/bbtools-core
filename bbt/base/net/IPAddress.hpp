@@ -14,10 +14,16 @@ public:
     //给服务器初始化使用
     explicit IPAddress(int port, int opt = INADDR_ANY);
     IPAddress() = default;
-    IPAddress& operator=(const IPAddress&);
+    bbt::net::IPAddress& operator=(const bbt::net::IPAddress& it)
+    {
+        m_ip = it.m_ip;
+        m_port = it.m_port;
+        m_addr = it.m_addr;
+        return *this;
+    }
     virtual ~IPAddress(){};
-    IPAddress(IPAddress&&);
-    IPAddress(const IPAddress&);
+    IPAddress(bbt::net::IPAddress&&);
+    IPAddress(const bbt::net::IPAddress&);
 
 public:
     void set(std::string ip,int port);
@@ -27,7 +33,7 @@ public:
     const struct sockaddr* getsockaddr() const;
     const socklen_t getsocklen() const;
     std::string GetIPPort() const;
-    void Swap(IPAddress& it);
+    void Swap(bbt::net::IPAddress& it);
     void Clear();
 private:
 protected:

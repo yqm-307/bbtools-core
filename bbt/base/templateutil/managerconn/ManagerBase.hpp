@@ -18,7 +18,7 @@
 #include <map>
 
 /* 标识类被 managerbase 管理 */
-#define FlagManagedByManagerBase( _KeyType, _MemType) \
+#define BBTManagerFriendFlag( _KeyType, _MemType) \
     friend util::templateutil::ManagerBase<_KeyType, _MemType>
 
 
