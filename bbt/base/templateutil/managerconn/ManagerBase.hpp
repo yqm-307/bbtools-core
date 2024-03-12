@@ -19,7 +19,7 @@
 
 /* 标识类被 managerbase 管理 */
 #define BBTManagerFriendFlag( _KeyType, _MemType) \
-    friend util::templateutil::ManagerBase<_KeyType, _MemType>
+    friend bbt::templateutil::ManagerBase<_KeyType, _MemType>
 
 
 
