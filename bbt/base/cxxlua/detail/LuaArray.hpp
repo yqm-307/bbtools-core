@@ -1,5 +1,5 @@
 #pragma once
-#include "./Config.hpp"
+#include <vector>
 
 namespace bbt::cxxlua::detail
 {

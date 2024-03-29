@@ -1,5 +1,5 @@
 #pragma once
-#include "./Config.hpp"
+#include "Config.hpp"
 
 namespace bbt::cxxlua::detail
 {
@@ -23,19 +23,44 @@ public:
     typedef std::function<std::optional<LuaErr>(std::unique_ptr<LuaStack>)> TableInitFunction;
 
 public:
-    LuaTable();
-    explicit LuaTable(const LuaTable& other);
-    ~LuaTable();
+    LuaTable() {}
+    explicit LuaTable(const LuaTable& other) { CopyFrom(&other); }
+    ~LuaTable() {}
 
     /* 用table覆盖自己 */
-    void CopyFrom(const LuaTable* table);
+    void CopyFrom(const LuaTable* table)
+    {
+        m_cfunction_set = table->m_cfunction_set;
+        m_field_set = table->m_field_set;
+        m_table_init_func = m_table_init_func;
+        m_table_name = m_table_name;
+    }
 
     /* 注册table初始化函数，调用此函数时，保证栈顶元素是new的table */
-    std::optional<LuaErr> RegistFieldInitFunc(const TableInitFunction& table_init_func);
+    std::optional<LuaErr> RegistFieldInitFunc(const TableInitFunction& table_init_func)
+    {
+        m_table_init_func = table_init_func;
+        return std::nullopt;
+    }
+
 protected:
-    std::optional<LuaErr> InitFields(const FieldSet& fields);
-    std::optional<LuaErr> InitCFunctions(const FuncSet& funcs);
-    std::optional<LuaErr> InitTableName(const std::string& name);
+    std::optional<LuaErr> InitFields(const FieldSet& fields)
+    {
+        m_field_set = fields;
+        return std::nullopt;
+    }
+
+    std::optional<LuaErr> InitCFunctions(const FuncSet& funcs)
+    {
+        m_cfunction_set = funcs;
+        return std::nullopt;
+    }
+
+    std::optional<LuaErr> InitTableName(const std::string& name)
+    {
+        m_table_name = name;
+        return std::nullopt;
+    }
 private:
     FieldSet        m_field_set{};
     /* m_cfunction_set 是 m_field_set 的子集，用来寻找调用函数 */
@@ -45,5 +70,3 @@ private:
 };
 
 } // namespace bbt::cxxlua::detail
-
-#include "LuaTable_Def.hpp"

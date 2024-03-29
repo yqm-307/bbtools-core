@@ -1,6 +1,5 @@
 #pragma once
-#include "./Config.hpp"
-#include "./LuaStack.hpp"
+#include "LuaStack.hpp"
 
 namespace bbt::cxxlua::detail
 {

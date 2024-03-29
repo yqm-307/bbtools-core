@@ -1,7 +1,6 @@
 #pragma once
+#include "Config.hpp"
 #include "bbt/base/type/type_traits.hpp"
-#include <string>
-#include "./Config.hpp"
 
 namespace bbt::cxxlua::detail
 {
@@ -52,7 +51,7 @@ template<>
 struct GetTypeEnum<bbt::cxxlua::detail::LuaRef>
 { static const LUATYPE type = LUATYPE::LUATYPE_STACKREF; };
 
-void DbgLuaStack(lua_State* l) {
+inline void DbgLuaStack(lua_State* l) {
     int type;
     fprintf(stderr, "-----------> top <-----------\n");
     fprintf(stderr, "索引\t类型\t值\n");
