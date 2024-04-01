@@ -44,7 +44,16 @@ public:
             return __ParseLuaLoadErr(err);
         }
 
-        lua_pcall(Context(), 0, 0, 0);
+        int ret = lua_pcall(Context(), 0, 0, 0);
+        switch (ret)
+        {
+        case LUA_OK:
+            break;    
+        case LUA_ERRRUN:
+            return LuaErr(lua_tostring(Context(), -1), ERRCODE::VM_ErrLuaRuntime);
+        default:
+            return LuaErr(std::to_string(ret), ERRCODE::Default);
+        }
 
         return std::nullopt;
     }
