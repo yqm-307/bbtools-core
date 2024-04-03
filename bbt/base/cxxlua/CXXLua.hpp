@@ -17,6 +17,7 @@ namespace bbt::cxxlua
 {
 
 typedef bbt::cxxlua::detail::LuaVM LuaVM;
+typedef bbt::cxxlua::detail::LuaValue Value;
 
 template<typename CXXClass>
 using LuaClass = bbt::cxxlua::detail::LuaClass<CXXClass>;

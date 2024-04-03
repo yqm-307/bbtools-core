@@ -4,6 +4,7 @@
 #include "LuaErr.hpp"
 #include "LuaRef.hpp"
 #include "LuaTable.hpp"
+#include "LuaValue.hpp"
 
 namespace bbt::cxxlua::detail
 {
@@ -275,14 +276,114 @@ public:
 
 
     void Pop(int n) { lua_pop(Context(), n); }
+/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////    从栈中读取操作    //////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+public:
+    std::optional<LuaErr> Pop(LuaValue& value)
+    {
+        /* 获取栈顶元素类型 */
+        LUATYPE type = GetType(g_lua_top_ref);
+        LuaValue lua_value;
+        switch (type)
+        {
+        case LUATYPE_BOOL:
+            lua_value.type = _Pop(lua_value.basevalue.boolean);
+            break;
+        case LUATYPE_CSTRING:
+            lua_value.type = _Pop(lua_value.str);
+            break;
+        case LUATYPE_FUNCTION:
+            lua_value.type = _Pop(lua_value.cfunc);
+            break;
+        case LUATYPE_NUMBER:
+            lua_value.type = _Pop(lua_value.basevalue.integer);
+            break;
+        case LUATYPE_NIL:
+            lua_value.type = _Pop();
+            break;
+        default:
+            return LuaErr("Pop() unsupported type!", ERRCODE::Comm_Failed);
+            break;
+        }
+
+        return std::nullopt;
+    }
+
+protected:
+    LUATYPE _Pop(bool& value)
+    {
+        LUATYPE type = GetType(g_lua_top_ref);
+        value = lua_toboolean(Context(), -1);
+        lua_pop(Context(), 1);
+        return type;
+    }
+    LUATYPE _Pop(int& value)
+    {
+        LUATYPE type = GetType(g_lua_top_ref);
+        value = lua_tointeger(Context(), -1);
+        lua_pop(Context(), 1);
+        return type;
+    }
+    LUATYPE _Pop(double& value)
+    {
+        LUATYPE type = GetType(g_lua_top_ref);
+        value = lua_tonumber(Context(), -1);
+        lua_pop(Context(), 1);
+        return type;
+    }
+    LUATYPE _Pop(std::string& value) 
+    {
+        LUATYPE type = GetType(g_lua_top_ref);
+        value = lua_tostring(Context(), -1);
+        lua_pop(Context(), 1);
+        return type;
+    }
+    LUATYPE _Pop(const char* value) 
+    {
+        LUATYPE type = GetType(g_lua_top_ref);
+        value = lua_tostring(Context(), -1);
+        lua_pop(Context(), 1);
+        return type;
+    }
+    LUATYPE _Pop(lua_CFunction& value)
+    {
+        LUATYPE type = GetType(g_lua_top_ref);
+        value = lua_tocfunction(Context(), -1);
+        lua_pop(Context(), 1);
+        return type;
+    }
+    LUATYPE _Pop(void)
+    {
+        LUATYPE type = GetType(g_lua_top_ref);
+        lua_pop(Context(), 1);
+        return type;
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
 protected:
     lua_State* Context(){ return lua; }
 
     /* 栈操作 */
-    LUATYPE Push(int value) 
+    LUATYPE Push(int32_t value) 
     {
         lua_pushinteger(Context(), value);
         return GetType(g_lua_top_ref);
+    }
+    LUATYPE Push(int64_t value)
+    {
+        return Push((int32_t)value);
+    }
+    LUATYPE Push(uint32_t value)
+    {
+        lua_pushinteger(Context(), value);
+        return GetType(g_lua_top_ref);
+    }
+    LUATYPE Push(uint64_t value)
+    {
+        return Push((uint32_t)value);
     }
     LUATYPE Push(double value)
     {

@@ -40,6 +40,11 @@ public: /* high level api */
         int                             return_nums,
         const LuaParseReturnCallback&   parse_handler,
         Args                            ...args);
+    
+    CXXLUA_API std::optional<LuaErr> Pop(LuaValue& value)
+    {
+        return m_stack->Pop(value);
+    }
 
 public: /* LuaClass 相关接口 */
 
