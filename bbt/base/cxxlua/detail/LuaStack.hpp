@@ -277,30 +277,29 @@ public:
 
     void Pop(int n) { lua_pop(Context(), n); }
 /////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////    从栈中读取操作    //////////////////////////////////////
+//////////////////////////    从栈中弹出基本类型    /////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 public:
     std::optional<LuaErr> Pop(LuaValue& value)
     {
         /* 获取栈顶元素类型 */
         LUATYPE type = GetType(g_lua_top_ref);
-        LuaValue lua_value;
         switch (type)
         {
         case LUATYPE_BOOL:
-            lua_value.type = _Pop(lua_value.basevalue.boolean);
+            value.type = _Pop(value.basevalue.boolean);
             break;
         case LUATYPE_CSTRING:
-            lua_value.type = _Pop(lua_value.str);
+            value.type = _Pop(value.str);
             break;
         case LUATYPE_FUNCTION:
-            lua_value.type = _Pop(lua_value.cfunc);
+            value.type = _Pop(value.cfunc);
             break;
         case LUATYPE_NUMBER:
-            lua_value.type = _Pop(lua_value.basevalue.integer);
+            value.type = _Pop(value.basevalue.integer);
             break;
         case LUATYPE_NIL:
-            lua_value.type = _Pop();
+            value.type = _Pop();
             break;
         default:
             return LuaErr("Pop() unsupported type!", ERRCODE::Comm_Failed);
@@ -358,6 +357,63 @@ protected:
         LUATYPE type = GetType(g_lua_top_ref);
         lua_pop(Context(), 1);
         return type;
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////       访问table          /////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief 对当前栈顶表进行多级访问操作
+     * 
+     * @tparam Args 
+     * @param value 
+     * @param args 
+     * @return std::optional<LuaErr> 
+     */
+    template<typename ...Args>
+    std::optional<LuaErr> GetByKey4Table(LuaValue& value, Args ...args)
+    {
+        return _GetByKey4Table(value, args...);
+    }
+
+private:
+    template<typename TKey, typename ...Args>
+    std::optional<LuaErr> _GetByKey4Table(LuaValue& value, TKey key, Args ...args)
+    {
+        if (LUATYPE_LUATABLE != GetType(g_lua_top_ref))
+            return LuaErr("[LuaStack::_GetByKey4Table] top value not lua table!", ERRCODE::Comm_Failed);
+
+        // 压入key，获取table值
+        Push(key);
+        LUATYPE type = (LUATYPE)lua_gettable(Context(), -2);
+
+        // 取出再尝试获取table值
+        auto err = _GetByKey4Table(value, args...);
+        Pop(1);
+
+        return err;
+    }
+
+    template<typename TKeyValue>
+    std::optional<LuaErr> _GetByKey4Table(LuaValue& value, TKeyValue key)
+    {
+        if (LUATYPE_LUATABLE != GetType(g_lua_top_ref))
+            return LuaErr("top value not lua table!", ERRCODE::Comm_Failed);
+        
+        Push(key);
+
+        LUATYPE type = (LUATYPE)lua_gettable(Context(), -2);
+
+        return Pop(value);
+    }
+/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////       全局操作            ////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+public:
+    LUATYPE GetGlobal(const std::string& value_name)
+    {
+        return __GetGlobalValue(value_name);
     }
 
 /////////////////////////////////////////////////////////////////////////////////////

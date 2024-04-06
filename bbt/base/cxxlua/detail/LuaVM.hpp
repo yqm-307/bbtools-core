@@ -46,6 +46,9 @@ public: /* high level api */
         return m_stack->Pop(value);
     }
 
+    template<typename ...Args>
+    CXXLUA_API std::optional<LuaErr> GetByKey4Table(LuaValue& value, const std::string& global_table, Args ...args);
+
 public: /* LuaClass 相关接口 */
 
     /* 在lua中注册 c++ class */

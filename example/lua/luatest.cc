@@ -1,6 +1,13 @@
 #include <bbt/base/cxxlua/CXXLua.hpp>
 #include <optional>
 
+#define IF_NOT_EXIT(err, handle) \
+auto err = handle; \
+if(err != std::nullopt) { \
+    printf("%s\n", err.value().What().c_str()); \
+    return -1; \
+}
+
 int main()
 {
     bbt::cxxlua::LuaVM lua;
@@ -31,5 +38,23 @@ int main()
         printf("%s\n", call_func_err.value().What().c_str());
         return -1;
     }
+
+    auto err3 = lua.DoScript(R"(
+        G_TB = {
+            "test1" = 1,
+            "test2" = {
+                "test3" = 3,
+            },
+            [4] = "test4",
+        }
+    )");
+
+    bbt::cxxlua::Value value_test1;
+    IF_NOT_EXIT(err4, lua.GetByKey4Table(value_test1, "G_TB", "test1"));
+    printf("test1 = %d\n", value_test1.basevalue.integer);
+    IF_NOT_EXIT(err5, lua.GetByKey4Table(value_test1, "G_TB", "test2", "test3"));
+    printf("test3 = %d\n", value_test1.basevalue.integer);
+    IF_NOT_EXIT(err6, lua.GetByKey4Table(value_test1, "G_TB", 4));
+    printf("test1 = %s\n", value_test1.str.c_str());    
 
 }

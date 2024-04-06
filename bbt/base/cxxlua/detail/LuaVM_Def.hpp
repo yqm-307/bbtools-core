@@ -33,4 +33,11 @@ std::optional<LuaErr> LuaVM::RegistClass()
     return CXXClass::CXXLuaInit(m_stack);
 }
 
+template<typename ...Args>
+std::optional<LuaErr> LuaVM::GetByKey4Table(LuaValue& value, const std::string& global_table, Args ...args)
+{
+    if (LUATYPE_LUATABLE != m_stack->GetGlobal(global_table))
+        return LuaErr("[LuaVM::GetByKey4Table] not a global table!");
+    return m_stack->GetByKey4Table(value, args...);
+}
 }
