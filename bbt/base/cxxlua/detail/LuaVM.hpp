@@ -48,6 +48,12 @@ public: /* high level api */
 
     template<typename ...Args>
     CXXLUA_API std::optional<LuaErr> GetByKey4Table(LuaValue& value, const std::string& global_table, Args ...args);
+    
+    CXXLUA_API std::optional<LuaErr> GetGlobalValue(LuaValue& value, const std::string& global_value)
+    {
+        m_stack->GetGlobal(global_value);
+        return Pop(value);
+    }
 
 public: /* LuaClass 相关接口 */
 
