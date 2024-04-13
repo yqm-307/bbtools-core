@@ -29,9 +29,9 @@ timer::clock::Timestamp<timer::clock::ms> TimeWheel<CallableType>::GetNextTickTi
 
 
 template<typename CallableType>
-bool TimeWheel<CallableType>::CancelTask(TaskID task)
+bool TimeWheel<CallableType>::CancelTask(TaskID taskid)
 {
-    return m_time_wheel_ptr->Cancel();
+    return m_time_wheel_ptr->Cancel(taskid);
 }
 
 
