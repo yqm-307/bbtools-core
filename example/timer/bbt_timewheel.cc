@@ -7,13 +7,7 @@ using namespace bbt::timer;
 int a=0;
 
 
-#define safe_insert(timer,timewheel,lock) {\
-    std::lock_guard<decltype(lock)> lo_magic_1823761(lock);\
-    timewheel.AddTask(timer);\
-}
-
-template<typename T>
-void safe_timer_rotate(TimeWheel<T>& timer,std::mutex& lock)
+void safe_timer_rotate(TimeWheel& timer,std::mutex& lock)
 {
     bbt::timer::clock::Timestamp<bbt::timer::clock::ms> next;
     {
@@ -27,7 +21,7 @@ void safe_timer_rotate(TimeWheel<T>& timer,std::mutex& lock)
     std::this_thread::sleep_until(next);
 }
 
-#define new_task() std::make_shared<TimeTask_Base<std::function<void()>>>()
+#define new_task() std::make_shared<Timer>()
 
 
 // 多线程测试
@@ -58,7 +52,7 @@ void test1()
     }Ctrl;
     
 
-    TimeWheel<std::function<void()>> timer;
+    TimeWheel timer;
     bbt::random::mt_random<int,1,120*1000> rd;
     std::mutex mutex;
 
@@ -75,9 +69,8 @@ void test1()
     auto doprint = new_task();
     doprint->Init([&Ctrl,doprint,&mutex,&timer](){
         Ctrl.print();
-        doprint->Reset(bbt::timer::clock::nowAfter(bbt::timer::clock::s(5)));
-        timer.AddTask(doprint);
-    },bbt::timer::clock::nowAfter(bbt::timer::clock::s(5)));
+        return true;
+    }, 5000);
     assert(timer.AddTask(doprint));
 
     for(int i=0;i<10;++i)
@@ -99,7 +92,9 @@ void test1()
                                 Ctrl.error_times++;
                             }
                             Ctrl.trigger_times++;
-                        },bbt::timer::clock::nowAfter(bbt::timer::clock::ms(rd())));
+                            return false;
+                        }, rd());
+
                         if (!timer.AddTask(ptr))
                         {
                             Ctrl.register_error++;
@@ -124,7 +119,7 @@ void test2()
     {
         std::atomic_int allcount=0;
         std::atomic_int trigger=0;
-        std::map<uint32_t,TimeWheel<std::function<void()>>::TaskBasePtr> map;
+        std::map<uint32_t,TimeWheel::TimerSPtr> map;
         void print()
         {
             printf("all: %5d \ttrigger: %d\n",allcount.load(),trigger.load());
@@ -132,7 +127,7 @@ void test2()
     }Ctrl;
     
     const int test_time_s = 300;    // 测试时长300s
-    TimeWheel<std::function<void()>> wheel;
+    TimeWheel wheel;
     bbt::random::mt_random<int,1000,200*1000> rd;
     std::mutex mutex;
     for (int i = 0;i<timer_count;++i)
@@ -141,12 +136,13 @@ void test2()
         ptr->Init([&Ctrl,ptr](){
             Ctrl.trigger++;
             // Ctrl.map.insert(std::make_pair(ptr->TaskID(),ptr));
-            Ctrl.map.erase(ptr->GetTaskID());
-        },bbt::timer::clock::nowAfter(bbt::timer::clock::ms(rd())));
+            Ctrl.map.erase(ptr->GetTimerId());
+            return false;
+        }, rd());
         if (wheel.AddTask(ptr))
         {
             Ctrl.allcount += 1;
-            Ctrl.map.insert(std::make_pair(ptr->GetTaskID(),ptr));
+            Ctrl.map.insert(std::make_pair(ptr->GetTimerId(),ptr));
         }
         else
             printf("%ld %ld\n",ptr->GetTimeOut().time_since_epoch().count(),bbt::timer::clock::now<bbt::timer::clock::ms>().time_since_epoch().count());
@@ -154,9 +150,8 @@ void test2()
     auto ptr = new_task();
     ptr->Init([&Ctrl,ptr,&wheel](){
         Ctrl.print();
-        ptr->Reset(bbt::timer::clock::nowAfter(bbt::timer::clock::ms(5000)));
-        wheel.AddTask(ptr);
-    },bbt::timer::clock::nowAfter(bbt::timer::clock::ms(5000)));
+        return true;
+    }, 5000);
     wheel.AddTask(ptr);
 
     while(1)

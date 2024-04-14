@@ -17,20 +17,21 @@
  * 
  */
 #pragma once
-#include "bbt/base/timer/detail/Task.hpp"
+#include "bbt/base/timer/detail/Timer.hpp"
 #include <map>
 namespace bbt::timer
 {
 
+/**
+ * @brief 返回若为true，则继续执行定时器；若为false，则释放定时器
+ * 
+ */
 
-
-template<typename CallableType>
 class TimeWheel 
 {
 public:
-    typedef TimeTask_Base<CallableType>     Timer;
-    typedef std::shared_ptr<Timer>          TaskBasePtr;
-    typedef typename Timer::TaskID          TaskID;
+    typedef std::shared_ptr<Timer>  TimerSPtr;
+    typedef Timer::TimerId          TimerId;
 
 public:
     TimeWheel();
@@ -42,7 +43,7 @@ public:
      * @return true 
      * @return false 
      */
-    bool AddTask(TaskBasePtr task);
+    bool AddTask(TimerSPtr task);
     
     /**
      * @brief 从TimeWheel中删除一个定时任务
@@ -51,25 +52,31 @@ public:
      * @return true 
      * @return false 
      */
-    bool CancelTask(TaskID task);
+    bool CancelTask(TimerId task);
 
     /**
-     * @brief 使时间轮滴答一次
-     * 推动整个时间轮向前推进一个"最小时间间隔"，并
-     * 执行超时任务
+     * @brief 外部驱动tick一次，但是时间轮不一定会向前推动
      */
     void Tick();
 
     timer::clock::Timestamp<timer::clock::ms> GetNextTickTimestamp();
 
+    /**
+     * @brief 是否还有已经超时的slot
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool HasTimeoutSlot(bbt::timer::clock::Timestamp<> now);
+
 private:
     // 可以设置：禁用、启用，触发间隔，触发次数，回调，
-    BBT_IMPL_STRUCT TimeWheel_Impl
+    struct TimeWheel_Impl
     {
-        typedef std::priority_queue<TaskBasePtr,std::vector<TaskBasePtr>,
-                std::function<bool(const TaskBasePtr& l,const TaskBasePtr& r)>>        DelayQueue;         // 延时队列
+        typedef std::priority_queue<TimerSPtr,std::vector<TimerSPtr>,
+                std::function<bool(const TimerSPtr& l,const TimerSPtr& r)>>        DelayQueue;         // 延时队列
         typedef std::vector<DelayQueue>                 TimeWheelMap;       // 主动轮
-        typedef std::map<TaskID,TaskBasePtr>            TimerMap;
+        typedef std::map<TimerId,TimerSPtr>            TimerMap;
 
         /**
          * @brief 初始化TimeWheel
@@ -83,26 +90,15 @@ private:
             m_current_index_lv3(0)
         {Init();}
 
-        /**
-         * @brief 初始化TimeWheel
-         * 
-         * @param tick_type 最小间隔，也就是时间轮精度 ,毫秒级
-         * @param max_record_range_ms 最大记录时长，毫秒级
-         */
-        // void Del();
-        // void Change();
-        // void Set();
-        // void Get();
-
         void Init();
         void TickTack();
-        bool Add(TaskBasePtr task_ptr);
+        bool Add(TimerSPtr task_ptr);
         timer::clock::Timestamp<timer::clock::ms> GetNextSlotTimestamp(); // 下一个 slot 全部超时的时间
         size_t Size() const;
-        bool Cancel(TaskID id);
+        bool Cancel(TimerId id);
 
     private:
-        int Insert_Detail(TaskBasePtr task_ptr);
+        int Insert_Detail(TimerSPtr task_ptr);
         void WheelLv1RotateOnce();  // 钟表摆臂转动一格
         void WheelLv2RotateOnce();  // lv2 从动
         void WheelLv3RotateOnce();  // lv3 从动
@@ -111,20 +107,18 @@ private:
         std::tuple<bool,int,int,int> GetIndexsByTimestamp(timer::clock::Timestamp<timer::clock::ms>);
         void DoDelayQueueToWheelMap(DelayQueue& queue, TimeWheelMap& wheel_index, int slotnum, timer::clock::Timestamp<timer::clock::ms> begin_time, int slot_interval_ms);    // queue 中task映射到对应层
     private:
-        // const int m_tick_interval_ms;   // 每次tick跨度间隔
-        // const int m_max_range;          // 最大可记录时间跨度（就是计时器最大一个周期可以记录多大范围的时间）
         
 
         TimeWheelMap    m_wheel_lv1;        // 第一级主动轮 -- tick主动转动
-        TimeWheelMap   m_wheel_lv2;    // 第二级存储轮 -- 存储数据,从动
-        TimeWheelMap   m_wheel_lv3;    // 第二级存储轮 -- 存储数据,从动
+        TimeWheelMap    m_wheel_lv2;    // 第二级存储轮 -- 存储数据,从动
+        TimeWheelMap    m_wheel_lv3;    // 第二级存储轮 -- 存储数据,从动
         DelayQueue      m_delay_queue; // 范围之外的超时任务，暂存DelayQueue
 
         TimerMap        m_task2timer;   
         
-        int m_current_index_lv1;
-        int m_current_index_lv2;
-        int m_current_index_lv3;
+        int             m_current_index_lv1;
+        int             m_current_index_lv2;
+        int             m_current_index_lv3;
 
         // 上次tick的时间
         timer::clock::Timestamp<timer::clock::ms> m_current_timestamp;
@@ -142,7 +136,3 @@ private:
 
 
 }
-
-
-#include "bbt/base/timer/detail/TimeWheel_Impl.hpp"
-#include "bbt/base/timer/detail/TimeWheel_Detail.hpp"
