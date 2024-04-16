@@ -20,6 +20,7 @@
 namespace bbt::timer
 {
 
+/* 返回true，继续执行；返回false，就不会继续执行了 */
 typedef std::function<bool()> TimeoutCallback;
 
 /**

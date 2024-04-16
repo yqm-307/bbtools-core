@@ -35,24 +35,24 @@ public:
 
 public:
     TimeWheel();
+
+    /**
+     * @brief 注册定时任务
+     * 
+     * @param cb 定时任务回调
+     * @param timeout_ms 触发间隔
+     * @return TimerId 
+     */
+    TimerId RegistTask(TimeoutCallback cb, int timeout_ms);
     
     /**
-     * @brief 向TimeWheel中添加一个定时任务
+     * @brief 反注册定时任务
      * 
-     * @param task 定时任务
+     * @param task 
      * @return true 
      * @return false 
      */
-    bool AddTask(TimerSPtr task);
-    
-    /**
-     * @brief 从TimeWheel中删除一个定时任务
-     * 
-     * @param task 定时任务
-     * @return true 
-     * @return false 
-     */
-    bool CancelTask(TimerId task);
+    bool UnRegistTask(TimerId task);
 
     /**
      * @brief 外部驱动tick一次，但是时间轮不一定会向前推动
@@ -70,6 +70,8 @@ public:
     bool HasTimeoutSlot(bbt::timer::clock::Timestamp<> now);
 
 private:
+
+    TimerSPtr CreateTimer(TimeoutCallback cb, int timeout_ms);
     // 可以设置：禁用、启用，触发间隔，触发次数，回调，
     struct TimeWheel_Impl
     {
@@ -109,24 +111,26 @@ private:
     private:
         
 
-        TimeWheelMap    m_wheel_lv1;        // 第一级主动轮 -- tick主动转动
+        TimeWheelMap    m_wheel_lv1;    // 第一级主动轮 -- tick主动转动
         TimeWheelMap    m_wheel_lv2;    // 第二级存储轮 -- 存储数据,从动
         TimeWheelMap    m_wheel_lv3;    // 第二级存储轮 -- 存储数据,从动
-        DelayQueue      m_delay_queue; // 范围之外的超时任务，暂存DelayQueue
+        DelayQueue      m_delay_queue;  // 范围之外的超时任务，暂存DelayQueue
 
-        TimerMap        m_task2timer;   
-        
-        int             m_current_index_lv1;
+        int             m_current_index_lv1;    // 当前所在的slot
         int             m_current_index_lv2;
         int             m_current_index_lv3;
+
+        //TODO timer对象池
+        TimerMap        m_task2timer;   // 保存所有的定时器对象
+
 
         // 上次tick的时间
         timer::clock::Timestamp<timer::clock::ms> m_current_timestamp;
         
         // 当前时间轮的起始和结束时间
-        timer::clock::Timestamp<timer::clock::ms> m_end_timestamp;
         timer::clock::Timestamp<timer::clock::ms> m_begin_timestamp;
-        size_t m_size;
+        timer::clock::Timestamp<timer::clock::ms> m_end_timestamp;
+        size_t m_size;  // 定时任务总数
     };
 
 private:

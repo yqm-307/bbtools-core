@@ -1,5 +1,6 @@
 #include "TimeWheel.hpp"
 #include "bbt/base/timer/Clock.hpp"
+#include "detail/Timer.hpp"
 
 #define IF_ZERO_OR_MINUS_ONE(expression) ( ((expression) == 0) ? 0 : (expression-1) ) 
 #define BBT_TW_LV1_Slot_MS   (__bbt_tickonce_ms__)
@@ -11,7 +12,8 @@ namespace bbt::timer
 {
 
 bool TimeWheel::TimeWheel_Impl::Add(TimerSPtr task)
-{    
+{
+
     assert(task != nullptr);
     if (task->Is_Expired())
         return false;
@@ -28,7 +30,7 @@ bool TimeWheel::TimeWheel_Impl::Add(TimerSPtr task)
         return false;
 }
 
-bool TimeWheel::CancelTask(TimerId TimerId)
+bool TimeWheel::UnRegistTask(TimerId TimerId)
 {
     return m_time_wheel_ptr->Cancel(TimerId);
 }
@@ -312,9 +314,11 @@ TimeWheel::TimeWheel()
 {
 }
 
-bool TimeWheel::AddTask(TimerSPtr task)
+TimeWheel::TimerId TimeWheel::RegistTask(TimeoutCallback cb, int timeout_ms)
 {
-    return m_time_wheel_ptr->Add(task);
+    auto ptr = CreateTimer(cb, timeout_ms);
+    assert(ptr != nullptr);
+    return m_time_wheel_ptr->Add(ptr);
 }
 
 void TimeWheel::Tick()
@@ -326,6 +330,17 @@ timer::clock::Timestamp<timer::clock::ms> TimeWheel::GetNextTickTimestamp()
 {
     return m_time_wheel_ptr->GetNextSlotTimestamp();
 }
+
+TimeWheel::TimerSPtr TimeWheel::CreateTimer(TimeoutCallback cb, int timeout_ms)
+{
+    auto timer = std::make_shared<Timer>();
+    if (Timer::TimeTask_InitStatus::OK != timer->Init(cb, timeout_ms)) {
+        return nullptr;
+    }
+
+    return timer;
+}
+
 
 }
 
