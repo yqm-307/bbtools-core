@@ -14,6 +14,9 @@ public:
     Errcode(Errcode&& other);
     virtual ~Errcode();
 
+    Errcode& operator=(const Errcode& other);
+    Errcode& operator=(Errcode&& other);
+
 protected:
     /* 设置信息文本 */
     void                SetMsg(const std::string& msg);

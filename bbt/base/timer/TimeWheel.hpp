@@ -94,7 +94,7 @@ private:
 
         void Init();
         void TickTack();
-        bool Add(TimerSPtr task_ptr);
+        timer::Errcode Add(TimerSPtr task_ptr);
         timer::clock::Timestamp<timer::clock::ms> GetNextSlotTimestamp(); // 下一个 slot 全部超时的时间
         size_t Size() const;
         bool Cancel(TimerId id);

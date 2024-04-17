@@ -73,6 +73,23 @@ const ErrType& Errcode<ErrType>::GetErrType() const
     return m_err_type;
 }
 
+template<typename ErrType>
+Errcode<ErrType>& Errcode<ErrType>::operator=(const Errcode<ErrType>& other)
+{
+    m_err_msg = other.m_err_msg;
+    m_err_type = other.m_err_type;
+    return *this;
+}
+
+template<typename ErrType>
+Errcode<ErrType>& Errcode<ErrType>::operator=(Errcode&& other)
+{
+    m_err_msg = std::move(other.m_err_msg);
+    m_err_type = std::move(other.m_err_type);
+    return *this;
+}
+
+
 
 
 }

@@ -16,6 +16,7 @@
 #include "bbt/base/templateutil/Comparator.hpp"
 #include "bbt/base/timer/detail/TimeWheel_Def.hpp"
 #include "bbt/base/poolutil/IDPool.hpp"
+#include "bbt/base/timer/detail/Error.hpp"
 
 namespace bbt::timer
 {
@@ -95,7 +96,7 @@ public:
      * @param timeout_ms 
      * @return TimeTask_InitStatus 初始化状态
      */
-    TimeTask_InitStatus Reset(int timeout_ms);
+    bbt::timer::Errcode Reset(int timeout_ms);
 
     /**
      * @brief 初始化一个定时器
@@ -104,7 +105,7 @@ public:
      * @param timeout_ms 
      * @return TimeTask_InitStatus 
      */
-    TimeTask_InitStatus Init(TimeoutCallback data, int timeout_ms);
+    bbt::timer::Errcode Init(TimeoutCallback data, int timeout_ms);
 
     /**
      * @brief 获取触发间隔

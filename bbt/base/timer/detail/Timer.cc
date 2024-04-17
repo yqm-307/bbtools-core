@@ -54,7 +54,7 @@ bbt::timer::clock::Timestamp<> Timer::GetTimeOut() const
     return it_;
 }
 
-Timer::TimeTask_InitStatus Timer::Reset(int timeout_ms)
+bbt::timer::Errcode Timer::Reset(int timeout_ms)
 {
     TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
     auto timeout_timestamp = bbt::timer::clock::nowAfter<>(bbt::timer::clock::ms(timeout_ms));
@@ -71,10 +71,10 @@ Timer::TimeTask_InitStatus Timer::Reset(int timeout_ms)
         m_status = Status::Waitting;
     } while (0);
 
-    return flag;
+    return std::nullopt;
 }
 
-Timer::TimeTask_InitStatus Timer::Init(TimeoutCallback data, int timeout_ms)
+bbt::timer::Errcode Timer::Init(TimeoutCallback data, int timeout_ms)
 {
 
     TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
