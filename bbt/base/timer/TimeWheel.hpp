@@ -43,8 +43,8 @@ public:
      * @param timeout_ms 触发间隔
      * @return TimerId 
      */
-    TimerId RegistTask(TimeoutCallback cb, int timeout_ms);
-    
+    std::pair<std::optional<timer::Errcode>, TimerId> RegistTask(TimeoutCallback cb, int timeout_ms);
+
     /**
      * @brief 反注册定时任务
      * 
@@ -71,7 +71,7 @@ public:
 
 private:
 
-    TimerSPtr CreateTimer(TimeoutCallback cb, int timeout_ms);
+    std::pair<std::optional<timer::Errcode>, TimerSPtr> CreateTimer(TimeoutCallback cb, int timeout_ms);
     // 可以设置：禁用、启用，触发间隔，触发次数，回调，
     struct TimeWheel_Impl
     {
@@ -94,7 +94,7 @@ private:
 
         void Init();
         void TickTack();
-        timer::Errcode Add(TimerSPtr task_ptr);
+        std::optional<timer::Errcode> Add(TimerSPtr task_ptr);
         timer::clock::Timestamp<timer::clock::ms> GetNextSlotTimestamp(); // 下一个 slot 全部超时的时间
         size_t Size() const;
         bool Cancel(TimerId id);

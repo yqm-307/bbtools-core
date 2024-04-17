@@ -17,6 +17,10 @@ public:
     Errcode& operator=(const Errcode& other);
     Errcode& operator=(Errcode&& other);
 
+    virtual const char*         CWhat() const = 0;
+    virtual const std::string&  What() const = 0;
+    virtual const ErrType&      Type() const = 0;
+
 protected:
     /* 设置信息文本 */
     void                SetMsg(const std::string& msg);

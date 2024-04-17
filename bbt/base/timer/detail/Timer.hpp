@@ -96,7 +96,7 @@ public:
      * @param timeout_ms 
      * @return TimeTask_InitStatus 初始化状态
      */
-    bbt::timer::Errcode Reset(int timeout_ms);
+    std::optional<bbt::timer::Errcode> Reset(int timeout_ms);
 
     /**
      * @brief 初始化一个定时器
@@ -105,7 +105,7 @@ public:
      * @param timeout_ms 
      * @return TimeTask_InitStatus 
      */
-    bbt::timer::Errcode Init(TimeoutCallback data, int timeout_ms);
+    std::optional<bbt::timer::Errcode> Init(TimeoutCallback data, int timeout_ms);
 
     /**
      * @brief 获取触发间隔

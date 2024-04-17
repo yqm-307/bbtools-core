@@ -12,10 +12,6 @@ enum ErrType
     Error = 1,
 };
 
-class Errcode;
-
-typedef std::optional<Errcode> ErrOpt;
-
 class Errcode:
     public bbt::errcode::Errcode<ErrType>
 {
@@ -32,12 +28,12 @@ public:
     {
     };
 
-    virtual ~Errcode();
+    virtual ~Errcode() {}
 
-    const char*         CWhat() const { return GetCMsg(); }
-    const std::string&  What()  const { return GetMsg(); }
+    virtual const char*         CWhat() const override { return GetCMsg(); }
+    virtual const std::string&  What() const override { return GetMsg(); }
 
-    const ErrType&      Type()  const { return GetErrType();}
+    virtual const ErrType&      Type() const override { return GetErrType();}
 };
 
 

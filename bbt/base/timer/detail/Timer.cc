@@ -54,46 +54,36 @@ bbt::timer::clock::Timestamp<> Timer::GetTimeOut() const
     return it_;
 }
 
-bbt::timer::Errcode Timer::Reset(int timeout_ms)
+std::optional<bbt::timer::Errcode> Timer::Reset(int timeout_ms)
 {
     TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
     auto timeout_timestamp = bbt::timer::clock::nowAfter<>(bbt::timer::clock::ms(timeout_ms));
-    do
-    {
-        if (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timeout_timestamp))
-        {
-            flag = TimeTask_InitStatus::IS_TimeOut;
-            break;
-        }
-        it_ = timeout_timestamp;
-        flag = TimeTask_InitStatus::OK;
-        m_timeout_ms = timeout_ms;
-        m_status = Status::Waitting;
-    } while (0);
+
+    if (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timeout_timestamp))
+        return timer::Errcode("", timer::ErrType::Error);
+        flag = TimeTask_InitStatus::IS_TimeOut;
+
+    it_ = timeout_timestamp;
+    flag = TimeTask_InitStatus::OK;
+    m_timeout_ms = timeout_ms;
+    m_status = Status::Waitting;
 
     return std::nullopt;
 }
 
-bbt::timer::Errcode Timer::Init(TimeoutCallback data, int timeout_ms)
+std::optional<bbt::timer::Errcode> Timer::Init(TimeoutCallback data, int timeout_ms)
 {
-
-    TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
     auto timeout_timestamp = bbt::timer::clock::nowAfter<>(bbt::timer::clock::ms(timeout_ms));
-    do
-    {
-        if (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timeout_timestamp))
-        {
-            flag = TimeTask_InitStatus::IS_TimeOut;
-            break;
-        }
-        m_timeout_handler = data;
-        it_ = timeout_timestamp;
-        flag = TimeTask_InitStatus::OK;
-        m_timeout_ms = timeout_ms;
-        m_status = Status::Waitting;
-    } while (0);
 
-    return flag;
+    if (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timeout_timestamp))
+        return timer::Errcode("task is already timeout!", timer::ErrType::Error);
+
+    m_timeout_handler = data;
+    it_ = timeout_timestamp;
+    m_timeout_ms = timeout_ms;
+    m_status = Status::Waitting;
+
+    return std::nullopt;
 }
 
 int Timer::GetTargetInteval()

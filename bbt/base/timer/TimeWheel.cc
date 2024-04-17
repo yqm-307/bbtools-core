@@ -11,23 +11,23 @@
 namespace bbt::timer
 {
 
-bool TimeWheel::TimeWheel_Impl::Add(TimerSPtr task)
+std::optional<timer::Errcode> TimeWheel::TimeWheel_Impl::Add(TimerSPtr task)
 {
 
     assert(task != nullptr);
     if (task->Is_Expired())
-        return false;
+        return timer::Errcode("[TimeWheel_Impl::Add] timer is timeour!", timer::ErrType::Error);
 
     if (m_task2timer[task->GetTimerId()] == task)
-        return false;
+        return timer::Errcode("[TimeWheel_Impl::Add] timer is already in timewheel!", timer::ErrType::Error);
 
     if (Insert_Detail(task) == 0)
     {
         m_task2timer.insert(std::pair(task->GetTimerId(), task));
-        return true;
+        return std::nullopt;
     }   
     else
-        return false;
+        return timer::Errcode("[TimeWheel_Impl::Add] Insert_Detail() undefined error", timer::ErrType::Error);
 }
 
 bool TimeWheel::UnRegistTask(TimerId TimerId)
@@ -59,8 +59,8 @@ void TimeWheel::TimeWheel_Impl::TickTack()
         need_go_on = it->OnTimeout();
         if (need_go_on) {
             it->Reset(it->GetTargetInteval());
-            assert(Add(it));
-            printf("重新注册一个timer %d", it->GetTimerId());
+            auto err = Add(it);
+            assert(err == std::nullopt);
         }
     }
     WheelLv1RotateOnce();
@@ -314,11 +314,14 @@ TimeWheel::TimeWheel()
 {
 }
 
-TimeWheel::TimerId TimeWheel::RegistTask(TimeoutCallback cb, int timeout_ms)
+std::pair<std::optional<timer::Errcode>, TimeWheel::TimerId>  TimeWheel::RegistTask(TimeoutCallback cb, int timeout_ms)
 {
-    auto ptr = CreateTimer(cb, timeout_ms);
-    assert(ptr != nullptr);
-    return m_time_wheel_ptr->Add(ptr);
+    auto [err_opt, timer_sptr] = CreateTimer(cb, timeout_ms);
+    if (err_opt != std::nullopt)
+        return {err_opt, 0};
+
+    m_time_wheel_ptr->Add(timer_sptr);
+    return {std::nullopt, timer_sptr->GetTimerId()};
 }
 
 void TimeWheel::Tick()
@@ -331,14 +334,15 @@ timer::clock::Timestamp<timer::clock::ms> TimeWheel::GetNextTickTimestamp()
     return m_time_wheel_ptr->GetNextSlotTimestamp();
 }
 
-TimeWheel::TimerSPtr TimeWheel::CreateTimer(TimeoutCallback cb, int timeout_ms)
+std::pair<std::optional<timer::Errcode>, TimeWheel::TimerSPtr> TimeWheel::CreateTimer(TimeoutCallback cb, int timeout_ms)
 {
     auto timer = std::make_shared<Timer>();
-    if (Timer::TimeTask_InitStatus::OK != timer->Init(cb, timeout_ms)) {
-        return nullptr;
+    auto err = timer->Init(cb, timeout_ms);
+    if (err != std::nullopt) {
+        return {err, nullptr};
     }
 
-    return timer;
+    return {std::nullopt, timer};
 }
 
 
