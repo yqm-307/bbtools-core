@@ -57,7 +57,7 @@ bbt::timer::clock::Timestamp<> Timer::GetTimeOut() const
 std::optional<bbt::timer::Errcode> Timer::Reset(int timeout_ms)
 {
     TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
-    auto timeout_timestamp = bbt::timer::clock::nowAfter<>(bbt::timer::clock::ms(timeout_ms));
+    auto timeout_timestamp = GetTimeOut() + bbt::timer::clock::ms(timeout_ms);
 
     if (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timeout_timestamp))
         return timer::Errcode("", timer::ErrType::Error);

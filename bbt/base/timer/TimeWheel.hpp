@@ -69,6 +69,14 @@ public:
      */
     bool HasTimeoutSlot(bbt::timer::clock::Timestamp<> now);
 
+    /**
+     * @brief 是否还有定时任务
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool Empty();
+
 private:
 
     std::pair<std::optional<timer::Errcode>, TimerSPtr> CreateTimer(TimeoutCallback cb, int timeout_ms);
@@ -130,7 +138,7 @@ private:
         // 当前时间轮的起始和结束时间
         timer::clock::Timestamp<timer::clock::ms> m_begin_timestamp;
         timer::clock::Timestamp<timer::clock::ms> m_end_timestamp;
-        size_t m_size;  // 定时任务总数
+        size_t m_size{0};  // 定时任务总数
     };
 
 private:

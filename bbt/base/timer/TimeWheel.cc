@@ -345,6 +345,10 @@ std::pair<std::optional<timer::Errcode>, TimeWheel::TimerSPtr> TimeWheel::Create
     return {std::nullopt, timer};
 }
 
+bool TimeWheel::Empty()
+{
+    return (m_time_wheel_ptr->Size() == 0);
+}
 
 }
 
