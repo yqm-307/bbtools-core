@@ -21,7 +21,8 @@ Timer::Timer(Timer&& task)
 
 bool Timer::Is_Expired() const 
 {
-    return bbt::timer::clock::is_expired<bbt::timer::clock::ms>(it_);
+    // 允许1ms的误差
+    return bbt::timer::clock::is_expired<bbt::timer::clock::ms>(it_ - bbt::timer::clock::ms(1));
 }
 
 bool Timer::OnTimeout()
@@ -56,15 +57,17 @@ bbt::timer::clock::Timestamp<> Timer::GetTimeOut() const
 
 std::optional<bbt::timer::Errcode> Timer::Reset(int timeout_ms)
 {
-    TimeTask_InitStatus flag{TimeTask_InitStatus::Failed};
     auto timeout_timestamp = GetTimeOut() + bbt::timer::clock::ms(timeout_ms);
 
-    if (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timeout_timestamp))
-        return timer::Errcode("", timer::ErrType::Error);
-        flag = TimeTask_InitStatus::IS_TimeOut;
-
+        printf("timeout=%ld next=%ld now=%ld inv=%d\n",
+            GetTimeOut().time_since_epoch().count(), 
+            timeout_timestamp.time_since_epoch().count(),
+            bbt::timer::clock::now<>().time_since_epoch().count(),
+            timeout_ms);
+    if (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timeout_timestamp)){
+        return timer::Errcode("is already timeout!", timer::ErrType::Error);
+    }
     it_ = timeout_timestamp;
-    flag = TimeTask_InitStatus::OK;
     m_timeout_ms = timeout_ms;
     m_status = Status::Waitting;
 

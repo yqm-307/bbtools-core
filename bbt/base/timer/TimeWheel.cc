@@ -13,12 +13,13 @@ namespace bbt::timer
 
 std::optional<timer::Errcode> TimeWheel::TimeWheel_Impl::Add(TimerSPtr task)
 {
+    if (task == nullptr)
+        return timer::Errcode("[TimeWheel_Impl::Add] timer is null!", timer::ErrType::Error);
 
-    assert(task != nullptr);
     if (task->Is_Expired())
-        return timer::Errcode("[TimeWheel_Impl::Add] timer is timeour!", timer::ErrType::Error);
+        return timer::Errcode("[TimeWheel_Impl::Add] timer is timeout!", timer::ErrType::Error);
 
-    if (m_task2timer[task->GetTimerId()] == task)
+    if (m_task2timer.find(task->GetTimerId()) != m_task2timer.end())
         return timer::Errcode("[TimeWheel_Impl::Add] timer is already in timewheel!", timer::ErrType::Error);
 
     if (Insert_Detail(task) == 0)
@@ -26,8 +27,8 @@ std::optional<timer::Errcode> TimeWheel::TimeWheel_Impl::Add(TimerSPtr task)
         m_task2timer.insert(std::pair(task->GetTimerId(), task));
         return std::nullopt;
     }   
-    else
-        return timer::Errcode("[TimeWheel_Impl::Add] Insert_Detail() undefined error", timer::ErrType::Error);
+
+    return timer::Errcode("[TimeWheel_Impl::Add] Insert_Detail() undefined error", timer::ErrType::Error);
 }
 
 bool TimeWheel::UnRegistTask(TimerId TimerId)
@@ -44,23 +45,24 @@ void TimeWheel::TimeWheel_Impl::TickTack()
     // 保护一下，在外部调用时超时才会真的tick
     auto next_timeout_timestamp = GetNextSlotTimestamp();
     // printf("next_timeout_timestamp: %ld\n", next_timeout_timestamp.time_since_epoch().count());
-    if (!bbt::timer::clock::is_expired<clock::ms>(next_timeout_timestamp)) {
+    if (next_timeout_timestamp > bbt::timer::clock::now<>()) {
         return;
     }
 
     while(!current_slot.empty())
     {
         // 将定时任务移除，然后执行
-        auto& it = current_slot.top();
+        auto it = current_slot.top();
         assert(it->Is_Expired());
-        m_task2timer.erase(it->GetTimerId());
+        assert(m_task2timer.erase(it->GetTimerId()) == 1);
         current_slot.pop();
         m_size--;
         need_go_on = it->OnTimeout();
         if (need_go_on) {
             it->Reset(it->GetTargetInteval());
+            // 这里添加失败直接移除，但不是个好做法
             auto err = Add(it);
-            assert(err == std::nullopt);
+            // assert(err == std::nullopt);
         }
     }
     WheelLv1RotateOnce();
@@ -106,7 +108,7 @@ void TimeWheel::TimeWheel_Impl::WheelLv1RotateOnce()
 
 void TimeWheel::TimeWheel_Impl::WheelLv2RotateOnce()
 {
-    // printf("---> lv2 从动: %d %ld <---\n",m_current_index_lv2,timer::clock::now<timer::milliseconds>().time_since_epoch().count());
+    // printf("---> lv2 从动: %d %ld <---\n", m_current_index_lv2, timer::clock::now<>().time_since_epoch().count());
     m_current_index_lv2++; // 从动
     if (m_current_index_lv2 >= __bbt_slot_num__)
     {
@@ -176,7 +178,7 @@ TimeWheel::TimeWheel_Impl::DelayQueue*
             queue_ptr = &m_delay_queue;
             break;
         }
-        auto [success,n1,n2,n3] = GetIndexsByTimestamp(timestamp); 
+        auto [success, n1, n2, n3] = GetIndexsByTimestamp(timestamp); 
         if (!success)
             return nullptr;
         // 如果需要得到所在的区间,需要判断是否在delayqueue中
@@ -232,10 +234,16 @@ std::tuple<bool,int,int,int> TimeWheel::TimeWheel_Impl::GetIndexsByTimestamp(tim
             m_current_index_lv2 * BBT_TW_LV2_Slot_MS +
             m_current_index_lv3 * BBT_TW_LV3_Slot_MS;
         assert(begin_pass_ms_num < diff_ms_num);
+        /**
+         * 当一个事件触发点是1000 ms，触发间隔为50ms
+         * 一个1000 ms触发的事件，所处的区间为 950 ms ~ 1000 ms
+         */
+        if ( (diff_ms_num % BBT_TW_LV1_Slot_MS) == 0 )
+            diff_ms_num -= 1;
 
         wheel_index[2] = diff_ms_num/BBT_TW_LV3_Slot_MS; diff_ms_num %= BBT_TW_LV3_Slot_MS;
         wheel_index[1] = diff_ms_num/BBT_TW_LV2_Slot_MS; diff_ms_num %= BBT_TW_LV2_Slot_MS;
-        wheel_index[0] = diff_ms_num/BBT_TW_LV1_Slot_MS;
+        wheel_index[0] = diff_ms_num/BBT_TW_LV1_Slot_MS; diff_ms_num %= BBT_TW_LV1_Slot_MS;
         success = true;
     }while(0);
     // printf("timeout:%ld\tlv1:%d\tlv2:%d\tlv3:%d\n",timestamp.time_since_epoch().count(), wheel_index[0], wheel_index[1], wheel_index[2]);
@@ -257,9 +265,9 @@ void TimeWheel::TimeWheel_Impl::DoDelayQueueToWheelMap(
     {
         auto task_ptr = queue.top();
         if (cur_index>=slotnum) break;
-        while(cur_index<slotnum)
+        while (cur_index < slotnum)
         {   
-            if (task_ptr->GetTimeOut() >= (begin_time + timer::clock::ms(slot_interval_ms*cur_index)))
+            if (task_ptr->GetTimeOut() > (begin_time + timer::clock::ms(slot_interval_ms * cur_index)))
             {
                 ++cur_index;
             }   
@@ -299,12 +307,12 @@ size_t TimeWheel::TimeWheel_Impl::Size() const
 bool TimeWheel::TimeWheel_Impl::Cancel(TimerId id)
 {
     auto it = m_task2timer.find(id);
-    if (it == m_task2timer.end())
-    {
+
+    // 做下保护
+    if (it == m_task2timer.end() || it->second == nullptr)
         return false;
-    }
-    else
-        it->second->Cancel();
+
+    it->second->Cancel();
     return true;
 }
 
@@ -320,8 +328,8 @@ std::pair<std::optional<timer::Errcode>, TimeWheel::TimerId>  TimeWheel::RegistT
     if (err_opt != std::nullopt)
         return {err_opt, 0};
 
-    m_time_wheel_ptr->Add(timer_sptr);
-    return {std::nullopt, timer_sptr->GetTimerId()};
+    auto add_err = m_time_wheel_ptr->Add(timer_sptr);
+    return {add_err, timer_sptr->GetTimerId()};
 }
 
 void TimeWheel::Tick()

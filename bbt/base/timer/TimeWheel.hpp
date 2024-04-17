@@ -10,6 +10,8 @@
  *  |--------------|  a slot
  *  ^              ^
  *  begin          end(this is slot time,ensure that all timers in this time period are timed out)
+ *  对应区间为：(begin, end]
+ * 
  * @version 0.1
  * @date 2023-01-02
  * 
