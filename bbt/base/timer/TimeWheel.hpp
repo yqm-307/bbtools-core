@@ -1,6 +1,6 @@
 /**
  * @file timewheel.hpp
- * @author your name (you@domain.com)
+ * @author yangqingmiao
  * @brief 想要实现一个时间轮，本质上不想去实现滴答操作。因为Reactor模型中，根本不需要单独去为定时任务做一个线程
  *  一般都是直接嵌入到事件分发的大循环中。因此需要这样去做一个由外部驱动的时间轮。实现方法就是提供一个驱动接口，
  *  需要外部调用ticktack接口 (假设提供一个滴答接口，外部调用就会导致接口滴答一次，然后检查并触发超时任务)。
@@ -119,7 +119,6 @@ private:
         std::tuple<bool,int,int,int> GetIndexsByTimestamp(timer::clock::Timestamp<timer::clock::ms>);
         void DoDelayQueueToWheelMap(DelayQueue& queue, TimeWheelMap& wheel_index, int slotnum, timer::clock::Timestamp<timer::clock::ms> begin_time, int slot_interval_ms);    // queue 中task映射到对应层
     private:
-        
 
         TimeWheelMap    m_wheel_lv1;    // 第一级主动轮 -- tick主动转动
         TimeWheelMap    m_wheel_lv2;    // 第二级存储轮 -- 存储数据,从动
