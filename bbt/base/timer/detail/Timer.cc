@@ -59,11 +59,11 @@ std::optional<bbt::timer::Errcode> Timer::Reset(int timeout_ms)
 {
     auto timeout_timestamp = bbt::timer::clock::nowAfter<>(bbt::timer::clock::ms(timeout_ms));
 
-    printf("timeout=%ld next=%ld now=%ld inv=%d\n",
-        GetTimeOut().time_since_epoch().count(), 
-        timeout_timestamp.time_since_epoch().count(),
-        bbt::timer::clock::now<>().time_since_epoch().count(),
-        timeout_ms);
+    // printf("timeout=%ld next=%ld now=%ld inv=%d\n",
+    //     GetTimeOut().time_since_epoch().count(), 
+    //     timeout_timestamp.time_since_epoch().count(),
+    //     bbt::timer::clock::now<>().time_since_epoch().count(),
+    //     timeout_ms);
     if (bbt::timer::clock::is_expired<bbt::timer::clock::ms>(timeout_timestamp)){
         return timer::Errcode("is already timeout!", timer::ErrType::Error);
     }
