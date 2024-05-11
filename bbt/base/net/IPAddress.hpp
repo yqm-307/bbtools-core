@@ -21,6 +21,7 @@ public:
         m_addr = it.m_addr;
         return *this;
     }
+    bool operator==(const bbt::net::IPAddress& addr) const;
     virtual ~IPAddress(){};
     IPAddress(bbt::net::IPAddress&&);
     IPAddress(const bbt::net::IPAddress&);

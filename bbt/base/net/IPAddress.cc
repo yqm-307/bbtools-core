@@ -125,5 +125,9 @@ void IPAddress::Swap(IPAddress& it)
 	(*this) = tmp;
 }
 
+bool IPAddress::operator==(const bbt::net::IPAddress& addr) const
+{
+	return (this->GetIPPort() == addr.GetIPPort());
+}
 
 } // namespace bbt::net
