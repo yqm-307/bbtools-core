@@ -1,40 +1,31 @@
 #pragma once
 #include <string>
+#include <functional>
+#include "IErrcode.hpp"
 
 namespace bbt::errcode
 {
 
-template<typename ErrType>
-class Errcode
+class Errcode:
+    public IErrcode
 {
 public:
     Errcode();
     explicit Errcode(const std::string& msg, ErrType type);
-    Errcode(const Errcode& other);
-    Errcode(Errcode&& other);
+    explicit Errcode(const Errcode& other);
+    explicit Errcode(Errcode&& other);
     virtual ~Errcode();
 
     Errcode& operator=(const Errcode& other);
     Errcode& operator=(Errcode&& other);
 
-    virtual const char*         CWhat() const = 0;
-    virtual const std::string&  What() const = 0;
-    virtual const ErrType&      Type() const = 0;
-
 protected:
-    /* 设置信息文本 */
-    void                SetMsg(const std::string& msg);
-    void                SetMsg(std::string&& msg);
-    /* 设置err type */
-    void                SetErrType(ErrType err_type);
-
-    const std::string&  GetMsg()        const;
-    const char*         GetCMsg()       const;
-    const ErrType&      GetErrType()    const;
-private:
-    ErrType    m_err_type;
-    std::string m_err_msg{""};
+    ErrType             m_err_type{-1};
+    std::string         m_err_msg{""};
 };
+
+
+
 
 }
 

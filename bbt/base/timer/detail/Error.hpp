@@ -34,6 +34,7 @@ public:
     virtual const std::string&  What() const override { return GetMsg(); }
 
     virtual const ErrType&      Type() const override { return GetErrType();}
+    virtual bool                IsErr() const override { return GetErrType() != OK; };
 };
 
 
