@@ -1,6 +1,4 @@
 #pragma once
-#include <string>
-#include <functional>
 #include "IErrcode.hpp"
 
 namespace bbt::errcode
@@ -24,9 +22,4 @@ protected:
     std::string         m_err_msg{""};
 };
 
-
-
-
 }
-
-#include "bbt/base/errcode/__TErrcode.hpp"

@@ -13,28 +13,28 @@ enum ErrType
 };
 
 class Errcode:
-    public bbt::errcode::Errcode<ErrType>
+    public bbt::errcode::Errcode
 {
 public:
     Errcode() {}
 
     explicit Errcode(const std::string& msg, ErrType type):
-        bbt::errcode::Errcode<ErrType>(msg, type)
+        bbt::errcode::Errcode(msg, type)
     {
     }
 
     Errcode(const Errcode& other):
-        bbt::errcode::Errcode<ErrType>(other)
+        bbt::errcode::Errcode(other)
     {
     };
 
     virtual ~Errcode() {}
 
-    virtual const char*         CWhat() const override { return GetCMsg(); }
-    virtual const std::string&  What() const override { return GetMsg(); }
+    virtual const char*         CWhat() const override { return What().c_str(); }
+    virtual const std::string&  What() const override { return m_err_msg; }
 
-    virtual const ErrType&      Type() const override { return GetErrType();}
-    virtual bool                IsErr() const override { return GetErrType() != OK; };
+    virtual bbt::errcode::ErrType Type() const override { return m_err_type;}
+    virtual bool                IsErr() const override { return Type() != OK; };
 };
 
 
