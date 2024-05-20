@@ -49,6 +49,20 @@ Errcode& Errcode::operator=(Errcode&& other)
     return *this;
 }
 
+const std::string& Errcode::What() const
+{
+    return m_err_msg;
+}
+
+const char* Errcode::CWhat() const
+{
+    return What().c_str();
+}
+
+ErrType Errcode::Type() const
+{
+    return m_err_type;
+}
 
 
 

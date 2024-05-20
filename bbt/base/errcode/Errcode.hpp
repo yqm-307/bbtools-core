@@ -17,6 +17,10 @@ public:
     Errcode& operator=(const Errcode& other);
     Errcode& operator=(Errcode&& other);
 
+    virtual const std::string& What() const override;
+    virtual const char* CWhat() const override;
+    virtual ErrType Type() const override;
+
 protected:
     ErrType             m_err_type{-1};
     std::string         m_err_msg{""};
