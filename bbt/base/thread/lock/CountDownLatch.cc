@@ -15,7 +15,7 @@ CountDownLatch::~CountDownLatch()
 
 void CountDownLatch::Wait()
 {
-    lock_guard<Mutex> lock(m_lock);
+    lock_guard lock(m_lock);
     if(m_count > 0)
         pthread_cond_wait(&m_sem,&m_lock.getlock());
 }	

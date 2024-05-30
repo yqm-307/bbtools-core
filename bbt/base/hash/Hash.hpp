@@ -1,7 +1,7 @@
 #pragma once
 #include "bbt/base/net/IPAddress.hpp"
 #include "bbt/base/uuid/Uuid.hpp"
-#include "bbt/base/myhash/BKDR.hpp"
+#include "bbt/base/hash/BKDR.hpp"
 
 namespace std
 {

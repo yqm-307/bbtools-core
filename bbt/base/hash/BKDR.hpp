@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 
-
 namespace bbt::hash
 {
 

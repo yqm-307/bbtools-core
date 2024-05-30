@@ -4,21 +4,20 @@
 namespace bbt::thread
 {
 
-template<typename TLock>
 class lock_guard
 {
 public:
-	lock_guard(TLock& a):_lock(a)
+	lock_guard(ILock& a):_lock(a)
 	{
-		a.lock();
+		a.Lock();
 	}
 	
 	~lock_guard()
 	{
-		_lock.unlock();
+		_lock.UnLock();
 	}
 private:
-	TLock& _lock;
+	ILock& _lock;
 };
 
 class Mutex:
