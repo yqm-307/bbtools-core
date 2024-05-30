@@ -5,7 +5,7 @@ namespace bbt::thread
 {
 
 class CountDownLatch:
-    private ILock,
+    private ISync,
     public bbt::templateutil::noncopyable
 {
 public:
