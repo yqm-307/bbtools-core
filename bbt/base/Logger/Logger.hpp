@@ -91,6 +91,7 @@ private:
 };
 
 std::string format(const char* fmt, ...);
+std::string vformat(const char* fmt, va_list ap);
 std::string format_red(const char* str, size_t len);
 std::string format_l_green(const char* str, size_t len);
 std::string format_green(const char* str, size_t len);

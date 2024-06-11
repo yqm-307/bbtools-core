@@ -1,4 +1,5 @@
 #include "bbt/base/Logger/Logger.hpp"
+#include "bbt/base/Logger/DebugPrint.hpp"
 
 using namespace std::chrono;
 // #define BBT_LOG_ASYNC_FLAG
@@ -32,4 +33,6 @@ int main()
     BBT_FULL_LOG_ERROR("test error");
     BBT_FULL_LOG_FATAL("test fatal");
     BBT_FULL_LOG_INFO("test info");
+
+    bbt::log::WarnPrint("%d %s", 1, "hello");
 }

@@ -283,6 +283,14 @@ std::string bbt::log::format(const char* fmt, ...)
     return std::string(data);
 }
 
+std::string bbt::log::vformat(const char* fmt, va_list ap)
+{
+    char        data[ARRAY_SIZE];
+    vsnprintf(data, sizeof(data), fmt, ap);
+
+    return std::string(data);
+}
+
 std::string bbt::log::format_red(const char* str,size_t len)
 {
     std::string string(len + 20,'\0');
