@@ -27,4 +27,10 @@ void CountDownLatch::Down()
     if(m_count <= 0)
         pthread_cond_broadcast(&m_sem);
 }
+
+void CountDownLatch::Reset(int n)
+{
+    m_count = n;
+}
+
 }

@@ -13,6 +13,7 @@ public:
 	~CountDownLatch();
     void Wait();
     void Down();
+    void Reset(int n);
 private:
     std::atomic_int m_count;
 	Mutex           m_lock;
