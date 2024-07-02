@@ -51,8 +51,6 @@ inline Timestamp<timeaccuracy> now()
     return std::chrono::time_point_cast<timeaccuracy>(std::chrono::system_clock::now());
 }
 
-
-
 /**
  * @brief 当前时间加interval后的时间戳
  * 
@@ -62,10 +60,6 @@ inline Timestamp<timeaccuracy> now()
 template<class timeaccuracy = ms, class Tsp = Timestamp<timeaccuracy>>
 inline Tsp nowAfter(timeaccuracy interval)
 { return now<timeaccuracy>() + interval; }
-
-
-
-
 
 /**
  * @brief 当前时间减去interval后的时间戳
@@ -77,7 +71,9 @@ template<class timeaccuracy = ms, class Tsp = Timestamp<timeaccuracy>>
 inline Tsp nowBefore(timeaccuracy interval)
 { return now<timeaccuracy>() - interval; }
 
-
+template<class timeaccuracy = ms>
+inline uint64_t gettime()
+{ return now<timeaccuracy>().time_since_epoch().count(); }
 
 /**
  * @brief 从1970年1月1日0时，到ts的ms数
