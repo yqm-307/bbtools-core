@@ -31,6 +31,9 @@ template<typename T = ms>
 using Timestamp = std::chrono::time_point<std::chrono::system_clock,T>;
 
 template<typename T = ms>
+using TimestampMono = std::chrono::time_point<std::chrono::steady_clock, T>;
+
+template<typename T = ms>
 using Duration = std::chrono::duration<ms>; 
 
 
@@ -44,11 +47,23 @@ inline Timestamp<timeaccuracy> utcnow()
     return std::chrono::time_point_cast<timeaccuracy>(std::chrono::system_clock::now());
 }
 
+template<class timeaccuracy = ms>
+inline TimestampMono<timeaccuracy> utcnow_mono()
+{
+    return std::chrono::time_point_cast<timeaccuracy>(std::chrono::steady_clock::now());
+}
 
 template<class timeaccuracy = ms>
 inline Timestamp<timeaccuracy> now()
 {
     return std::chrono::time_point_cast<timeaccuracy>(std::chrono::system_clock::now());
+}
+
+
+template<class timeaccuracy = ms>
+inline TimestampMono<timeaccuracy> now_mono()
+{
+    return std::chrono::time_point_cast<timeaccuracy>(std::chrono::steady_clock::now());
 }
 
 /**
@@ -74,6 +89,10 @@ inline Tsp nowBefore(timeaccuracy interval)
 template<class timeaccuracy = ms>
 inline uint64_t gettime()
 { return now<timeaccuracy>().time_since_epoch().count(); }
+
+template<class timeaccuracy = ms>
+inline uint64_t gettime_mono()
+{ return now_mono<timeaccuracy>().time_since_epoch().count(); }
 
 /**
  * @brief 从1970年1月1日0时，到ts的ms数
