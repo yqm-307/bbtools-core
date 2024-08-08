@@ -34,7 +34,7 @@ void DebugPrint(const char* fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    auto msg = format(fmt, ap);
+    auto msg = vformat(fmt, ap);
     va_end(ap);
 
     VPrint("[DEBUG] %s", msg.c_str());
