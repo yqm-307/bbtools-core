@@ -6,10 +6,11 @@ namespace bbt::thread
 
 
 template <typename T, size_t size>
-Queue<T, size>::Queue()
+Queue<T, size>::Queue(T null)
     :m_data(size),
     m_read_count(0U),
-    m_write_count(0U) 
+    m_write_count(0U),
+    m_null_value(null)
 {}
 
 template <typename T, size_t size> 
@@ -80,6 +81,7 @@ bool Queue<T, size>::Pop(T &element)
             if (m_read_count.compare_exchange_weak(total_read_count, total_read_count + 1U, std::memory_order_relaxed)) 
             {
                 element = m_data[will_read_index].obj;
+                m_data[will_read_index].obj = m_null_value;
                 m_data[will_read_index].pop_count.store(pop_count + 1U, std::memory_order_release);
                 return true;
             }

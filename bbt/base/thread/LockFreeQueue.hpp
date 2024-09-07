@@ -21,9 +21,8 @@ namespace bbt::thread
 template <typename T, size_t size> 
 class Queue {
     static_assert(size > 2, "Buffer size must be bigger than 2");
-
 public:
-    Queue();
+    Queue(T null);
 
     /**
      * @brief 向队尾追加一个元素
@@ -56,6 +55,7 @@ private:
     std::vector<Slot> m_data;
     std::atomic_size_t m_read_count;    // 已经读的总数，取余可获得index
     std::atomic_size_t m_write_count;   // 已经写的总数，取余可活动index
+    T                   m_null_value;
 };
 
 }
