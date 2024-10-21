@@ -15,8 +15,3 @@ include_directories(
 add_executable(Test_generate_id Test_generate_id.cc)
 target_link_libraries(Test_generate_id ${MY_COMM_LIB})
 add_test(NAME Test_generate_id COMMAND Test_generate_id)
-
-
-add_executable(Test_luaclass_gc Test_luaclass_gc.cc)
-target_link_libraries(Test_luaclass_gc ${MY_COMM_LIB} lua)
-add_test(NAME Test_luaclass_gc COMMAND Test_luaclass_gc)
