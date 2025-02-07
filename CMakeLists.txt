@@ -4,7 +4,6 @@ project(YUtil CXX)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g -O0")
 
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib) 
@@ -20,21 +19,17 @@ message(STATUS "${PROJECT_SOURCE_DIR}")
 file(GLOB_RECURSE BBT_SRCS 
     ${PROJECT_SOURCE_DIR}/bbt/*.cc
     ${PROJECT_SOURCE_DIR}/bbt/*.hpp
-    # ${PROJECT_SOURCE_DIR}/bbt/*.cpp
-    # ${PROJECT_SOURCE_DIR}/bbt/*.h
 )
-# message("begin" ${BBT_SRCS} "end")
 
 
 add_library(ybbt SHARED ${BBT_SRCS})
 
-target_link_libraries(ybbt
+target_link_libraries(ybbt PRIVATE
     pthread
     dl
 )
 
 # 编译例程
 add_subdirectory(example)
-# add_subdirectory(example/test) ## 
 enable_testing()
 add_subdirectory(unit_test)
