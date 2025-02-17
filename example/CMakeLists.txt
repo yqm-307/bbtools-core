@@ -9,3 +9,6 @@ add_subdirectory(uuid)
 add_subdirectory(logger)
 add_subdirectory(attribute)
 add_subdirectory(filehelper)
+
+add_executable(test_def_reflex reflex/test_def_reflex.cc)
+target_link_libraries(test_def_reflex ybbt )
