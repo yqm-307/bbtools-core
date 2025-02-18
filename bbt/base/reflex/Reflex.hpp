@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <memory>
+#include <atomic>
 #include <bbt/base/assert/Assert.hpp>
 
 namespace bbt::core::reflex
@@ -24,63 +25,25 @@ public:
         return s_instance;
     }
 
-    
-    TypeId GetTypeId(const std::string& type_name)
+    template<typename T>
+    TypeId GetTypeId()
     {
-        AssertWithInfo(RegisterType(type_name), "Type name has been registered");
-        return std::hash<std::string>{}(type_name);
-    }
-
-    const std::string& GetTypeName(TypeId type_id)
-    {
-        auto it = m_type_ids.find(type_id);
-        AssertWithInfo(it != m_type_ids.end(), "Type id not found");
-        return it->second;
+        static const TypeId s_type_id = ++m_type_id_counter;
+        return s_type_id;
     }
     
 private:
-    bool RegisterType(const std::string& type_name)
-    {
-        if(m_type_names.find(type_name) != m_type_names.end())
-        {
-            return false;
-        }
-        TypeId type_id = std::hash<std::string>{}(type_name);
-        m_type_ids[type_id] = type_name;
-        m_type_names[type_name] = type_id;
-        return true;
-    }
-
-    std::unordered_map<TypeId, std::string> m_type_ids;
-    std::unordered_map<std::string, TypeId> m_type_names;
+    std::atomic<TypeId> m_type_id_counter = 0;
 };
-
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-#define CONCAT(x, y) x##y
-#define MAKE_UNIQUE_NAME(name) #name TOSTRING(__LINE__) TOSTRING(__COUNTER__)
-
 
 template<typename classtype>
 class ReflexMetaTypeInfo
 {
+public:
+    virtual TypeId Reflex_GetTypeId()
+    {
+        return ReflexInfoMgr::GetInstance()->GetTypeId<classtype>();
+    }
 };
-
-#define ReflexClassDeclare(classtype) \
-    template<> \
-    class bbt::core::reflex::ReflexMetaTypeInfo<classtype> \
-    { \
-    public: \
-        static const std::string& ReflexTypeName() \
-        { \
-            static const std::string s_name = MAKE_UNIQUE_NAME(classname); \
-            return s_name; \
-        } \
-        static bbt::core::reflex::TypeId ReflexTypeId() \
-        { \
-            static const bbt::core::reflex::TypeId s_type_id = bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId(ReflexTypeName()); \
-            return s_type_id; \
-        } \
-    };
 
 } // namespace bbt::core::reflex

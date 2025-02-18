@@ -6,10 +6,8 @@
 #include <cassert>
 #include <cstring>
 
-namespace bbt::buffer
+namespace bbt::core
 {
-
-
 
 class Buffer
 {

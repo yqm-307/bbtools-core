@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include "bbt/base/buffer/Buffer.hpp"
 
-namespace bbt::buffer
+namespace bbt::core
 {
 
 const int HeaderBytes=0;        // 预留位置
