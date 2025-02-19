@@ -5,12 +5,31 @@
 #include <memory>
 #include <atomic>
 #include <bbt/base/assert/Assert.hpp>
+#include <bbt/base/reflex/TypeInfo.hpp>
 
 namespace bbt::core::reflex
 {
 
-/* 编译期确定的类型id。在编译后确定，运行时生成 */
-typedef uint64_t TypeId;
+
+#define BBT_REFLEX_REGISTCLASS(classname) \
+    bbt::core::reflex::ReflexInfoMgr::GetInstance()->Register<classname>(#classname)
+
+#define BBT_REFLEX_DYN_TYPEINFO_METHOD(classname) \
+    public: \
+        virtual bbt::core::reflex::TypeId Reflex_GetTypeId() override \
+        { \
+            return bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId<classname>(); \
+        } \
+        virtual const char* Reflex_GetTypeName() override \
+        { \
+            return bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeName<classname>(); \
+        }
+
+#define BBT_REFLEX_GET_TYPEID(classname) \
+    bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId<classname>()
+
+#define BBT_REFLEX_GET_TYPENAME(classname) \
+    bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeName<classname>()
 
 class ReflexInfoMgr
 {
@@ -25,11 +44,50 @@ public:
         return s_instance;
     }
 
-    template<typename T>
+    template<typename TClass>
+    void Register(const std::string& classname)
+    {
+        GetTypeInfo<TClass>(GenId(), classname);
+    }
+
+    TypeId GenId()
+    {
+        return ++m_type_id_counter;
+    }
+
+    template<typename TClass>
+    auto& GetTypeInfo(TypeId id = -1, const std::string& name = "")
+    {
+        static std::unique_ptr<TypeInfo<TClass>> info_ptr{nullptr};
+        static std::once_flag once_flag;
+        std::call_once(once_flag, [&]{
+            AssertWithInfo(id > 0 && !name.empty(), "bad component meta!");
+            info_ptr = std::make_unique<TypeInfo<TClass>>(id, name.c_str());
+        });
+    
+        return info_ptr;
+    }
+
+    template<typename TClass>
     TypeId GetTypeId()
     {
-        static const TypeId s_type_id = ++m_type_id_counter;
-        return s_type_id;
+        auto& typeinfo = GetTypeInfo<TClass>(0, "");
+        if (typeinfo)
+        {
+            return typeinfo->GetType();
+        }
+        return -1;
+    }
+
+    template<typename TClass>
+    const char* GetTypeName()
+    {
+        auto& typeinfo = GetTypeInfo<TClass>(0, "");
+        if (typeinfo)
+        {
+            return typeinfo->GetName();
+        }
+        return "";
     }
     
 private:
@@ -37,12 +95,17 @@ private:
 };
 
 template<typename classtype>
-class ReflexMetaTypeInfo
+class ReflexDynTypeInfo
 {
 public:
     virtual TypeId Reflex_GetTypeId()
     {
         return ReflexInfoMgr::GetInstance()->GetTypeId<classtype>();
+    }
+
+    virtual const char* Reflex_GetTypeName()
+    {
+        return ReflexInfoMgr::GetInstance()->GetTypeName<classtype>();
     }
 };
 
