@@ -41,11 +41,12 @@ public:
 
     virtual ~MemberBase() = 0;
     virtual _KeyType GetMemberId() const final;
-
+protected:
+    std::shared_ptr<ManagerType> GetManager() const;
 private:
-    void OnInit(ManagerType* mgr, _KeyType key);
+    void OnInit(std::weak_ptr<ManagerType> mgr, _KeyType key);
     
-    ManagerType*    m_mgr{nullptr};
+    std::weak_ptr<ManagerType>  m_mgr;
     _KeyType        m_key;
 };
 
@@ -55,7 +56,8 @@ private:
  */
 template<typename _KeyType, typename _MemType>
 class ManagerBase:
-    public bbt::templateutil::noncopyable
+    public bbt::templateutil::noncopyable,
+    public std::enable_shared_from_this<ManagerBase<_KeyType, _MemType>>
 {
     friend class MemberBase<_KeyType, _MemType>;
 public:

@@ -12,11 +12,18 @@ _KeyType MemberBase<_KeyType, _MemType>::GetMemberId() const
 }
 
 template<typename _KeyType, typename _MemType>
-void MemberBase<_KeyType, _MemType>::OnInit(ManagerType* mgr, _KeyType key) 
+void MemberBase<_KeyType, _MemType>::OnInit(std::weak_ptr<ManagerType> mgr, _KeyType key) 
 {
     m_mgr = mgr;
     m_key = key;
 }
+
+template<typename _KeyType, typename _MemType>
+std::shared_ptr<typename MemberBase<_KeyType, _MemType>::ManagerType> MemberBase<_KeyType, _MemType>::GetManager() const
+{
+    return m_mgr.lock();
+}
+
 
 template<typename _KeyType, typename _MemType>
 template<typename MemberBaseChildType, typename ...InitArgs>
@@ -28,8 +35,8 @@ std::shared_ptr<MemberBaseChildType> ManagerBase<_KeyType, _MemType>::Create(Ini
     auto sptr = std::shared_ptr<MemberBaseChildType>(new MemberBaseChildType(args...));
     DebugAssertWithInfo(sptr != nullptr, "managerbase create child type error!");
 
-    DebugAssert(this != nullptr);
-    sptr->OnInit(this, GenerateKey(sptr));
+    DebugAssert( this->shared_from_this() != nullptr);
+    sptr->OnInit(this->shared_from_this(), GenerateKey(sptr));
     bool isok = OnMemberCreate(sptr);
     // XXX 如果GenerateID没有稳定了，可以去除debug断言
     DebugAssertWithInfo(isok, "managerbase OnMemberCreate() failed!");
@@ -45,7 +52,11 @@ std::shared_ptr<MemberBaseChildType> ManagerBase<_KeyType, _MemType>::Create(Ini
 template<typename _KeyType, typename _MemType>
 MemberBase<_KeyType, _MemType>::~MemberBase()
 {
-    bool isok = m_mgr->OnMemberDestory(m_key);
+    if (m_mgr.expired()) {
+        return;
+    }
+
+    bool isok = m_mgr.lock()->OnMemberDestory(m_key);
     DebugAssertWithInfo(isok, "destory a member failed!");
 }
 
