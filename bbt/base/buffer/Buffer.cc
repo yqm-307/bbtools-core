@@ -1,20 +1,18 @@
 #include <assert.h>
-#include <sys/uio.h>    //散步读和聚集写
 #include <unistd.h>
-#include "bbt/base/buffer/Buffer.hpp"
+#include <bbt/base/buffer/Buffer.hpp>
+#include <bbt/base/assert/Assert.hpp>
 
 namespace bbt::core
 {
 
 const int HeaderBytes=0;        // 预留位置
-const int Buffer::headSize=0;   // 
 const int Buffer::initSize=4096;// 初始长度
 
 
-Buffer::Buffer(size_t size)
-    :_readIndex(headSize),
-    _writeIndex(headSize),
-    reservedBytes(HeaderBytes)
+Buffer::Buffer(size_t size):
+    m_head_idx(0),
+    m_tail_idx(0)
 {
     int syspagesize = getpagesize();
     if (size%syspagesize == 0)
@@ -24,146 +22,150 @@ Buffer::Buffer(size_t size)
         int npage = size/syspagesize;
         m_bytes = std::move(std::vector<char>(syspagesize*(npage+1)));
     }
-    assert( m_bytes.size() >= DataSize() );
+    assert( m_bytes.size() >= Size() );
 }
 
-Buffer::Buffer(const Buffer& rval)
-    :m_bytes(rval.m_bytes),
-    reservedBytes(HeaderBytes),
-    _readIndex(rval._readIndex),
-    _writeIndex(rval._writeIndex)
+Buffer::Buffer(const Buffer& rval):
+    m_bytes(rval.m_bytes),
+    m_head_idx(rval.m_head_idx),
+    m_tail_idx(rval.m_tail_idx)
 {
-    assert( m_bytes.size() >= DataSize() );
+    assert( m_bytes.size() >= Size() );
 }
 
-Buffer::Buffer(Buffer&& rval)
-    :reservedBytes(HeaderBytes),
-    _readIndex(rval._readIndex),
-    _writeIndex(rval._writeIndex),
+Buffer::Buffer(Buffer&& rval):
+    m_head_idx(rval.m_head_idx),
+    m_tail_idx(rval.m_tail_idx),
     m_bytes(std::move(rval.m_bytes))
 {
-    assert( m_bytes.size() >= DataSize() );
+    assert( m_bytes.size() >= Size() );
 }
-Buffer::Buffer(const char* begin, size_t len)
-    :m_bytes(initSize),
-    _readIndex(0),
-    _writeIndex(0)
+Buffer::Buffer(const char* begin, size_t len):
+    m_bytes(initSize),
+    m_head_idx(0),
+    m_tail_idx(0)
 {
     WriteString(begin,len);
-    assert( m_bytes.size() >= DataSize() );
-}
-Buffer::Buffer(const std::string& str)
-    :m_bytes(initSize),
-    _readIndex(0),
-    _writeIndex(0)
-{
-    assert(WriteString(str.c_str(),str.size()));
-    assert( m_bytes.size() >= DataSize() );
+    assert( m_bytes.size() >= Size() );
 }
 
+Buffer::Buffer(const std::string& str):
+    m_bytes(initSize),
+    m_head_idx(0),
+    m_tail_idx(0)
+{
+    assert(WriteString(str.c_str(),str.size()));
+    assert( m_bytes.size() >= Size() );
+}
 
 Buffer& Buffer::operator=(Buffer&&bf)
 {
     this->Swap(bf);    
-    assert( m_bytes.size() >= DataSize() );
+    assert( m_bytes.size() >= Size() );
     return *this;
 }
+
 Buffer& Buffer::operator=(const Buffer&bf)
 {
     this->m_bytes = bf.m_bytes;
-    this->_readIndex = bf._readIndex;
-    this->_writeIndex = bf._writeIndex;
-    assert( m_bytes.size() >= DataSize() );
+    this->m_head_idx = bf.m_head_idx;
+    this->m_tail_idx = bf.m_tail_idx;
+    assert( m_bytes.size() >= Size() );
     return *this;
 }
 
-
-
-
-
 //可读 = 已写 - 已读
-size_t Buffer::ReadableBytes() const
+size_t Buffer::Size() const
 {
-    assert(_writeIndex >= _readIndex);
-    return _writeIndex - _readIndex;
+    assert(m_tail_idx >= m_head_idx);
+    return m_tail_idx - m_head_idx;
 }
 
 //可写字节数
-size_t Buffer::WriteableBytes() const
+size_t Buffer::_WriteableBytes() const
 {
-    assert(m_bytes.size() >= _writeIndex);
-    return m_bytes.size() - _writeIndex;
+    assert(m_bytes.size() >= m_tail_idx);
+    return m_bytes.size() - m_tail_idx;
 }
 
-//前置空闲字节数
-size_t Buffer::PrepareBytes() const
+size_t Buffer::Capacity() const
 {
-    return _readIndex;
+    return m_bytes.size();
 }
+
+bool Buffer::Empty() const
+{
+    return m_head_idx == m_tail_idx;
+}
+
 
 //swap
 void Buffer::Swap(Buffer& s)
 {
     m_bytes.swap(s.m_bytes);
-    std::swap(_readIndex, s._readIndex);
-    std::swap(_writeIndex, s._writeIndex);
-    assert( m_bytes.size() >= DataSize() );
+    std::swap(m_head_idx, s.m_head_idx);
+    std::swap(m_tail_idx, s.m_tail_idx);
+    assert( m_bytes.size() >= Size() );
 }
 
-void Buffer::InitAll()                 //初始化
+void Buffer::Clear()                 //初始化
 {
-    _writeIndex = headSize;
-    _readIndex = headSize;
-    // bytes.clear();
-    memset(Begin(),'\0',m_bytes.size());
+    m_tail_idx = 0;
+    m_head_idx = 0;
+    m_bytes.clear();
 }
 
 //读取len个字节到byte中
-bool Buffer::Read(void* byte,size_t len)
+bool Buffer::_ReadValue(void* byte, size_t len)
 {
-    assert(ReadableBytes() >= len);
-    memcpy(byte,Begin()+_readIndex,len);
-    _readIndex+=len;
+    assert(Size() >= len);
+    if (Size() < len)
+        return false;
+
+    if (byte != nullptr)
+        memcpy(byte, _Begin() + m_head_idx, len);
+
+    m_head_idx += len;
     return true;
 }
 
 
 //start位置长度为len的内存，移动到obj处
-void Buffer::move(int obj, int start, int len)
+void Buffer::_Move(int obj, int start, int len)
 {
     assert(obj >= 0);
     assert((start + len) <= m_bytes.size());
-    memcpy(Begin() + obj, Begin() + start, len);
+    memcpy(_Begin() + obj, _Begin() + start, len);
 }
 
 //将数据移动到前方
-void Buffer::moveForward()
+void Buffer::_MoveForward()
 {
-    if (_readIndex == headSize)
+    if (m_head_idx == 0)
         return;
-    int buffsize = ReadableBytes();
-    move(headSize, _readIndex, ReadableBytes());
-    _readIndex = headSize;
-    _writeIndex = headSize+buffsize;
+    int buffsize = Size();
+    _Move(0, m_head_idx, Size());
+    m_head_idx = 0;
+    m_tail_idx = buffsize;
 }
 
 
-bool Buffer::Write(const char* data, size_t len)
+bool Buffer::_WriteValue(const char* data, size_t len)
 {
-    if (WriteableBytes() < len)  //可写空间不足
+    if (_WriteableBytes() < len)  //可写空间不足
     {
-        moveForward();  //向前移动
+        _MoveForward();  //向前移动
         
-        int writen=WriteableBytes();
+        int writen=_WriteableBytes();
         if(writen < len)
         {
-            assert((writen+_writeIndex) <= m_bytes.size());
-            memcpy(Begin() + _writeIndex, data,writen);
+            assert((writen+m_tail_idx) <= m_bytes.size());
+            memcpy(_Begin() + m_tail_idx, data,writen);
         }
         else
         {
             writen = len;
-            memcpy(Begin() + _writeIndex, data, len);
+            memcpy(_Begin() + m_tail_idx, data, len);
         }
         
         int lenshengyu = len - writen;
@@ -176,17 +178,17 @@ bool Buffer::Write(const char* data, size_t len)
                 char s=*(data+i);
                 m_bytes.push_back(s);
             }
-        _writeIndex += len;
+        m_tail_idx += len;
     }
     else    //可写空间足够
     {
-        if (! ((len+_writeIndex) <= m_bytes.size()))
+        if (! ((len+m_tail_idx) <= m_bytes.size()))
         {
             return false;
         }
-        assert((len+_writeIndex) <= m_bytes.size());
-        memcpy(Begin() + _writeIndex, data, len);
-        _writeIndex += len;
+        assert((len+m_tail_idx) <= m_bytes.size());
+        memcpy(_Begin() + m_tail_idx, data, len);
+        m_tail_idx += len;
     }
     
     
@@ -194,165 +196,74 @@ bool Buffer::Write(const char* data, size_t len)
 
 }
 
-
-
-bool Buffer::WriteInt64(int64_t num)
-{
-    char buf[8];
-    memcpy(buf,&num,8);
-    return Write(buf,sizeof(buf));
-}
-bool Buffer::WriteInt32(int32_t num)
-{
-    char buf[4];
-    memcpy(buf,&num,4);
-    return Write(buf,sizeof(buf));
-}
-bool Buffer::WriteInt16(int16_t num)
-{
-    char buf[2];
-    memcpy(buf,&num,2);
-    return Write(buf,sizeof(buf));
-}
-bool Buffer::WriteInt8(int8_t num)
-{
-    char buf[1];
-    memcpy(buf,&num,1);
-    return Write(buf,sizeof(buf));
-}
-bool Buffer::WriteString(std::string str)
-{
-    char buf[str.size()];
-    memcpy(buf,str.c_str(),str.size());
-    return Write(buf,sizeof(buf));
-}
 bool Buffer::WriteString(const char* p ,size_t len)
 {
     // char buf[len];
     // memcpy(buf,p,len);
-    return Write(p,len);
+    return _WriteValue(p,len);
 }
 
-int64_t Buffer::ReadInt64()
+bool Buffer::ReadString(char* ret,size_t len)
 {
-    assert(ReadableBytes()>=sizeof(int64_t));
-    int64_t ret;
-    Read(&ret,sizeof(int64_t));
-    return ret;
-}
-int32_t Buffer::ReadInt32()
-{
-    assert(ReadableBytes()>=sizeof( int32_t));
-
-    int32_t ret;
-    Read(&ret,sizeof(int32_t));
-    return ret;
-}
-int16_t Buffer::ReadInt16()
-{
-    assert(ReadableBytes()>=sizeof(int16_t));
-    int16_t ret;
-    Read(&ret,sizeof(int16_t));
-    return ret;    
-}
-int8_t  Buffer::ReadInt8()
-{
-    assert(ReadableBytes()>=sizeof(int8_t));
-    int8_t ret;
-    Read(&ret,sizeof(int8_t));
-    return ret;
-}
-void Buffer::ReadString(std::string& ret,size_t len)
-{
-    assert(ReadableBytes()>=len);
-    char buf[len];
-    Read(buf,len);
-    ret = std::string(buf);
+    return _ReadValue(ret, len);
 }
 
-void Buffer::ReadString(char* ret,size_t len)
+void Buffer::ReadNull(size_t n)
 {
-    assert(ReadableBytes()>=len);
-    Read(ret,len);
+    size_t read_max_num = std::min(n, Size());
+    m_head_idx += read_max_num;
 }
 
-
-/*
-    将数据读到vec0和vec1中，如果 inputbuffer 满了，就先暂存到缓冲区。
-    之后判断有没有用到缓冲区，用到了就移动到inputbuffer中
-*/
-int64_t Buffer::Readfd(int fd, int& savedErrno)
+bool Buffer::ToString(size_t begin, char* str, size_t len) const
 {
-    char extrabuf[65536];
-    struct iovec vec[2];
-    const size_t writable = WriteableBytes();   //缓冲区可写字节数
-    vec[0].iov_base = Begin() + _writeIndex;
-    vec[0].iov_len = writable;
-    vec[1].iov_base = extrabuf;
-    vec[1].iov_len = sizeof extrabuf;
-
-    //是否用得到缓冲区呢
-    const int iovcnt = (writable < sizeof extrabuf) ? 2 : 1;
-    const ssize_t n = ::readv(fd, vec, iovcnt);
-
-    if (n < 0)
-        savedErrno = errno;
-    else if (static_cast<size_t>(n) <= writable)
-        _writeIndex += n;
-    else {
-        _writeIndex = m_bytes.size();
-        WriteString(extrabuf, n - writable);
-    }
-    return n;
+    return _ToValue(begin, str, len);
 }
 
-const char* Buffer::GetOffset(size_t n) const
+bool Buffer::_ToValue(size_t begin, void* value, size_t len) const
 {
-    if ( n > _writeIndex )
+    // [begin, begin+len-1]
+    if ((begin + len) > Size())
+        return false;
+    
+    memcpy(value, Peek() + begin, len);
+    return true;
+}
+
+const char* Buffer::_GetOffset(size_t n) const
+{
+    if ( n > m_tail_idx )
         return nullptr;
-    return Begin()+n;
+    return _Begin()+n;
 }
 
-char* Buffer::GetOffset(size_t n)
+char* Buffer::_GetOffset(size_t n)
 {
     // 如果超出可写范围，返回空指针
-    if ( n > _writeIndex )
+    if ( n > m_tail_idx )
         return nullptr;
-    return Begin()+n;
+    return _Begin()+n;
 }
 
 const char* Buffer::Peek(size_t n) const
 {
-    return GetOffset(_readIndex+n);
+    return _GetOffset(m_head_idx+n);
 }
 char* Buffer::Peek(size_t n)
 {
-    return GetOffset(_readIndex+n);
+    return _GetOffset(m_head_idx+n);
 }
-
-
-void Buffer::Recycle(size_t n) //回收n字节空间
-{
-    if(n<ReadableBytes())
-    {
-        _readIndex+=n;
-    }
-    else
-        InitAll(); //初始化整个空间
-}
-
 
 size_t Buffer::WriteNull(size_t len)
 {
     
-    if (WriteableBytes() < len)  //可写空间不足
+    if (_WriteableBytes() < len)  //可写空间不足
     {
-        moveForward();  //向前移动
+        _MoveForward();  //向前移动
         
-        int writen=WriteableBytes();
+        int writen=_WriteableBytes();
         if(writen < len)
         {
-            assert((writen+_writeIndex) <= m_bytes.size());
+            assert((writen+m_tail_idx) <= m_bytes.size());
         }
         else
         {
@@ -368,16 +279,16 @@ size_t Buffer::WriteNull(size_t len)
                 assert(i < len);
                 m_bytes.push_back('\0');
             }
-        _writeIndex += len;
+        m_tail_idx += len;
     }
     else    //可写空间足够
     {
-        if (! ((len+_writeIndex) <= m_bytes.size()))
+        if (! ((len+m_tail_idx) <= m_bytes.size()))
         {
             return -1;
         }
-        assert((len+_writeIndex) <= m_bytes.size());
-        _writeIndex += len;
+        assert((len+m_tail_idx) <= m_bytes.size());
+        m_tail_idx += len;
     }
     
     
