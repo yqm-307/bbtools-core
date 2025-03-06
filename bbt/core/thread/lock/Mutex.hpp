@@ -1,0 +1,39 @@
+#pragma once
+#include <bbt/core/thread/lock/ILock.hpp>
+
+namespace bbt::core::thread
+{
+
+class lock_guard
+{
+public:
+	lock_guard(ILock& a):_lock(a)
+	{
+		a.Lock();
+	}
+	
+	~lock_guard()
+	{
+		_lock.UnLock();
+	}
+private:
+	ILock& _lock;
+};
+
+class Mutex:
+    public templateutil::noncopyable,
+    public ILock
+{
+public:
+	Mutex();
+	virtual ~Mutex();
+	virtual void        Lock() override;
+
+	virtual void        UnLock() override;
+	pthread_mutex_t&    getlock();
+private:
+    pthread_mutexattr_t m_mutex_attr;
+	pthread_mutex_t     m_mutex;
+};
+
+}

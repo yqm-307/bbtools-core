@@ -2,7 +2,7 @@
 #define BOOST_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
 
-#include "bbt/base/uuid/EasyID.hpp"
+#include <bbt/core/crypto/EasyID.hpp>
 
 
 BOOST_AUTO_TEST_SUITE(ID_TEST)
@@ -10,7 +10,7 @@ BOOST_AUTO_TEST_SUITE(ID_TEST)
 
 BOOST_AUTO_TEST_CASE(t_increment_id)
 {
-    bbt::uuid::EasyID<bbt::uuid::EM_AUTO_INCREMENT, 0> G;
+    bbt::core::crypto::EasyID<bbt::core::crypto::EM_AUTO_INCREMENT, 0> G;
     std::set<int64_t> set1;
 
     for( int i = 0; i<1000000; ++i )
@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(t_increment_id)
         set1.insert(id);
     }
 
-    bbt::uuid::EasyID<bbt::uuid::EM_AUTO_INCREMENT, 1> G2;
+    bbt::core::crypto::EasyID<bbt::core::crypto::EM_AUTO_INCREMENT, 1> G2;
 
     for( int i = 0; i<1000000; ++i )
     {
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(t_increment_id)
 
 BOOST_AUTO_TEST_CASE(t_thread_safe_id)
 {
-    bbt::uuid::EasyID<bbt::uuid::EM_AUTO_INCREMENT_SAFE, 0> G1;
+    bbt::core::crypto::EasyID<bbt::core::crypto::EM_AUTO_INCREMENT_SAFE, 0> G1;
     std::set<int64_t> set1;
     std::mutex  mtx;
 

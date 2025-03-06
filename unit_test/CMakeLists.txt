@@ -5,7 +5,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/unit_test)
 set(MY_COMM_LIB
     boost_unit_test_framework
     boost_test_exec_monitor
-    ybbt
+    bbt_core
 )
 
 include_directories(

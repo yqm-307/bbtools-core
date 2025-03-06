@@ -2,7 +2,7 @@
 #define BOOST_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
 
-#include <bbt/base/timer/TimeWheel.hpp>
+#include <bbt/core/timer/TimeWheel.hpp>
 BOOST_AUTO_TEST_SUITE(TimerWheelTest)
 
 BOOST_AUTO_TEST_CASE(t_do_repeat_timer)

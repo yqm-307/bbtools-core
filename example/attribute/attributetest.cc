@@ -1,6 +1,7 @@
-#include "bbt/base/Attribute.hpp"
+#include <bbt/core/Attribute.hpp>
+#include <bbt/core/util/StopWatch.hpp>
 #include <stdio.h>
-#include "bbt/base/timer/Interval.hpp"
+// #include <bbt/core/timer/Interval.hpp>
 void ColdFunc() BBTATTR_FUNC_Cold;
 
 // void foo1() BBTATTR_FUNC_DeprecatedMsg("foo1不好");
@@ -16,14 +17,14 @@ int hot2(int i);
 void test1()
 {
     int a = 0;
-    bbt::timer::interval clock;
+    bbt::core::util::StopWatch clock;
     for(int i=0; i<__INT32_MAX__; ++i)
     {
         a = hot1(a);
         a = hot2(a);
     }
     printf("result: %d\n", a);
-    printf("耗时: %ld\n", clock.intervalnow());
+    printf("耗时: %ld\n", clock.IntervalMs());
 }
 
 __attribute__((noclone)) void* noclone(int);

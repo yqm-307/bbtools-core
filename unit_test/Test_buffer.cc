@@ -2,7 +2,7 @@
 #define BOOST_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
 
-#include <bbt/base/buffer/Buffer.hpp>
+#include <bbt/core/buffer/Buffer.hpp>
 
 BOOST_AUTO_TEST_SUITE(Buffer_TEST)
 

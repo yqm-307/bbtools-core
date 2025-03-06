@@ -1,5 +1,5 @@
 #include <iostream>
-#include <bbt/base/reflex/Reflex.hpp>
+#include <bbt/core/reflex/Reflex.hpp>
 
 class ClassA
 {
