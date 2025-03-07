@@ -13,8 +13,9 @@
  * 
  */
 #pragma once
+#include <boost/noncopyable.hpp>
 #include <bbt/core/macroutil/Assert.hpp>
-#include <bbt/core/templateutil/Noncopyable.hpp>
+#include <bbt/core/reflex/Reflex.hpp>
 #include <map>
 
 /* 标识类被 managerbase 管理 */
@@ -23,47 +24,49 @@
 
 
 
-namespace bbt::core::templateutil
+namespace bbt::core::util
 {
 
-template<typename _KeyType, typename _MemType> class ManagerBase;
+template<typename TKey, typename TMember> class ManagerBase;
 
 /**
  * @brief 被管理成员基类
  * 1、成员本身需要覆盖的实现 OnCreate 和 OnDestory，这两个函数会被 ManagerBase 在合适的时机调用;
  */
-template<typename _KeyType, typename _MemType>
-class MemberBase
+template<typename TKey, typename TMember>
+class MemberBase:
+    public bbt::core::reflex::ReflexDynTypeInfo<MemberBase<TKey, TMember>>
 {
-    friend class ManagerBase<_KeyType, _MemType>;
+    friend class ManagerBase<TKey, TMember>;
 public:
-    typedef ManagerBase<_KeyType, _MemType> ManagerType;
+    typedef ManagerBase<TKey, TMember> ManagerType;
 
     virtual ~MemberBase() = 0;
-    virtual _KeyType GetMemberId() const final;
+    virtual TKey                GetMemberId() const final;
 protected:
     std::shared_ptr<ManagerType> GetManager() const;
 private:
-    void OnInit(std::weak_ptr<ManagerType> mgr, _KeyType key);
+    void                        OnInit(std::weak_ptr<ManagerType> mgr, TKey key);
     
     std::weak_ptr<ManagerType>  m_mgr;
-    _KeyType        m_key;
+    TKey                        m_key;
 };
 
 
 /**
  * @brief 标准的一个管理者模型需要实现的接口
  */
-template<typename _KeyType, typename _MemType>
+template<typename TKey, typename TMember>
 class ManagerBase:
-    public bbt::core::templateutil::noncopyable,
-    public std::enable_shared_from_this<ManagerBase<_KeyType, _MemType>>
+    public boost::noncopyable,
+    public std::enable_shared_from_this<ManagerBase<TKey, TMember>>,
+    public bbt::core::reflex::ReflexDynTypeInfo<ManagerBase<TKey, TMember>>
 {
-    friend class MemberBase<_KeyType, _MemType>;
+    friend class MemberBase<TKey, TMember>;
 public:
-    typedef _KeyType                                        KeyType;
-    typedef std::shared_ptr<MemberBase<_KeyType, _MemType>> MemberBasePtr;
-    typedef std::shared_ptr<_MemType>                       MemberPtr;
+    typedef TKey                                        KeyType;
+    typedef std::shared_ptr<MemberBase<TKey, TMember>>  MemberBasePtr;
+    typedef std::shared_ptr<TMember>                    MemberPtr;
 
     template<typename MemberBaseChildType, typename ...InitArgs>
     std::shared_ptr<MemberBaseChildType> Create(InitArgs ...args);
@@ -100,6 +103,6 @@ protected:
 };
 
 
-} // namespace bbt::core::templateutil
+} // namespace bbt::core::util
 
-#include "__TManagerBase.hpp"
+#include "detail/__TManagerBase.hpp"

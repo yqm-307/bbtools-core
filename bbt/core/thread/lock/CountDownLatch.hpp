@@ -5,8 +5,7 @@ namespace bbt::core::thread
 {
 
 class CountDownLatch:
-    private ISync,
-    public templateutil::noncopyable
+    public boost::noncopyable
 {
 public:
    	CountDownLatch(int cot);

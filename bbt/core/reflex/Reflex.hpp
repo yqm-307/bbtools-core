@@ -6,6 +6,7 @@
 #include <atomic>
 #include <bbt/core/macroutil/Assert.hpp>
 #include <bbt/core/reflex/TypeInfo.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace bbt::core::reflex
 {
@@ -31,67 +32,38 @@ namespace bbt::core::reflex
 #define BBT_REFLEX_GET_TYPENAME(classname) \
     bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeName<classname>()
 
-class ReflexInfoMgr
+class ReflexInfoMgr:
+    public boost::noncopyable
 {
 public:
-    static std::unique_ptr<ReflexInfoMgr>& GetInstance()
-    {
-        static std::unique_ptr<ReflexInfoMgr> s_instance;
-        if(s_instance == nullptr)
-        {
-            s_instance = std::make_unique<ReflexInfoMgr>();
-        }
-        return s_instance;
-    }
+    static std::unique_ptr<ReflexInfoMgr>& GetInstance();
 
+    /**
+     * @brief 注册一个类信息
+     */
     template<typename TClass>
-    void Register(const std::string& classname)
-    {
-        GetTypeInfo<TClass>(GenId(), classname);
-    }
+    void        Register(const std::string& classname);
 
-    TypeId GenId()
-    {
-        return ++m_type_id_counter;
-    }
-
+    /**
+     * @brief 获取一个类信息
+     */
     template<typename TClass>
-    auto& GetTypeInfo(TypeId id = -1, const std::string& name = "")
-    {
-        static std::unique_ptr<TypeInfo<TClass>> info_ptr{nullptr};
-        static std::once_flag once_flag;
-        std::call_once(once_flag, [&]{
-            AssertWithInfo(id > 0 && !name.empty(), "bad component meta!");
-            info_ptr = std::make_unique<TypeInfo<TClass>>(id, name.c_str());
-        });
-    
-        return info_ptr;
-    }
+    auto&       GetTypeInfo(const char* name = "");
 
+    /**
+     * @brief 获取一个类的类型ID
+     */
     template<typename TClass>
-    TypeId GetTypeId()
-    {
-        auto& typeinfo = GetTypeInfo<TClass>(0, "");
-        if (typeinfo)
-        {
-            return typeinfo->GetType();
-        }
-        return -1;
-    }
+    TypeId      GetTypeId();
 
+    /**
+     * @brief 获取一个类的类型名称
+     */
     template<typename TClass>
-    const char* GetTypeName()
-    {
-        auto& typeinfo = GetTypeInfo<TClass>(0, "");
-        if (typeinfo)
-        {
-            return typeinfo->GetName();
-        }
-        return "";
-    }
-    
+    const char* GetTypeName();
+
 private:
-    std::atomic<TypeId> m_type_id_counter = 0;
+    std::unordered_set<TypeId>    m_type_id_set;
 };
 
 template<typename classtype>
@@ -100,15 +72,10 @@ class ReflexDynTypeInfo
 public:
     virtual ~ReflexDynTypeInfo() = default;
 
-    virtual TypeId Reflex_GetTypeId()
-    {
-        return ReflexInfoMgr::GetInstance()->GetTypeId<classtype>();
-    }
-
-    virtual const char* Reflex_GetTypeName()
-    {
-        return ReflexInfoMgr::GetInstance()->GetTypeName<classtype>();
-    }
+    virtual TypeId Reflex_GetTypeId();
+    virtual const char* Reflex_GetTypeName();
 };
 
 } // namespace bbt::core::reflex
+
+#include <bbt/core/reflex/__TReflex.hpp>

@@ -3,7 +3,7 @@
 namespace bbt::core::reflex
 {
 
-typedef int TypeId;
+typedef uint64_t TypeId;
 
 class Meta
 {

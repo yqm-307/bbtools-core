@@ -4,25 +4,18 @@
 #include <thread>
 #include <time.h>
 #include <stdlib.h>
-#include <bbt/core/templateutil/Noncopyable.hpp>
 
 namespace bbt::core::thread
 {
 
-class ISync
+class IBasicLockable
 {
 public:
-    virtual ~ISync() = default;
-};
+    virtual ~IBasicLockable() = default;
 
-class ILock:
-    public ISync
-{
-public:
-    virtual ~ILock() = default;
-
-    virtual void Lock() = 0;
-    virtual void UnLock() = 0;
+    virtual void lock() = 0;
+    virtual void unlock() = 0;
+    virtual bool try_lock() = 0;
 };
 
 }

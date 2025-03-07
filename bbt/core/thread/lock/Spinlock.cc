@@ -15,14 +15,19 @@ Spinlock::~Spinlock()
     Assert(pthread_spin_destroy(&m_spin) == 0);
 }
 
-void Spinlock::Lock()
+void Spinlock::lock()
 {
     pthread_spin_lock(&m_spin);
 }
 
-void Spinlock::UnLock()
+void Spinlock::unlock()
 {
     pthread_spin_unlock(&m_spin);
+}
+
+bool Spinlock::try_lock()
+{
+    return pthread_spin_trylock(&m_spin) == 0;
 }
 
 }

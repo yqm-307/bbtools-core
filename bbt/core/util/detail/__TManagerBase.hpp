@@ -1,36 +1,36 @@
 #pragma once
-#include "./ManagerBase.hpp"
+#include "../ManagerBase.hpp"
 
 
-namespace bbt::core::templateutil
+namespace bbt::core::util
 {
 
-template<typename _KeyType, typename _MemType>
-_KeyType MemberBase<_KeyType, _MemType>::GetMemberId() const
+template<typename TKey, typename TMember>
+TKey MemberBase<TKey, TMember>::GetMemberId() const
 {
     return m_key;
 }
 
-template<typename _KeyType, typename _MemType>
-void MemberBase<_KeyType, _MemType>::OnInit(std::weak_ptr<ManagerType> mgr, _KeyType key) 
+template<typename TKey, typename TMember>
+void MemberBase<TKey, TMember>::OnInit(std::weak_ptr<ManagerType> mgr, TKey key) 
 {
     m_mgr = mgr;
     m_key = key;
 }
 
-template<typename _KeyType, typename _MemType>
-std::shared_ptr<typename MemberBase<_KeyType, _MemType>::ManagerType> MemberBase<_KeyType, _MemType>::GetManager() const
+template<typename TKey, typename TMember>
+std::shared_ptr<typename MemberBase<TKey, TMember>::ManagerType> MemberBase<TKey, TMember>::GetManager() const
 {
     return m_mgr.lock();
 }
 
 
-template<typename _KeyType, typename _MemType>
+template<typename TKey, typename TMember>
 template<typename MemberBaseChildType, typename ...InitArgs>
-std::shared_ptr<MemberBaseChildType> ManagerBase<_KeyType, _MemType>::Create(InitArgs ...args)
+std::shared_ptr<MemberBaseChildType> ManagerBase<TKey, TMember>::Create(InitArgs ...args)
 {
     /* 静态断言，要求模板提供类型只能是继承关系 */
-    static_assert( std::is_base_of_v<MemberBase<_KeyType, _MemType>, MemberBaseChildType> );
+    static_assert( std::is_base_of_v<MemberBase<TKey, TMember>, MemberBaseChildType> );
 
     auto sptr = std::shared_ptr<MemberBaseChildType>(new MemberBaseChildType(args...));
     DebugAssertWithInfo(sptr != nullptr, "managerbase create child type error!");
@@ -49,8 +49,8 @@ std::shared_ptr<MemberBaseChildType> ManagerBase<_KeyType, _MemType>::Create(Ini
 }
 
 
-template<typename _KeyType, typename _MemType>
-MemberBase<_KeyType, _MemType>::~MemberBase()
+template<typename TKey, typename TMember>
+MemberBase<TKey, TMember>::~MemberBase()
 {
     if (m_mgr.expired()) {
         return;
@@ -61,4 +61,4 @@ MemberBase<_KeyType, _MemType>::~MemberBase()
 }
 
 
-} // namespace bbt::core::templateutil
+} // namespace bbt::core::util

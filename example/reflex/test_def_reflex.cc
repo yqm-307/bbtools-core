@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 #include <bbt/core/reflex/Reflex.hpp>
 
 class ClassA
@@ -39,7 +40,7 @@ int main()
     ClassTemplate<ClassA> f;
     ClassTemplate<ClassB> g;
 
-    // 注册类型信息
+    // 使用前需要手动将类型注册到ReflexMgr中
     BBT_REFLEX_REGISTCLASS(ClassA);
     BBT_REFLEX_REGISTCLASS(ClassB);
     BBT_REFLEX_REGISTCLASS(ClassTemplate<int>);
@@ -48,7 +49,6 @@ int main()
     BBT_REFLEX_REGISTCLASS(ClassTemplate<ClassB>);
     BBT_REFLEX_REGISTCLASS(DynClassA);
     BBT_REFLEX_REGISTCLASS(DynClassA_C1);
-
 
     std::cout << "classname=" << BBT_REFLEX_GET_TYPENAME(decltype(c)) << "\ttypeid=" << BBT_REFLEX_GET_TYPEID(decltype(c)) << std::endl;
     std::cout << "classname=" << BBT_REFLEX_GET_TYPENAME(decltype(a)) << "\ttypeid=" << BBT_REFLEX_GET_TYPEID(decltype(a)) << std::endl;
@@ -64,4 +64,7 @@ int main()
     std::cout << dyn_a->Reflex_GetTypeName() << "\t" << dyn_a->Reflex_GetTypeId() << std::endl;
     std::cout << dyn_a->Reflex_GetTypeName() << "\t" << dyn_b->Reflex_GetTypeId() << std::endl;
     std::cout << dyn_c->Reflex_GetTypeName() << "\t" << dyn_c->Reflex_GetTypeId() << std::endl;
+
+    // 对于未注册的类型id，返回0。合法的typeid从1开始
+    std::cout << BBT_REFLEX_GET_TYPEID(int) << std::endl;
 }

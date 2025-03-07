@@ -16,7 +16,7 @@
 #include <condition_variable>   //mutex
 #include <functional>
 
-#include <bbt/core/templateutil/Noncopyable.hpp>
+#include <boost/noncopyable.hpp>
 #include <bbt/core/Define.hpp>
 
 namespace bbt::core::log
@@ -33,7 +33,8 @@ enum LOGLEVEL
 };
 
 //缓冲日志
-class Logger: templateutil::noncopyable
+class Logger:
+    public boost::noncopyable
 {
 public:
     // 创建前调用

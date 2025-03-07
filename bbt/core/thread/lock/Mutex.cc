@@ -16,20 +16,19 @@ Mutex::~Mutex()
     pthread_mutex_destroy(&m_mutex);
 }
 
-void Mutex::Lock()
+void Mutex::lock()
 {
-    if(0>pthread_mutex_lock(&m_mutex))
-    {
-        exit(-1);
-    }
+    pthread_mutex_lock(&m_mutex);
 }
 
-void Mutex::UnLock()
+void Mutex::unlock()
 {
-    if(0>pthread_mutex_unlock(&m_mutex))
-    {
-        exit(-1);
-    }
+    pthread_mutex_unlock(&m_mutex);
+}
+
+bool Mutex::try_lock()
+{
+    return pthread_mutex_trylock(&m_mutex) == 0;
 }
 
 pthread_mutex_t& Mutex::getlock()

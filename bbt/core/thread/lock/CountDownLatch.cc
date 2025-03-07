@@ -1,4 +1,5 @@
 #include <bbt/core/thread/lock/CountDownLatch.hpp>
+#include <mutex>
 
 namespace bbt::core::thread
 {
@@ -15,14 +16,14 @@ CountDownLatch::~CountDownLatch()
 
 void CountDownLatch::Wait()
 {
-    lock_guard lock(m_lock);
+    std::lock_guard<Mutex> lock(m_lock);
     if(m_count > 0)
         pthread_cond_wait(&m_sem,&m_lock.getlock());
 }	
 
 int CountDownLatch::WaitTimeout(int timeout)
 {
-    lock_guard lock(m_lock);
+    std::lock_guard<Mutex> lock(m_lock);
     if (m_count > 0) {
         timespec now;
         timespec end_tm;
@@ -42,7 +43,6 @@ int CountDownLatch::WaitTimeout(int timeout)
 void CountDownLatch::Down()
 {
     --m_count;
-    //INFO("count %d",_count.load());
     if(m_count <= 0)
         pthread_cond_broadcast(&m_sem);
 }

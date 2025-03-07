@@ -6,13 +6,14 @@ namespace bbt::core::thread
 {
 
 class Spinlock:
-    public ILock
+    public IBasicLockable
 {
 public:
     Spinlock();
     virtual ~Spinlock();
-    virtual void Lock() override;
-    virtual void UnLock() override;
+    virtual void lock() override;
+    virtual void unlock() override;
+    virtual bool try_lock() override;
 
 private:
     pthread_spinlock_t m_spin{-1};
