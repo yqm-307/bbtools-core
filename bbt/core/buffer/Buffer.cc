@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <bbt/core/buffer/Buffer.hpp>
-#include <bbt/core/macroutil/Assert.hpp>
+#include <bbt/core/util/Assert.hpp>
 
 namespace bbt::core
 {

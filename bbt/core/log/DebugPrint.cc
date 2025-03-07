@@ -1,6 +1,6 @@
 #include <stdarg.h>
-#include <bbt/core/Logger/DebugPrint.hpp>
-#include <bbt/core/Logger/Logger.hpp>
+#include <bbt/core/log/DebugPrint.hpp>
+#include <bbt/core/log/Logger.hpp>
 
 namespace bbt::core::log
 {

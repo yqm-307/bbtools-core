@@ -14,13 +14,13 @@
  */
 #pragma once
 #include <boost/noncopyable.hpp>
-#include <bbt/core/macroutil/Assert.hpp>
+#include <bbt/core/util/Assert.hpp>
 #include <bbt/core/reflex/Reflex.hpp>
 #include <map>
 
 /* 标识类被 managerbase 管理 */
 #define BBTManagerFriendFlag( _KeyType, _MemType) \
-    friend bbt::templateutil::ManagerBase<_KeyType, _MemType>
+    friend bbt::core::util::ManagerBase<_KeyType, _MemType>
 
 
 

@@ -16,15 +16,15 @@ public:
     IPAddress() = default;
     IPAddress& operator=(const IPAddress& it);
     bool operator==(const IPAddress& addr) const;
-    virtual ~IPAddress(){};
+    ~IPAddress() = default;
     IPAddress(IPAddress&&);
     IPAddress(const IPAddress&);
 
 public:
     void set(std::string ip,int port);
     void set(sockaddr_in addr);
-    virtual std::string GetIP() const;
-    virtual int GetPort() const;
+    std::string GetIP() const;
+    int GetPort() const;
     const struct sockaddr* getsockaddr() const;
     const socklen_t getsocklen() const;
     std::string GetIPPort() const;

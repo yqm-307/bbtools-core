@@ -60,4 +60,4 @@ TypeId ReflexDynTypeInfo<TClass>::Reflex_GetTypeId()
     return ReflexInfoMgr::GetInstance()->GetTypeId<TClass>();
 }
 
-} // namespace bbt::core::templateutil
+} // namespace bbt::core::util

@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <memory>
 #include <atomic>
-#include <bbt/core/macroutil/Assert.hpp>
+#include <bbt/core/util/Assert.hpp>
 #include <bbt/core/reflex/TypeInfo.hpp>
 #include <boost/noncopyable.hpp>
 

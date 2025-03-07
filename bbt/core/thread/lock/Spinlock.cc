@@ -1,5 +1,5 @@
 
-#include <bbt/core/macroutil/Assert.hpp>
+#include <bbt/core/util/Assert.hpp>
 #include <bbt/core/thread/lock/Spinlock.hpp>
 
 namespace bbt::core::thread

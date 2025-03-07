@@ -1,14 +1,14 @@
 #include <bbt/core/util/ManagerBase.hpp>
 
 class Student:
-    public bbt::core::templateutil::MemberBase<int, Student>
+    public bbt::core::util::MemberBase<int, Student>
 {
 public:
     BBT_REFLEX_DYN_TYPEINFO_METHOD(Student);
 };
 
 class School:
-    public bbt::core::templateutil::ManagerBase<int, Student>
+    public bbt::core::util::ManagerBase<int, Student>
 {
 public:
     BBT_REFLEX_DYN_TYPEINFO_METHOD(School);

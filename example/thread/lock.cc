@@ -1,5 +1,5 @@
 #include <bbt/core/thread/Lock.hpp>
-#include <bbt/core/macroutil/Assert.hpp>
+#include <bbt/core/util/Assert.hpp>
 #include <mutex>
 #include <thread>
 #include <vector>
