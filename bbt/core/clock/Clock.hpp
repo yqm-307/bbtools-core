@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include <bbt/core/Define.hpp>
+#include <cstring>
 
 namespace bbt::core::clock
 {
@@ -212,6 +213,8 @@ inline std::string getnow_str()
                     tm_time->tm_year + 1900, tm_time->tm_mon + 1, tm_time->tm_mday,
                     tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec, static_cast<int>(dis_millseconds));
     
+    str.resize(strlen(str.data()));
+
     return str;
 }
 
