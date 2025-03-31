@@ -7,7 +7,7 @@ class T
     int a=0;
 };
 
-int main()
+void test1()
 {
     std::vector<std::thread> threads;
 
@@ -48,5 +48,24 @@ int main()
     {
         thread.join();
     }
+}
+
+void test2()
+{
+    bbt::core::thread::Queue<int, boost::lockfree::capacity<10>> queue;
+
+    int i = 0;
+    assert(!queue.Pop(i));
+    for (int i = 0; i < 10; ++i)
+    {
+        assert(queue.Push(1));
+    }
+    assert(!queue.Push(1));
+}
+
+int main()
+{
+    // test1();
+    test2();
     return 0;
 }

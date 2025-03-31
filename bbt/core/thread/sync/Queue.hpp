@@ -5,12 +5,13 @@ namespace bbt::core::thread
 {
 
 
-template <typename TValue>
+template <typename TValue, typename ...Options>
 class Queue:
     public boost::noncopyable
 {
 public:
     Queue(size_t default_size): m_queue(default_size) {}
+    Queue() = default;
     ~Queue() = default;
 
     bool Push(const TValue& cmd)
@@ -46,7 +47,7 @@ public:
         return size < 0 ? 0 : size;
     }
 private:
-    boost::lockfree::queue<TValue> m_queue;
+    boost::lockfree::queue<TValue, Options...> m_queue;
     std::atomic_size_t          m_count{0};
 };
 }
