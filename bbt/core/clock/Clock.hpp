@@ -218,6 +218,24 @@ inline std::string getnow_str()
     return str;
 }
 
+inline std::string tostr(Timestamp<> ts)
+{
+    std::string str{""};
+    str.resize(256);
+    //通过不同精度获取相差的毫秒数
+    uint64_t dis_millseconds = ms(ts.time_since_epoch()).count() % 1000;
+    time_t tt = std::chrono::system_clock::to_time_t(ts);
+    tm* tm_time = localtime(&tt);
+
+    snprintf(str.data(), str.size(), "[%4d-%02d-%02d %02d:%02d:%02d %04d]",
+                    tm_time->tm_year + 1900, tm_time->tm_mon + 1, tm_time->tm_mday,
+                    tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec, static_cast<int>(dis_millseconds));
+    
+    str.resize(strlen(str.data()));
+
+    return str;
+}
+
 
 /**
  * @brief ts 是否小于 now
