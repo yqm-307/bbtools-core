@@ -41,6 +41,7 @@ public:
     static Logger* GetInstance();
     void Log(LOGLEVEL level, const std::string log);
     void Stdout(bool open);
+    void SetPrefix(const std::string& prefix);
 
 private:
     Logger();
@@ -48,6 +49,7 @@ private:
 private:
     std::string                 GetLogName();
     std::string                 filename{""};
+    std::string                 m_prefix{""};
     int                         m_openfd{-1};
     bool                        m_stdout_open{false};
 };

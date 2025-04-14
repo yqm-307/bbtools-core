@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <assert.h>
+#include <bbt/core/util/Assert.hpp>
 
 namespace bbt::core::log
 {
@@ -32,8 +33,6 @@ Logger* Logger::GetInstance()
 
 Logger::Logger()
 {
-    filename = GetLogName();
-    m_openfd = ::open(filename.c_str(),O_RDWR|O_CREAT|O_APPEND,S_IRWXU);  //读写打开文件
 }
 
 Logger::~Logger()
@@ -46,6 +45,12 @@ Logger::~Logger()
 
 void Logger::Log(LOGLEVEL level ,const std::string str)
 {
+    if (m_openfd <= 0)
+    {
+        filename = GetLogName();
+        m_openfd = ::open(filename.c_str(), O_RDWR|O_CREAT|O_APPEND, S_IRUSR|S_IWOTH);  //读写打开文件
+    }
+
     char log[ARRAY_SIZE];
     int len = 0;
 
@@ -138,6 +143,12 @@ void Logger::Stdout(bool open)
     m_stdout_open = open;
 }
 
+void Logger::SetPrefix(const std::string& prefix)
+{
+    m_prefix = prefix + '_';
+    AssertWithInfo(prefix.size() < 31, "prefix size is too long");
+}
+
 /**
  * @brief 根据当前时间生成日志
  *  格式: 20230412_14_35_00_123.log
@@ -154,7 +165,8 @@ std::string Logger::GetLogName()
 	time_t tt = std::chrono::system_clock::to_time_t(now);
 	tm* tm_time = localtime(&tt);
 
-    snprintf(name, namelen, "%4d%02d%02d_%02d_%02d_%02d_%06ld.log",
+    snprintf(name, namelen, "%s%4d%02d%02d_%02d_%02d_%02d_%06ld.log",
+                    m_prefix.c_str(),
                     tm_time->tm_year + 1900, tm_time->tm_mon + 1, tm_time->tm_mday,
                     tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec, dis_millseconds);
     return std::string(name,strlen(name));
