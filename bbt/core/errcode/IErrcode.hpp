@@ -8,6 +8,7 @@ namespace bbt::core::errcode
 {
 
 typedef int ErrType;
+static const ErrType ERR_TYPE_UNKNOWN = -1;
 
 class IErrcode;
 typedef std::function<void(const IErrcode&)> OnErrorCallback;
