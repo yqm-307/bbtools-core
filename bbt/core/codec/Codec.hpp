@@ -60,31 +60,7 @@ struct FieldHeader
 template<typename T> struct IsSupportType { static constexpr bool value = true; };
 
 template<typename T>
-inline constexpr FieldType ToFieldType()
-{
-    if constexpr (std::is_same_v<T, int32_t>)
-        return INT32;
-    else if constexpr (std::is_same_v<T, uint32_t>)
-        return UINT32;
-    else if constexpr (std::is_same_v<T, int64_t>)
-        return INT64;
-    else if constexpr (std::is_same_v<T, uint64_t>)
-        return UINT64;
-    else if constexpr (std::is_same_v<T, int16_t>)
-        return INT16;
-    else if constexpr (std::is_same_v<T, uint16_t>)
-        return UINT16;
-    else if constexpr (std::is_same_v<T, int8_t>)
-        return INT8;
-    else if constexpr (std::is_same_v<T, uint8_t>)
-        return UINT8;
-    else if constexpr (std::is_same_v<reflex::remove_cvref_t<T>, std::string>)
-        return STRING;
-    else if constexpr (std::is_pod_v<T>)
-        return POD;
-    else
-        return BYTEOBJ;
-}
+inline constexpr FieldType ToFieldType();
 
 /**
  * @brief 将args打包为字节流并返回
@@ -94,114 +70,37 @@ inline constexpr FieldType ToFieldType()
  * @return Buffer 
  */
 template<typename ...Args>
-inline Buffer Serialize(Args... args)
-{
-    Buffer buffer;
-    SerializeArgs(buffer, args...);
-    return buffer;
-}
+inline Buffer Serialize(Args... args);
 
 template<typename T>
-inline void SerializeArg(Buffer& bytes, T arg)
-{
-    FieldHeader header;
-    auto constexpr type = ToFieldType<T>();
+inline void SerializeArg(Buffer& bytes, T arg);
 
-    header.field_type = type;
-
-    if constexpr (type >= INT64 && type <= UINT8 || type == POD || type == BYTEOBJ) {
-        header.field_len = sizeof(arg);
-        bytes.WriteString((char*)&header, sizeof(header));
-        bytes.WriteString((char*)&arg, sizeof(arg));
-    } else if constexpr (type == STRING) {
-        header.field_len = arg.size();
-        bytes.WriteString((char*)&header, sizeof(header));
-        bytes.WriteString(arg.c_str(), arg.size());
-    }
-}
+template<>
+inline void SerializeArg(Buffer& bytes, const char* arg);
 
 inline void SerializeArgs(Buffer& buffer) {}
 
 template<typename T, typename... Args>
-inline void SerializeArgs(Buffer& buffer, T arg, Args... args)
-{
-    SerializeArg(buffer, arg);
-    SerializeArgs(buffer, args...);
-}
-
+inline void SerializeArgs(Buffer& buffer, T arg, Args... args);
 
 template<typename Tuple>
-inline Buffer SerializeWithTuple(Tuple&& tuple)
-{
-    Buffer buffer;
-
-    std::apply([&](auto&&... args) {
-        SerializeArgs(buffer, args...);
-    }, std::forward<Tuple>(tuple));
-
-    return buffer;
-}
+inline Buffer SerializeWithTuple(Tuple&& tuple);
 
 template<typename ...Args>
-inline void SerializeAppend(Buffer& buffer, Args... args)
-{
-    SerializeArgs(buffer, args...);
-}
+inline void SerializeAppend(Buffer& buffer, Args... args);
 
 template<typename Tuple>
-inline void SerializeAppendWithTuple(Buffer& buffer, Tuple&& args)
-{
-    std::apply([&](auto&&... args) {
-        SerializeArgs(buffer, args...);
-    }, std::forward<Tuple>(args));
-}
+inline void SerializeAppendWithTuple(Buffer& buffer, Tuple&& args);
 
 template<typename T>
-inline errcode::ErrOpt DeserializeOneArg(const Buffer& buffer, size_t& offset, T& arg)
-{
-    FieldHeader header;
-
-    // 检查类型是否匹配
-    static_assert(IsSupportType<T>::value, "Unsupported type for deserialization!");
-    if (!buffer.ToString(offset, (char*)&header, sizeof(header)))
-        return errcode::Errcode("[bbt::core::codec] deserialize failed, buffer too short!", errcode::ERR_TYPE_UNKNOWN);
-    offset += sizeof(header);
-
-    if (header.field_type != ToFieldType<T>())
-        return errcode::Errcode("[bbt::core::codec] deserialize failed, field type mismatch! expected type=" + std::to_string(ToFieldType<T>()) + " , but it is actually=" + std::to_string(header.field_type), errcode::ERR_TYPE_UNKNOWN);
-
-    if constexpr (std::is_same_v<T, std::string>)
-    {
-        arg.resize(header.field_len);
-        if (!buffer.ToString(offset, arg.data(), header.field_len))
-            return errcode::Errcode("[bbt::core::codec] deserialize failed, buffer too short!", errcode::ERR_TYPE_UNKNOWN);
-    }
-    else {
-        if (header.field_len != sizeof(arg))
-            return errcode::Errcode("[bbt::core::codec] deserialize failed, field length mismatch!", errcode::ERR_TYPE_UNKNOWN);
-
-        if (!buffer.ToString(offset, (char*)&arg, sizeof(arg)))
-            return errcode::Errcode("[bbt::core::codec] deserialize failed, buffer too short!", errcode::ERR_TYPE_UNKNOWN);
-    }
-    offset += header.field_len;
-
-    return std::nullopt;
-}
+inline errcode::ErrOpt DeserializeOneArg(const Buffer& buffer, size_t& offset, T& arg);
 
 template<typename Tuple, size_t... Index>
-inline errcode::ErrOpt DeserializeArgsRecursive(const Buffer& buffer, size_t& offset, Tuple& args, std::index_sequence<Index...>)
-{
-    errcode::ErrOpt err;
-    // 递归展开每个参数
-    ((err = DeserializeOneArg(buffer, offset, std::get<Index>(args))) || ...);
-    return err;
-}
+inline errcode::ErrOpt DeserializeArgsRecursive(const Buffer& buffer, size_t& offset, Tuple& args, std::index_sequence<Index...>);
 
 template<typename... Args>
-inline errcode::ErrOpt DeserializeWithTuple(const Buffer& buffer, std::tuple<Args...>& args)
-{
-    size_t offset = 0;
-    return DeserializeArgsRecursive(buffer, offset, args, std::index_sequence_for<Args...>{});
-}
+inline errcode::ErrOpt DeserializeWithTuple(const Buffer& buffer, std::tuple<Args...>& args);
 
 } // namespace bbt::core::util
+
+#include <bbt/core/codec/__TCodec.hpp>

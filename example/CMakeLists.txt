@@ -17,3 +17,6 @@ target_link_libraries(example_thread_lock bbt_core )
 
 add_executable(example_thread_queue thread/queue.cc)
 target_link_libraries(example_thread_queue bbt_core)
+
+add_executable(example_codec codec/example_codec.cc)
+target_link_libraries(example_codec bbt_core)
