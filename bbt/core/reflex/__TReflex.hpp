@@ -1,5 +1,6 @@
 #pragma once
 #include <bbt/core/reflex/Reflex.hpp>
+#include <bbt/core/reflex/TypeInfo.hpp>
 #include <cstring>
 
 namespace bbt::core::reflex
@@ -14,18 +15,18 @@ void ReflexInfoMgr::Register(const std::string& classname)
 template<typename TClass>
 auto& ReflexInfoMgr::GetTypeInfo(const char* name)
 {
-    static std::unique_ptr<TypeInfo<TClass>> info_ptr{nullptr};
+    static Meta* metainfo{nullptr};
     static std::once_flag once_flag;
     std::call_once(once_flag, [&]{
-        AssertWithInfo(name != nullptr, "bad type meta!");
-        if (strlen(name) == 0)
-            return;
+        AssertWithInfo(name != nullptr || strlen(name) <= 0, "bad type meta!");
         TypeId id = std::hash<std::string>()(name);
-        AssertWithInfo(m_type_id_set.find(id) == m_type_id_set.end(), "type id conflict!");
-        info_ptr = std::make_unique<TypeInfo<TClass>>(id, name);
+        AssertWithInfo(m_typemeta_map.find(id) == m_typemeta_map.end(), "type id conflict!");
+
+        metainfo = new TypeInfo(id, name, sizeof(TClass));
+        m_typemeta_map[id] = dynamic_cast<Meta*>(metainfo);
     });
 
-    return info_ptr;
+    return metainfo;
 }
 
 template<typename TClass>

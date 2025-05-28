@@ -12,30 +12,43 @@ namespace bbt::core::reflex
 {
 
 
-#define BBT_REFLEX_REGISTCLASS(classname) \
-    bbt::core::reflex::ReflexInfoMgr::GetInstance()->Register<classname>(#classname)
+#define BBT_REFLEX_REGISTCLASS(TClass) \
+    bbt::core::reflex::ReflexInfoMgr::GetInstance()->Register<TClass>(#TClass)
 
-#define BBT_REFLEX_DYN_TYPEINFO_METHOD(classname) \
+#define BBT_REFLEX_DYN_TYPEINFO_METHOD(TClass) \
     public: \
         virtual bbt::core::reflex::TypeId Reflex_GetTypeId() override \
         { \
-            return bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId<classname>(); \
+            return bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId<TClass>(); \
         } \
         virtual const char* Reflex_GetTypeName() override \
         { \
-            return bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeName<classname>(); \
+            return bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeName<TClass>(); \
         }
 
-#define BBT_REFLEX_GET_TYPEID(classname) \
-    bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId<classname>()
+#define BBT_REFLEX_GET_TYPEID(TClass) \
+    bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId<TClass>()
 
-#define BBT_REFLEX_GET_TYPENAME(classname) \
-    bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeName<classname>()
+#define BBT_REFLEX_GET_TYPENAME(TClass) \
+    bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeName<TClass>()
+
+#define BBT_REFLEX_GET_META(TClass) \
+    bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetMeta(bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId<TClass>())
 
 class ReflexInfoMgr:
     public boost::noncopyable
 {
 public:
+    ReflexInfoMgr() = default;
+    virtual ~ReflexInfoMgr()
+    {
+        for (auto& pair : m_typemeta_map)
+        {
+            delete pair.second;
+        }
+        m_typemeta_map.clear();
+    }
+
     static std::unique_ptr<ReflexInfoMgr>& GetInstance();
 
     /**
@@ -62,8 +75,19 @@ public:
     template<typename TClass>
     const char* GetTypeName();
 
+    Meta* GetMeta(TypeId type_id)
+    {
+
+        return m_typemeta_map.count(type_id) ? m_typemeta_map[type_id] : nullptr;
+        auto it = m_typemeta_map.find(type_id);
+        if (it != m_typemeta_map.end())
+            return it->second;
+
+        return nullptr;
+    }
+
 private:
-    std::unordered_set<TypeId>    m_type_id_set;
+    std::unordered_map<TypeId, Meta*> m_typemeta_map;
 };
 
 template<typename classtype>

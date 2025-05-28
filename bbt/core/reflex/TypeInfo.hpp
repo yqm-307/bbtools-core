@@ -1,4 +1,6 @@
 #pragma once
+#include <cstdint>
+#include <cstddef>
 
 namespace bbt::core::reflex
 {
@@ -12,30 +14,24 @@ public:
 
     virtual TypeId GetType() const = 0;
     virtual const char* GetName() const = 0;
+    virtual size_t GetSize() const = 0;
 };
 
-template<typename TClass>
 class TypeInfo: public Meta
 {
 public:
-    TypeInfo(TypeId id, const char* name)
-        : type(id), name(name)
-    {}
+    TypeInfo(TypeId id, const char* name, size_t type_size);
+    virtual ~TypeInfo();
 
-    virtual ~TypeInfo() = default;
+    virtual TypeId GetType() const override;
 
-    virtual TypeId GetType() const override
-    {
-        return type;
-    }
+    virtual const char* GetName() const override;
 
-    virtual const char* GetName() const override
-    {
-        return name.c_str();
-    }
+    virtual size_t GetSize() const override;
 private:
-    TypeId type{-1};
-    std::string name{""};
+    TypeId m_type_id{0};
+    char* m_type_name{nullptr};
+    size_t m_type_size{0};
 };
 
 }// namespace bbt::base::reflex
