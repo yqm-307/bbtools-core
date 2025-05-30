@@ -24,10 +24,9 @@ public:
     virtual ~TypeInfo();
 
     virtual TypeId GetType() const override;
-
     virtual const char* GetName() const override;
-
     virtual size_t GetSize() const override;
+
 private:
     TypeId m_type_id{0};
     char* m_type_name{nullptr};

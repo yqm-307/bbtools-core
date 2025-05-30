@@ -11,10 +11,17 @@
 namespace bbt::core::reflex
 {
 
-
+/**
+ * @brief 注册一个Class到反射系统中
+ * 
+ */
 #define BBT_REFLEX_REGISTCLASS(TClass) \
     bbt::core::reflex::ReflexInfoMgr::GetInstance()->Register<TClass>(#TClass)
 
+/**
+ * @brief 生成一个继承自ReflexDynTypeInfo类动态类型信息的方法
+ * 
+ */
 #define BBT_REFLEX_DYN_TYPEINFO_METHOD(TClass) \
     public: \
         virtual bbt::core::reflex::TypeId Reflex_GetTypeId() override \
@@ -26,14 +33,6 @@ namespace bbt::core::reflex
             return bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeName<TClass>(); \
         }
 
-#define BBT_REFLEX_GET_TYPEID(TClass) \
-    bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId<TClass>()
-
-#define BBT_REFLEX_GET_TYPENAME(TClass) \
-    bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeName<TClass>()
-
-#define BBT_REFLEX_GET_META(TClass) \
-    bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetMeta(bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId<TClass>())
 
 class ReflexInfoMgr:
     public boost::noncopyable
@@ -90,15 +89,55 @@ private:
     std::unordered_map<TypeId, Meta*> m_typemeta_map;
 };
 
+/**
+ * @brief 提供动态类型信息的基类。
+ * 
+ * @example test_def_reflex.cc
+ * 
+ * @note
+ * ReflexDynTypeInfo 是一个抽象基类，子类可以继承该类并实现这些虚函数，以便在运行时提供类型信息。
+ * 结合 ReflexInfoMgr，可以实现动态类型注册和查询功能。
+ *
+ * 子类可以通过宏 BBT_REFLEX_DYN_TYPEINFO_METHOD(TClass) 自动实现这些虚函数。
+ */
 template<typename classtype>
 class ReflexDynTypeInfo
 {
 public:
     virtual ~ReflexDynTypeInfo() = default;
 
+    /**
+     * @brief 获取类型ID
+     * 
+     * @return 返回类型的唯一标识符。
+     */
     virtual TypeId Reflex_GetTypeId();
+
+    /**
+     * @brief 获取类型的名称，该函数返回该类型原本的类型名
+     * 
+     * @return 类型名称
+     */
     virtual const char* Reflex_GetTypeName();
 };
+
+template<typename TClass>
+inline static TypeId GetTypeId()
+{ 
+    return bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeId<TClass>();
+}
+
+template<typename TClass>
+inline static const char* GetTypeName()
+{
+    return bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetTypeName<TClass>();
+}
+
+template<typename TClass>
+inline static Meta* GetTypeMeta()
+{
+    return bbt::core::reflex::ReflexInfoMgr::GetInstance()->GetMeta(GetTypeId<TClass>());
+}
 
 } // namespace bbt::core::reflex
 

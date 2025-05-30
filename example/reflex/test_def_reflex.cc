@@ -68,13 +68,13 @@ int main()
     BBT_REFLEX_REGISTCLASS(ClassC);
     BBT_REFLEX_REGISTCLASS(ClassD);
 
-    std::cout << "classname=" << BBT_REFLEX_GET_TYPENAME(decltype(c)) << "\ttypeid=" << BBT_REFLEX_GET_TYPEID(decltype(c)) << std::endl;
-    std::cout << "classname=" << BBT_REFLEX_GET_TYPENAME(decltype(a)) << "\ttypeid=" << BBT_REFLEX_GET_TYPEID(decltype(a)) << std::endl;
-    std::cout << "classname=" << BBT_REFLEX_GET_TYPENAME(decltype(b)) << "\ttypeid=" << BBT_REFLEX_GET_TYPEID(decltype(b)) << std::endl;
-    std::cout << "classname=" << BBT_REFLEX_GET_TYPENAME(decltype(d)) << "\ttypeid=" << BBT_REFLEX_GET_TYPEID(decltype(d)) << std::endl;
-    std::cout << "classname=" << BBT_REFLEX_GET_TYPENAME(decltype(e)) << "\ttypeid=" << BBT_REFLEX_GET_TYPEID(decltype(e)) << std::endl;
-    std::cout << "classname=" << BBT_REFLEX_GET_TYPENAME(decltype(f)) << "\ttypeid=" << BBT_REFLEX_GET_TYPEID(decltype(f)) << std::endl;
-    std::cout << "classname=" << BBT_REFLEX_GET_TYPENAME(decltype(g)) << "\ttypeid=" << BBT_REFLEX_GET_TYPEID(decltype(g)) << std::endl;
+    std::cout << "classname=" << GetTypeName<decltype(c)>() << "\ttypeid=" << GetTypeId<decltype(c)>() << std::endl;
+    std::cout << "classname=" << GetTypeName<decltype(a)>() << "\ttypeid=" << GetTypeId<decltype(a)>() << std::endl;
+    std::cout << "classname=" << GetTypeName<decltype(b)>() << "\ttypeid=" << GetTypeId<decltype(b)>() << std::endl;
+    std::cout << "classname=" << GetTypeName<decltype(d)>() << "\ttypeid=" << GetTypeId<decltype(d)>() << std::endl;
+    std::cout << "classname=" << GetTypeName<decltype(e)>() << "\ttypeid=" << GetTypeId<decltype(e)>() << std::endl;
+    std::cout << "classname=" << GetTypeName<decltype(f)>() << "\ttypeid=" << GetTypeId<decltype(f)>() << std::endl;
+    std::cout << "classname=" << GetTypeName<decltype(g)>() << "\ttypeid=" << GetTypeId<decltype(g)>() << std::endl;
     // 动态类型id
     DynClassA_C1* dyn_a = new DynClassA_C1();
     DynClassA* dyn_b = (DynClassA_C1*)dyn_a;
@@ -84,17 +84,17 @@ int main()
     std::cout << dyn_c->Reflex_GetTypeName() << "\t" << dyn_c->Reflex_GetTypeId() << std::endl;
 
     // 获取类型长度
-    std::cout << "sizeof(DynClassA_C1)=" << BBT_REFLEX_GET_META(DynClassA_C1)->GetSize() << "\t" << dyn_a->Reflex_GetTypeId() << std::endl;
-    std::cout << "sizeof(ClassA)=" << BBT_REFLEX_GET_META(ClassA)->GetSize() << "\t" << BBT_REFLEX_GET_TYPENAME(ClassA) << std::endl;
-    std::cout << "sizeof(ClassC)=" << BBT_REFLEX_GET_META(ClassC)->GetSize() << "\t" << BBT_REFLEX_GET_TYPENAME(ClassC) << std::endl;
-    std::cout << "sizeof(ClassD)=" << BBT_REFLEX_GET_META(ClassD)->GetSize() << "\t" << BBT_REFLEX_GET_TYPENAME(ClassD) << std::endl;
+    std::cout << "sizeof(DynClassA_C1)=" << GetTypeMeta<DynClassA_C1>()->GetSize() << "\t" << dyn_a->Reflex_GetTypeId() << std::endl;
+    std::cout << "sizeof(ClassA)=" << GetTypeMeta<ClassA>()->GetSize() << "\t" << GetTypeName<ClassA>() << std::endl;
+    std::cout << "sizeof(ClassC)=" << GetTypeMeta<ClassC>()->GetSize() << "\t" << GetTypeName<ClassC>() << std::endl;
+    std::cout << "sizeof(ClassD)=" << GetTypeMeta<ClassD>()->GetSize() << "\t" << GetTypeName<ClassD>() << std::endl;
 
 
     // 根据typeid获取类型信息
-    TypeId type_id = BBT_REFLEX_GET_TYPEID(ClassD);
+    TypeId type_id = GetTypeId<ClassD>();
     Meta* meta = ReflexInfoMgr::GetInstance()->GetMeta(type_id);
     std::cout << "type_id=" << type_id << "\tname=" << meta->GetName() << "\tsize=" << meta->GetSize() << std::endl;
 
     // 对于未注册的类型id，返回0。合法的typeid从1开始
-    std::cout << BBT_REFLEX_GET_TYPEID(int) << std::endl;
+    std::cout << GetTypeName<int>() << std::endl;
 }
