@@ -2,14 +2,14 @@
 #include <bbt/core/util/StopWatch.hpp>
 #include <stdio.h>
 // #include <bbt/core/timer/Interval.hpp>
-void ColdFunc() BBTATTR_FUNC_Cold;
+void ColdFunc() BBTATTR_FUNC_COLD;
 
-// void foo1() BBTATTR_FUNC_DeprecatedMsg("foo1不好");
-// void foo1() BBTATTR_FUNC_Deprecated;
+// void foo1() BBTATTR_FUNC_DEPRECATEDMSG("foo1不好");
+// void foo1() BBTATTR_FUNC_DEPRECATED;
 // void foo1() BBTATTR_FUNC_Unavailable;
 
-// int hot1(int i) BBTATTR_FUNC_Hot;
-// int hot2(int i) BBTATTR_FUNC_Hot;
+// int hot1(int i) BBTATTR_FUNC_HOT;
+// int hot2(int i) BBTATTR_FUNC_HOT;
 
 int hot1(int i);
 int hot2(int i);
@@ -30,7 +30,7 @@ void test1()
 __attribute__((noclone)) void* noclone(int);
 void noclone1(void*(int));
 
-int nodiscord() BBTATTR_FUNC_RetVal;
+int nodiscord() BBTATTR_FUNC_WARN_UNUSERESULT;
 
 int main()
 {

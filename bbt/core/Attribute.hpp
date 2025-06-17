@@ -23,7 +23,7 @@
  * 
  */
 #if __glibc_has_attribute(warn_unused_result) >= 0
-#define BBTATTR_FUNC_RetVal __attribute__((warn_unused_result))
+#define BBTATTR_FUNC_WARN_UNUSERESULT __attribute__((warn_unused_result))
 #else
 #error "not exist attribute [warn_unused_result]"
 #endif
@@ -35,7 +35,7 @@
  * 尚未验证，也许是g++不支持
  */
 #if __glibc_has_attribute(cold) >= 0
-#define BBTATTR_FUNC_Cold __attribute__((cold))
+#define BBTATTR_FUNC_COLD __attribute__((cold))
 #else
 #error "not exist attribute [cold]"
 #endif
@@ -47,7 +47,7 @@
  * 尚未验证，也许是g++不支持
  */
 #if __glibc_has_attribute(hot) >= 0
-#define BBTATTR_FUNC_Hot __attribute__((hot)) 
+#define BBTATTR_FUNC_HOT __attribute__((hot)) 
 #else
 #error "not exist attribute [hot]"
 #endif
@@ -57,7 +57,7 @@
  * 如果被标记函数被调用，则报warning
  */
 #if __glibc_has_attribute(__deprecated__) >= 0
-#define BBTATTR_FUNC_DeprecatedMsg(msg)    __attribute_deprecated_msg__(msg)
+#define BBTATTR_FUNC_DEPRECATEDMSG(msg)    __attribute_deprecated_msg__(msg)
 #else
 #error "not exist attribute [__deprecated__]"
 #endif
@@ -67,7 +67,7 @@
  * 如果被标记函数被调用，则报warning
  */
 #if __glibc_has_attribute(__deprecated__) >= 0
-#define BBTATTR_FUNC_Deprecated         __attribute_deprecated__
+#define BBTATTR_FUNC_DEPRECATED         __attribute_deprecated__
 #else
 #error "not exist attribute [__deprecated__]"
 #endif
@@ -80,9 +80,9 @@
  * 
  */
 #if __glibc_has_attribute(__deprecated__) >= 0
-#define BBTATTR_FUNC_Ctor_Hidden    BBTATTR_FUNC_DeprecatedMsg("此函数的构造函数被隐藏，不可以直接调用")
+#define BBTATTR_FUNC_CTOR_HIDDEN    BBTATTR_FUNC_DEPRECATEDMSG("此函数的构造函数被隐藏，不可以直接调用")
 #else
-#error "not exist attribute [BBTATTR_FUNC_DeprecatedMsg]"
+#error "not exist attribute [BBTATTR_FUNC_DEPRECATEDMSG]"
 #endif
 
 //---------------------------- 通用注解 ----------------------------//
@@ -90,7 +90,7 @@
  * //TODO gcc还有一些很有用的attribute，比如内存检测、套接字检测等。
  */
 #if __glibc_has_attribute(unused) >= 0
-#define BBTATTR_COMM_Unused         __attribute__((unused))
+#define BBTATTR_COMM_UNUSED         __attribute__((unused))
 #else
 #error "not exist attribute [unused]"
 #endif
