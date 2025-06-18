@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IErrcode.hpp"
+#include <bbt/core/util/Result.hpp>
 
 namespace bbt::core::errcode
 {
@@ -31,5 +32,9 @@ typedef std::optional<bbt::core::errcode::Errcode> ErrOpt;
 
 template<typename ...TRetTuple>
 using ErrTuple = std::tuple<ErrOpt, TRetTuple...>;
+
+template<typename TRet>
+using ErrRlt = bbt::core::util::Result<TRet, Errcode>;
+
 
 } // namespace bbt::core::errcode

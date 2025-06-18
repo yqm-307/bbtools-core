@@ -20,3 +20,6 @@ target_link_libraries(example_thread_queue bbt_core)
 
 add_executable(example_codec codec/example_codec.cc)
 target_link_libraries(example_codec bbt_core)
+
+add_executable(example_result errcode/example_result.cc)
+target_link_libraries(example_result bbt_core)
