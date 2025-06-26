@@ -108,24 +108,24 @@ errcode::ErrOpt DeserializeOneArg(const Buffer& buffer, size_t& offset, T& arg)
     // 检查类型是否匹配
     static_assert(IsSupportType<T>::value, "Unsupported type for deserialization!");
     if (!buffer.ToString(offset, (char*)&header, sizeof(header)))
-        return errcode::Errcode("[bbt::core::codec] deserialize failed, buffer too short!", errcode::ERR_TYPE_UNKNOWN);
+        return errcode::Errcode("[bbt::core::codec] deserialize failed, buffer too short!", errcode::ERR_UNKNOWN);
     offset += sizeof(header);
 
     if (header.field_type != ToFieldType<T>())
-        return errcode::Errcode("[bbt::core::codec] deserialize failed, field type mismatch! expected type=" + std::to_string(ToFieldType<T>()) + " , but it is actually=" + std::to_string(header.field_type), errcode::ERR_TYPE_UNKNOWN);
+        return errcode::Errcode("[bbt::core::codec] deserialize failed, field type mismatch! expected type=" + std::to_string(ToFieldType<T>()) + " , but it is actually=" + std::to_string(header.field_type), errcode::ERR_UNKNOWN);
 
     if constexpr (std::is_same_v<T, std::string>)
     {
         arg.resize(header.field_len);
         if (!buffer.ToString(offset, arg.data(), header.field_len))
-            return errcode::Errcode("[bbt::core::codec] deserialize failed, buffer too short!", errcode::ERR_TYPE_UNKNOWN);
+            return errcode::Errcode("[bbt::core::codec] deserialize failed, buffer too short!", errcode::ERR_UNKNOWN);
     }
     else {
         if (header.field_len != sizeof(arg))
-            return errcode::Errcode("[bbt::core::codec] deserialize failed, field length mismatch!", errcode::ERR_TYPE_UNKNOWN);
+            return errcode::Errcode("[bbt::core::codec] deserialize failed, field length mismatch!", errcode::ERR_UNKNOWN);
 
         if (!buffer.ToString(offset, (char*)&arg, sizeof(arg)))
-            return errcode::Errcode("[bbt::core::codec] deserialize failed, buffer too short!", errcode::ERR_TYPE_UNKNOWN);
+            return errcode::Errcode("[bbt::core::codec] deserialize failed, buffer too short!", errcode::ERR_UNKNOWN);
     }
     offset += header.field_len;
 

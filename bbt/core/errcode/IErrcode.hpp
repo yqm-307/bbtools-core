@@ -8,7 +8,15 @@ namespace bbt::core::errcode
 {
 
 typedef int ErrType;
-static const ErrType ERR_TYPE_UNKNOWN = -1;
+
+
+enum ErrTypeEnum : ErrType
+{
+    ERR_UNKNOWN             = -1,       // 未知错误|未分类错误
+    ERR_INVALID_ARGUMENT    = 1,        // 无效参数
+    ERR_MAX                 = 100000,   // 内部错误
+};
+
 
 class IErrcode;
 typedef std::function<void(const IErrcode&)> OnErrorCallback;

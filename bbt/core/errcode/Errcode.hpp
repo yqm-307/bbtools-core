@@ -11,7 +11,7 @@ class Errcode:
 {
 public:
     Errcode();
-    Errcode(const std::string& msg, ErrType type);
+    Errcode(const std::string& msg, ErrType type = ERR_UNKNOWN);
     Errcode(const Errcode& other);
     Errcode(Errcode&& other);
     virtual ~Errcode();

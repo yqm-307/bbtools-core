@@ -23,3 +23,6 @@ target_link_libraries(example_codec bbt_core)
 
 add_executable(example_result errcode/example_result.cc)
 target_link_libraries(example_result bbt_core)
+
+add_executable(example_ipaddress net/example_ipaddress.cc)
+target_link_libraries(example_ipaddress bbt_core)

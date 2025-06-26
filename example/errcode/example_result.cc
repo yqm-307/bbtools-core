@@ -15,7 +15,7 @@ errcode::ErrRlt<Obj> DoSomething(bool succ)
     if (succ)
         return Obj{};  // 成功时返回一个Obj对象    
     
-    return errcode::Errcode{"it`s wrong!", errcode::ERR_TYPE_UNKNOWN};  // 失败时返回错误码
+    return errcode::Errcode{"it`s wrong!", errcode::ERR_UNKNOWN};  // 失败时返回错误码
 }
 
 errcode::ErrRlt<std::tuple<int, std::string>> DoSomethingWithArgs(bool succ)
@@ -23,7 +23,7 @@ errcode::ErrRlt<std::tuple<int, std::string>> DoSomethingWithArgs(bool succ)
     if (succ)
         return std::make_tuple(1, std::string("success"));  // 成功时返回一个元组
 
-    return errcode::Errcode{"it`s wrong!", errcode::ERR_TYPE_UNKNOWN};  // 失败时返回错误码
+    return errcode::Errcode{"it`s wrong!", errcode::ERR_UNKNOWN};  // 失败时返回错误码
 }
 
 int main()
