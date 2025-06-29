@@ -34,19 +34,6 @@ private:
     boost::asio::ip::tcp::endpoint m_endpoint;
 };
 
-errcode::ErrRlt<IPAddress> make_ip_address(const std::string& ip, unsigned short port)
-{
-    if (ip.empty())
-        return errcode::ErrRlt<IPAddress>(bbt::core::errcode::Errcode("IP address is empty", bbt::core::errcode::ERR_UNKNOWN));
-
-    boost::system::error_code ec;
-    auto addr = boost::asio::ip::make_address_v4(ip, ec);    
-    if (ec)
-        return errcode::ErrRlt<IPAddress>(bbt::core::errcode::Errcode("Invalid IP address format", bbt::core::errcode::ERR_UNKNOWN));
-
-    auto endpoint = boost::asio::ip::tcp::endpoint(addr, port);
-
-    return errcode::ErrRlt<IPAddress>(IPAddress(std::move(endpoint)));
-}
+errcode::ErrRlt<IPAddress> make_ip_address(const std::string& ip, unsigned short port);
 
 } // namespace bbt::core::net

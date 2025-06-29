@@ -10,85 +10,22 @@
  */
 #pragma once
 #include <fcntl.h>
-#include <sys/socket.h>
-#include <evutil.h>
-#include <netinet/in.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <bbt/core/errcode/Errcode.hpp>
 
 namespace bbt::core::net
 {
 
-class Util
-{
-public:
-static int CreateListen(const char* ip, short port, bool noblock)
-{
-    int                 fd  = -1;
-    sockaddr_in         addr;
-    socklen_t           len = 0;
-    int                 error = 0;
-    int                 opt = 0;
 
-    fd = ::socket(AF_INET, SOCK_STREAM, 0);
-    if (fd < 0)
-        return -1;
+errcode::ErrRlt<int> CreateListen(const char* ip, short port, bool noblock);
 
-    addr.sin_port = htons(port);
-    addr.sin_family = AF_INET;
+errcode::ErrOpt SetFdNoBlock(int fd);
 
-    if(ip == NULL || strlen(ip) <= 0)
-        addr.sin_addr.s_addr = INADDR_ANY;  // 监听任意地址
-    else
-        error = evutil_inet_pton(AF_INET, ip, &addr.sin_addr.s_addr);   // 监听指定地址
+errcode::ErrOpt SetFdReuseable(int fd);
 
-    if (error < 0) return -1;
-
-    error = SetFdReuseable(fd);
-    if (error < 0) return -1;
-
-    len = sizeof(addr);
-    error = ::bind(fd, reinterpret_cast<sockaddr*>(&addr), len);
-    if (error < 0) return -1; 
-
-    if( noblock ) {
-        error = SetFdNoBlock(fd);
-        if(error < 0)
-            return -1;
-    }
-
-    error = ::listen(fd, 5);
-    if (error < 0) return -1;
-
-    return fd;
-}
-
-static int SetFdNoBlock(int fd)
-{
-    return evutil_make_socket_nonblocking(fd);
-}
-
-static int SetFdReuseable(int fd)
-{
-    return evutil_make_listen_socket_reuseable(fd);
-}
-
-static int CreateConnect(const char* ip, short port, bool noblock)
-{
-    int socket = -1;
-    socket = ::socket(AF_INET, SOCK_STREAM, 0);
-    if (socket < 0)
-        return -1;
-
-    if (noblock) {
-        if (0 > SetFdNoBlock(socket))
-            return -1;
-    }
-
-    return socket;
-}
-
-};
-
-
+errcode::ErrRlt<int> CreateConnect(const char* ip, short port, bool noblock);
 
 } // namespace bbt::core::net
