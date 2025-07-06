@@ -14,6 +14,7 @@
 #include <mutex>
 #include <assert.h>
 #include <queue>
+#include <string>
 
 /**
  * gcc内置关键字 分支预测

@@ -14,6 +14,7 @@
 #include <iostream>
 #include <tuple>
 #include <string>
+#include <cstdint>
 #include <bbt/core/reflex/TypeHelper.hpp>
 #include <bbt/core/buffer/Buffer.hpp>
 #include <bbt/core/errcode/Errcode.hpp>
