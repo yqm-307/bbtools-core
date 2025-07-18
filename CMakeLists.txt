@@ -6,7 +6,14 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(NEED_TEST "Build unit test exec" ON)
 option(ENABLE_EXAMPLE "Build example exec" ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++17 -O2 \
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build." FORCE)
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC \
 -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wdeprecated-copy \
 -Waddress -Warray-bounds=1 -Wbool-compare -Wbool-operation \
 -Wduplicated-branches -Wduplicated-cond \
@@ -31,7 +38,11 @@ file(GLOB_RECURSE BBT_SRCS
 
 add_library(bbt_core SHARED ${BBT_SRCS})
 
-target_link_libraries(bbt_core)
+target_link_libraries(bbt_core
+    event_core
+    event_pthreads
+    pthread
+)
 
 # 编译例程
 if (ENABLE_EXAMPLE)

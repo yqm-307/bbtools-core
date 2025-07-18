@@ -25,3 +25,7 @@ add_test(NAME Test_buffer COMMAND Test_buffer)
 add_executable(Test_codec Test_codec.cc)
 target_link_libraries(Test_codec ${MY_COMM_LIB})
 add_test(NAME Test_codec COMMAND Test_codec)
+
+add_executable(Test_eventloop pollevent/Test_eventloop.cc)
+target_link_libraries(Test_eventloop ${MY_COMM_LIB})
+add_test(NAME Test_eventloop COMMAND Test_eventloop)

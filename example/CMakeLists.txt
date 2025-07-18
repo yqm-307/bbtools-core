@@ -26,3 +26,6 @@ target_link_libraries(example_result bbt_core)
 
 add_executable(example_ipaddress net/example_ipaddress.cc)
 target_link_libraries(example_ipaddress bbt_core)
+
+add_executable(timer pollevent/timer.cc)
+target_link_libraries(timer bbt_core)

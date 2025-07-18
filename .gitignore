@@ -51,7 +51,5 @@ _deps
 #忽略文件夹
 build/
 bin/
-.vscode/settings.json
-.vscode/c_cpp_properties.json
 !.vscode/launch.json
 *.log
