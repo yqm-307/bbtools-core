@@ -16,19 +16,19 @@ BOOST_AUTO_TEST_CASE(t_buffer_read_write)
     buffer.Write<int8_t>(40);
 
     int64_t read_num64;
-    BOOST_ASSERT(buffer.Read(&read_num64));
+    BOOST_REQUIRE(buffer.Read(&read_num64));
     BOOST_CHECK_EQUAL(read_num64, 10);
 
     int32_t read_num32;
-    BOOST_ASSERT(buffer.Read(&read_num32));
+    BOOST_REQUIRE(buffer.Read(&read_num32));
     BOOST_CHECK_EQUAL(read_num32, 20);
 
     int16_t read_num16;
-    BOOST_ASSERT(buffer.Read(&read_num16));
+    BOOST_REQUIRE(buffer.Read(&read_num16));
     BOOST_CHECK_EQUAL(read_num16, 30);
 
     int8_t read_num8;
-    BOOST_ASSERT(buffer.Read(&read_num8));
+    BOOST_REQUIRE(buffer.Read(&read_num8));
     BOOST_CHECK_EQUAL(read_num8, 40);
 
     BOOST_CHECK_EQUAL(buffer.Size(), 0);
@@ -76,23 +76,23 @@ BOOST_AUTO_TEST_CASE(t_buffer_to_value)
     buffer.WriteString(str, strlen(str));
 
     int8_t num8_read;
-    BOOST_ASSERT(buffer.ToNum(0, num8_read));
+    BOOST_REQUIRE(buffer.ToNum(0, num8_read));
     BOOST_CHECK( num8 == num8_read );
 
     int16_t num16_read;
-    BOOST_ASSERT(buffer.ToNum(1, num16_read));
+    BOOST_REQUIRE(buffer.ToNum(1, num16_read));
     BOOST_CHECK( num16 == num16_read );
 
     int32_t num32_read;
-    BOOST_ASSERT(buffer.ToNum(3, num32_read));
+    BOOST_REQUIRE(buffer.ToNum(3, num32_read));
     BOOST_CHECK( num32 == num32_read );
 
     int64_t num64_read;
-    BOOST_ASSERT(buffer.ToNum(7, num64_read));
+    BOOST_REQUIRE(buffer.ToNum(7, num64_read));
     BOOST_CHECK( num64 == num64_read );
 
     char str_read[20];
-    BOOST_ASSERT(buffer.ToString(15, str_read, strlen(str)));
+    BOOST_REQUIRE(buffer.ToString(15, str_read, strlen(str)));
     BOOST_CHECK_EQUAL(memcmp(str, str_read, strlen(str)), 0);
 
 }
@@ -116,10 +116,10 @@ BOOST_AUTO_TEST_CASE(t_obj_rw)
     buffer.Write(&a);
 
     A a_read;
-    BOOST_ASSERT(buffer.Read(&a_read));
+    BOOST_REQUIRE(buffer.Read(&a_read));
     BOOST_CHECK_EQUAL(memcmp(&a, &a_read, sizeof(A)), 0);
 
-    BOOST_ASSERT(buffer.Size() == 0);
+    BOOST_REQUIRE(buffer.Size() == 0);
 }
 
 struct BigData
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(t_buffer_loop_rw)
     for (int i = 0; i < 100; i++)
     {
         BigData obj_read;
-        BOOST_ASSERT(buffer.Read(&obj_read));
+        BOOST_REQUIRE(buffer.Read(&obj_read));
         BOOST_CHECK_EQUAL(obj_read.data[0], 10);
     }
 

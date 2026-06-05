@@ -1,11 +1,3 @@
+// ASIO 替代 libevent，不需要 evthread_use_pthreads
+// 此文件保留用于链接兼容
 #include <bbt/pollevent/detail/Define.hpp>
-
-namespace bbt::pollevent
-{
-
-__PollEvent_Init::__PollEvent_Init()
-{
-    AssertWithInfo(evthread_use_pthreads() == 0, "init libevent thread-safe failed!");
-}
-
-} // namespace bbt::pollevent

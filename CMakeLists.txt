@@ -13,6 +13,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build." FORCE)
 endif()
 
+# Release 用 -O2 而非 CMake 默认的 -O3，更稳定
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG" CACHE STRING "" FORCE)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC \
 -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wdeprecated-copy \
 -Waddress -Warray-bounds=1 -Wbool-compare -Wbool-operation \
