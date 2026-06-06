@@ -26,15 +26,15 @@ BOOST_AUTO_TEST_SUITE(EventBaseTest)
 
 BOOST_AUTO_TEST_CASE(t_default_construct)
 {
+    // io_context 构造即有效（无对应 GetRawBase 接口）
     detail::EventBase base;
-    BOOST_CHECK(base.GetRawBase() != nullptr);
     BOOST_CHECK_EQUAL(base.GetEventNum(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(t_construct_with_flag)
 {
+    // flag 保留兼容，ASIO 忽略
     detail::EventBase base(detail::EventBaseConfigFlag::PRECISE_TIMER);
-    BOOST_CHECK(base.GetRawBase() != nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(t_get_time_of_day)
@@ -65,7 +65,8 @@ BOOST_AUTO_TEST_CASE(t_external_base_no_autofree)
         EventLoop loop(base, false);
         BOOST_CHECK(loop.GetEventBase() != nullptr);
     }
-    BOOST_CHECK(base->GetRawBase() != nullptr);
+    // base 未被释放，可继续使用
+    BOOST_CHECK_EQUAL(base->GetEventNum(), 0);
     delete base;
 }
 
@@ -219,7 +220,7 @@ BOOST_AUTO_TEST_CASE(t_cancellisten_prevents_callback)
 
     char c = 'x';
     (void)write(wfd, &c, 1);
-    loop->StartLoop(EventLoopOpt::LOOP_ONCE);
+    loop->StartLoop(EventLoopOpt::LOOP_NONBLOCK); // 取消后无事可等
     BOOST_CHECK(!fired.load());
 
     BOOST_CHECK(fcntl(rfd, F_GETFL) >= 0); // fd still open
@@ -353,7 +354,8 @@ BOOST_AUTO_TEST_CASE(t_multiple_events_same_loop)
     char c = 'x';
     (void)write(wfd, &c, 1);
     (void)write(wfd2, &c, 1);
-    loop->StartLoop(EventLoopOpt::LOOP_ONCE);
+    loop->StartLoop(EventLoopOpt::LOOP_ONCE); // 第一个事件
+    loop->StartLoop(EventLoopOpt::LOOP_ONCE); // 第二个事件
     BOOST_CHECK_EQUAL(cnt.load(), 2);
 
     e1->CancelListen(true); e2->CancelListen(true);

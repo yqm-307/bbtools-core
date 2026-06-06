@@ -1,8 +1,8 @@
 #include <atomic>
-#include <event2/event_struct.h>
-#include <bbt/core/clock/Clock.hpp>
+#include <boost/asio.hpp>
 #include <bbt/pollevent/Event.hpp>
 #include <bbt/pollevent/detail/EventBase.hpp>
+#include <bbt/core/clock/Clock.hpp>
 
 namespace bbt::pollevent
 {
@@ -10,96 +10,168 @@ namespace bbt::pollevent
 std::unordered_map<EventId, OnEventCallback>    Event::m_callback_map;
 std::mutex                                      Event::m_callback_map_mtx;
 
-void COnEventWapper(evutil_socket_t fd, short events, void* arg) 
-{
-    // 若在这里事件已经被析构了，那么这里的pthis就是一个野指针
-    // libevent 只保证了 event_add 和 event_del 是线程安全的
-    // 但是 事件回调函数是不是线程安全的，这个是不确定的
-    // auto pthis = reinterpret_cast<Event*>(arg);
-    // Assert(pthis != nullptr);
-    // if (!pthis->weak_from_this().expired()) {
-    //     pthis->m_c_func_wapper_param.m_cpp_handler(pthis->shared_from_this(), events);
-    // }
-    // pthis->m_c_func_wapper_param.m_cpp_handler(pthis->shared_from_this(), events);
-    auto eventid = reinterpret_cast<EventId>(arg);
-    Event::CallEventCallback(eventid, fd, events);
-}
-
-Event::Event(detail::EventBase* base, evutil_socket_t fd, short listen_events, const OnEventCallback& onevent_cb)
+Event::Event(detail::EventBase* base, evutil_socket_t fd, short listen_events,
+             const OnEventCallback& onevent_cb)
     :m_id(GenerateId()),
-    m_ref_base(base),
-    m_mono_timer(evutil_monotonic_timer_new())
+     m_ref_base(base),
+     m_fd(fd),
+     m_listen_events(listen_events)
 {
-    Assert(m_mono_timer != nullptr);
     Assert(base != nullptr);
     AddEventCallback(m_id, onevent_cb);
 
-    m_raw_event = event_new(base->GetRawBase(), fd, listen_events, COnEventWapper, reinterpret_cast<void*>(m_id));
-    Assert(m_raw_event != nullptr);
+    // 判断事件类型并创建 ASIO 对象（fd 和 timer 可共存）
+    bool is_fd_event = (fd >= 0) && (listen_events & (EV_READ | EV_WRITE | EV_CLOSED));
+    bool is_timer   = (listen_events & EV_TIMEOUT);
+
+    if (is_fd_event) {
+        Assert(fd >= 0);
+        m_sd = std::make_unique<boost::asio::posix::stream_descriptor>(
+            base->GetContext(), fd);
+    }
+    if (is_timer) {
+        m_timer = std::make_unique<boost::asio::steady_timer>(base->GetContext());
+    }
+
+    m_ref_base->IncEventCount();
 }
 
 Event::~Event()
 {
-    auto ret = CancelListen();
-    DebugAssertWithInfo(ret == 0, "it`s a wrong!");
-    event_free(m_raw_event);
-
-    m_raw_event = nullptr;
-
-    evutil_monotonic_timer_free(m_mono_timer);
-    m_mono_timer = nullptr;
+    CancelListen();
+    m_ref_base->DecEventCount();
 }
 
 int Event::StartListen(uint64_t timeout)
 {
-    timeval     tv;
-    timeval*    tmptr = nullptr;
-    int         err;
-
+    // 记录超时
     if (timeout > 0) {
-        m_timeout = core::clock::nowAfter(core::clock::milliseconds(timeout + 1)).time_since_epoch().count();
-        evutil_timerclear(&tv);
-        tv.tv_sec  = timeout / 1000;
-        tv.tv_usec = (timeout % 1000) * 1000 + 1;
-        tmptr = &tv;
+        m_timeout = bbt::core::clock::nowAfter(
+            bbt::core::clock::milliseconds(timeout + 1))
+            .time_since_epoch().count();
     } else {
-        tmptr = NULL;
+        m_timeout = -1;
     }
 
-    err = event_add(m_raw_event, tmptr);
-    if (err != 0) {
-        return -1;
+    // fd 事件
+    if (m_sd) {
+        boost::system::error_code ec;
+        m_sd->cancel(ec);
+
+        if (m_listen_events & EV_READ)
+            DoAsyncWait(EV_READ);
+        if (m_listen_events & EV_WRITE)
+            DoAsyncWait(EV_WRITE);
+    }
+
+    // 定时器事件（可与 fd 事件共存）
+    if (m_timer) {
+        if (timeout > 0) {
+            m_timer->expires_after(std::chrono::milliseconds(timeout));
+            m_timer->async_wait([this](boost::system::error_code ec) {
+                if (ec == boost::asio::error::operation_aborted)
+                    return;
+                CallEventCallback(m_id, -1, EV_TIMEOUT);
+            });
+        }
+        return 0;
+    }
+
+    // 自定义事件：无 fd 无 timer，由 Trigger() 驱动
+    if (timeout > 0 && m_fd < 0) {
+        // 为自定义事件也支持超时
+        m_timer = std::make_unique<boost::asio::steady_timer>(
+            m_ref_base->GetContext());
+        m_timer->expires_after(std::chrono::milliseconds(timeout));
+        m_timer->async_wait([this](boost::system::error_code ec) {
+            if (ec == boost::asio::error::operation_aborted)
+                return;
+            CallEventCallback(m_id, -1, EV_TIMEOUT);
+        });
+        return 0;
     }
 
     return 0;
 }
 
+void Event::DoAsyncWait(short event_flag)
+{
+    if (!m_sd) return;
+
+    auto wait_type = (event_flag == EV_READ)
+        ? boost::asio::posix::stream_descriptor::wait_read
+        : boost::asio::posix::stream_descriptor::wait_write;
+
+    EventId id = m_id;
+    short persist = (m_listen_events & EV_PERSIST);
+    int fd = m_fd;
+
+    m_sd->async_wait(wait_type,
+        [this, id, event_flag, persist, fd](boost::system::error_code ec) {
+            if (ec == boost::asio::error::operation_aborted)
+                return;
+
+            CallEventCallback(id, fd, event_flag);
+
+            // PERSIST: 重新注册
+            if (persist && m_sd) {
+                DoAsyncWait(event_flag);
+            }
+        });
+}
+
 int Event::CancelListen(bool need_close_fd)
 {
-    int         err;
-
     DelEventCallback(m_id);
-    err = event_del(m_raw_event);
-    evutil_socket_t socket = GetSocket();
 
-    if (need_close_fd && socket >= 0)
-        ::close(socket);
-
-    if (err != 0) {
-        return -1;
+    // 取消所有挂起的异步操作
+    if (m_sd) {
+        boost::system::error_code ec;
+        m_sd->cancel(ec);
+        // flush 掉所有被取消的 handler
+        m_ref_base->GetContext().restart();
+        while (m_ref_base->GetContext().poll() > 0) {}
+        if (need_close_fd && m_fd >= 0) {
+            m_sd->release();
+            ::close(m_fd);
+        } else {
+            // 不关 fd — 先 release 防止 stream_descriptor 析构关掉
+            m_sd->release();
+        }
+        m_sd.reset();
     }
 
+    if (m_timer) {
+        m_timer->cancel();
+        m_timer.reset();
+    }
+
+    if (need_close_fd && m_fd >= 0 && !m_sd) {
+        ::close(m_fd);
+    }
+
+    m_timeout = -1;
+    return 0;
+}
+
+int Event::Trigger(int flag)
+{
+    EventId id = m_id;
+    int fd = m_fd;
+    m_ref_base->GetContext().post([id, fd, flag]() {
+        CallEventCallback(id, fd, static_cast<short>(flag));
+    });
     return 0;
 }
 
 int Event::GetSocket() const
 {
-    return event_get_fd(m_raw_event);
+    return m_fd;
 }
 
 short Event::GetEvents() const
 {
-    return event_get_events(m_raw_event);
+    return m_listen_events;
 }
 
 EventId Event::GetEventId()
@@ -107,15 +179,15 @@ EventId Event::GetEventId()
     return m_id;
 }
 
+int64_t Event::GetTimeoutMs() const
+{
+    return m_timeout;
+}
+
 EventId Event::GenerateId()
 {
     static std::atomic_uint64_t _id{0};
     return (++_id);
-}
-
-int64_t Event::GetTimeoutMs() const
-{
-    return m_timeout;
 }
 
 void Event::AddEventCallback(EventId id, const OnEventCallback& cb)
@@ -130,10 +202,9 @@ void Event::DelEventCallback(EventId id)
     m_callback_map.erase(id);
 }
 
-void Event::CallEventCallback(EventId id, evutil_socket_t fd, short events)
-{    
+void Event::CallEventCallback(EventId id, int fd, short events)
+{
     OnEventCallback cb = nullptr;
-
     {
         std::lock_guard<std::mutex> lock(m_callback_map_mtx);
         auto it = m_callback_map.find(id);

@@ -3,42 +3,33 @@
 namespace bbt::pollevent::detail
 {
 
-EventBase::EventBase()
-    :m_ev_base(event_base_new())
-{
-    Assert(m_ev_base != nullptr);
-}
-
 EventBase::EventBase(int32_t flag)
 {
-    m_ev_config = event_config_new();
-    Assert(m_ev_config != nullptr);
-    Assert(event_config_set_flag(m_ev_config, flag) == 0);
-    m_ev_base = event_base_new_with_config(m_ev_config);
-    Assert(m_ev_base != nullptr);
+    // ASIO io_context 无等价配置标志，flag 保留兼容，实际忽略
+    (void)flag;
 }
 
 EventBase::~EventBase()
 {
-    event_base_free(m_ev_base);
-    if (m_ev_config != nullptr)
-        event_config_free(m_ev_config);
+    // io_context 自动析构
 }
 
-int EventBase::GetEventNum()
+int EventBase::GetEventNum() const
 {
-    return event_base_get_num_events(m_ev_base, EVENT_BASE_COUNT_ADDED);
+    return m_event_count.load();
 }
 
-event_base* EventBase::GetRawBase()
+int EventBase::GetTimeOfDayCache(struct timeval* tv) const
 {
-    return m_ev_base;
+    auto now = std::chrono::system_clock::now();
+    auto secs = std::chrono::duration_cast<std::chrono::seconds>(
+        now.time_since_epoch());
+    auto usecs = std::chrono::duration_cast<std::chrono::microseconds>(
+        now.time_since_epoch() - secs);
+
+    tv->tv_sec  = secs.count();
+    tv->tv_usec = usecs.count();
+    return 0;
 }
 
-int EventBase::GetTimeOfDayCache(struct timeval* tv)
-{
-    return event_base_gettimeofday_cached(m_ev_base, tv);
-}
-
-
-} // namespace bbt:pollevent
+} // namespace bbt::pollevent::detail
