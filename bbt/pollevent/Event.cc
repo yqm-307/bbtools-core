@@ -67,10 +67,16 @@ int Event::StartListen(uint64_t timeout)
     // 定时器事件（可与 fd 事件共存）
     if (m_timer) {
         if (timeout > 0) {
+            m_timer->cancel();  // 防止重复 StartListen 导致双重 async_wait UB
             m_timer->expires_after(std::chrono::milliseconds(timeout));
             m_timer->async_wait([this](boost::system::error_code ec) {
                 if (ec == boost::asio::error::operation_aborted)
                     return;
+                // Plan C: timer 触发时取消 fd 等待，防止 double-fire
+                if (m_sd) {
+                    boost::system::error_code ignored;
+                    m_sd->cancel(ignored);
+                }
                 CallEventCallback(m_id, -1, EV_TIMEOUT);
             });
         }
@@ -110,6 +116,11 @@ void Event::DoAsyncWait(short event_flag)
         [this, id, event_flag, persist, fd](boost::system::error_code ec) {
             if (ec == boost::asio::error::operation_aborted)
                 return;
+
+            // Plan C: fd 就绪时取消 timer，防止 double-fire
+            if (m_timer) {
+                m_timer->cancel();
+            }
 
             CallEventCallback(id, fd, event_flag);
 
@@ -156,6 +167,15 @@ int Event::CancelListen(bool need_close_fd)
 
 int Event::Trigger(int flag)
 {
+    // Plan C: Trigger 时取消所有挂起的异步操作，防止与其他路径 double-fire
+    if (m_timer) {
+        m_timer->cancel();
+    }
+    if (m_sd) {
+        boost::system::error_code ignored;
+        m_sd->cancel(ignored);
+    }
+
     EventId id = m_id;
     int fd = m_fd;
     m_ref_base->GetContext().post([id, fd, flag]() {
