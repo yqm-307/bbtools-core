@@ -34,30 +34,25 @@ int EventLoop::StartLoop(int opt)
 
     switch (opt) {
     case EventLoopOpt::LOOP_NONBLOCK: {
-        // 先批量派发已就绪 handler（不阻塞）
+        // 非阻塞：仅处置已就绪事件，无就绪立即返回
         ctx.restart();
         dispatched = static_cast<int>(ctx.poll());
-        if (dispatched > 0)
-            return 0;
-        // 无就绪事件才驱动 reactor（阻塞直到一个事件就绪）
-        ctx.restart();
-        dispatched = static_cast<int>(ctx.run_one());
         return (dispatched > 0) ? 0 : 1;
     }
 
     case EventLoopOpt::LOOP_ONCE:
-        // run_one: 阻塞直到一个 handler 完成（包含 reactor 轮询）
+        // 阻塞：等待一个事件就绪并处置后返回
         dispatched = static_cast<int>(ctx.run_one());
         return (dispatched > 0) ? 0 : 1;
 
     case EventLoopOpt::LOOP_NO_EXIT_ON_EMPTY:
+        // 阻塞：无就绪事件时不退出，继续等待
         ctx.restart();
         dispatched = static_cast<int>(ctx.run_one());
         return (dispatched > 0) ? 0 : 1;
 
     default: {
-        // LOOP_NORMAL: 兼容 libevent EVLOOP_NORMAL
-        // run() 有持久事件时永不返回 → 用 run_one()
+        // LOOP_NORMAL：阻塞，处置一个就绪事件后返回
         dispatched = static_cast<int>(ctx.run_one());
         return (dispatched > 0) ? 0 : 1;
     }

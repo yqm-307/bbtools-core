@@ -300,6 +300,25 @@ BOOST_AUTO_TEST_CASE(t_timeout_minimal_fires_quickly)
     BOOST_CHECK(fired.load());
 }
 
+BOOST_AUTO_TEST_CASE(t_loop_nonblock_returns_immediately_with_pending_timer)
+{
+    // 回归测试：LOOP_NONBLOCK 不应阻塞等待未就绪的 timer。
+    // run_one() 底层走 epoll_wait，在有 pending timer 时会阻塞，
+    // 导致 scheduler 线程卡死 → 全系统死锁。
+    auto loop = std::make_shared<EventLoop>();
+    auto ev = loop->CreateEvent(-1, EventOpt::TIMEOUT,
+        [](int, short, EventId) {});
+    ev->StartListen(10000); // 10s 后才到期
+
+    auto t0 = std::chrono::steady_clock::now();
+    int ret = loop->StartLoop(EventLoopOpt::LOOP_NONBLOCK);
+    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - t0).count();
+
+    BOOST_CHECK(ret == 0 || ret == 1);
+    BOOST_CHECK(elapsed_ms < 100); // 不应阻塞超过 100ms
+}
+
 BOOST_AUTO_TEST_CASE(t_get_timeout_ms_default_minus_one)
 {
     auto loop = std::make_shared<EventLoop>();
