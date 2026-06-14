@@ -28,13 +28,19 @@ enum EventOpt : short
     FINALIZE                = 0x40,
 };
 
-/* ── 事件循环选项 ── */
+/* ── 事件循环选项 ──
+ *
+ * LOOP_NORMAL:           阻塞，处置一个就绪事件后返回
+ * LOOP_ONCE:             阻塞，等待一个事件就绪并处置后返回
+ * LOOP_NONBLOCK:         非阻塞，仅处置已就绪事件，无就绪立即返回
+ * LOOP_NO_EXIT_ON_EMPTY: 阻塞，无就绪事件时不退出，继续等待
+ */
 enum EventLoopOpt
 {
     LOOP_NORMAL             = 0,
-    LOOP_ONCE               = 0x01,   /* EVLOOP_ONCE */
-    LOOP_NONBLOCK           = 0x02,   /* EVLOOP_NONBLOCK */
-    LOOP_NO_EXIT_ON_EMPTY   = 0x04,   /* EVLOOP_NO_EXIT_ON_EMPTY */
+    LOOP_ONCE               = 0x01,
+    LOOP_NONBLOCK           = 0x02,
+    LOOP_NO_EXIT_ON_EMPTY   = 0x04,
 };
 
 /* ── 线程状态 ── */
