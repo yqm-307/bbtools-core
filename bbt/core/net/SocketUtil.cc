@@ -36,7 +36,10 @@ errcode::ErrRlt<int> CreateListen(const char* ip, short port, bool noblock)
             return std::move(err.value());
     }
 
-    error = ::listen(fd, 5);
+    /* backlog 是 accept 队列上限：写死 5 会在并发建连突发时丢握手，
+     * 内核对无匹配 socket 的首包回 RST（表现为客户端 ConnectionResetError）。
+     * 用 SOMAXCONN 交给内核上限（net.core.somaxconn）裁决。 */
+    error = ::listen(fd, SOMAXCONN);
     if (error < 0) return errcode::Errcode{"listen failed, errno=" + std::to_string(errno), errcode::ERR_UNKNOWN};
 
     return fd;
