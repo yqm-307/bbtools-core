@@ -29,3 +29,7 @@ add_test(NAME Test_codec COMMAND Test_codec)
 add_executable(Test_eventloop pollevent/Test_eventloop.cc)
 target_link_libraries(Test_eventloop ${MY_COMM_LIB})
 add_test(NAME Test_eventloop COMMAND Test_eventloop)
+
+add_executable(Test_countdown_latch Test_countdown_latch.cc)
+target_link_libraries(Test_countdown_latch ${MY_COMM_LIB})
+add_test(NAME Test_countdown_latch COMMAND Test_countdown_latch)
