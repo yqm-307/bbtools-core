@@ -33,6 +33,7 @@ private:
     friend class EventLoop;
     static void AddEventCallback(EventId id, const OnEventCallback& cb);
     static void DelEventCallback(EventId id);
+    static bool HasEventCallback(EventId id);
     static void CallEventCallback(EventId id, int fd, short events);
 
     void                        DoAsyncWait(short event_flag);

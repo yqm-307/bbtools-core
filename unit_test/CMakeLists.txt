@@ -32,6 +32,10 @@ add_executable(Test_eventloop pollevent/Test_eventloop.cc)
 target_link_libraries(Test_eventloop ${MY_COMM_LIB})
 add_test(NAME Test_eventloop COMMAND Test_eventloop)
 
+add_executable(Test_event_cancel pollevent/Test_event_cancel.cc)
+target_link_libraries(Test_event_cancel ${MY_COMM_LIB})
+add_test(NAME Test_event_cancel COMMAND Test_event_cancel)
+
 add_executable(Test_countdown_latch Test_countdown_latch.cc)
 target_link_libraries(Test_countdown_latch ${MY_COMM_LIB})
 add_test(NAME Test_countdown_latch COMMAND Test_countdown_latch)
