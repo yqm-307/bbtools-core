@@ -1,5 +1,7 @@
 #pragma once
+#include <boost/core/noncopyable.hpp>
 #include <boost/lockfree/queue.hpp>
+#include <atomic>
 
 namespace bbt::core::thread
 {
