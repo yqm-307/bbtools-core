@@ -178,7 +178,9 @@ int Event::Trigger(int flag)
 
     EventId id = m_id;
     int fd = m_fd;
-    m_ref_base->GetContext().post([id, fd, flag]() {
+    // Boost.Asio 移除了 io_context::post(Function) 单参成员，改用自由函数
+    // boost::asio::post(ctx, handler)；同一执行器上入队递 handler，语义等价。
+    boost::asio::post(m_ref_base->GetContext(), [id, fd, flag]() {
         CallEventCallback(id, fd, static_cast<short>(flag));
     });
     return 0;

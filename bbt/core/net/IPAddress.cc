@@ -80,8 +80,19 @@ errcode::ErrOpt IPAddress::From(const std::string& ip)
 
 std::string IPAddress::GetIP() const noexcept
 {
-	boost::system::error_code ec;
-	return m_endpoint.address().to_string(ec);
+	// Boost.Asio 移除了 address::to_string(error_code&) 重载，仅剩无参 to_string()。
+	// 异常语义核对：NoArg to_string() 在 inet_ntop 失败时会经 throw_error 抛 system_error
+	//（见 address_v4/v6.ipp 实现），而旧 ec 重载失败仅置 ec 并返回空串、不抛异常。
+	// GetIP 声明为 noexcept，直接调用无参版本会把新引入的抛出路径带到 terminate；
+	// 此处捕获 system_error 返回空串，与旧错误语义保持一致（bad_alloc 依旧传播，
+	// 旧实现同样按值构造 std::string，具备相同分配风险）。
+	std::string ip;
+	try {
+		ip = m_endpoint.address().to_string();
+	} catch (const boost::system::system_error&) {
+		return std::string();
+	}
+	return ip;
 }
 
 int IPAddress::GetPort() const noexcept

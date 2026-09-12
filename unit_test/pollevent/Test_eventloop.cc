@@ -1,4 +1,3 @@
-#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
 
@@ -403,6 +402,52 @@ BOOST_AUTO_TEST_CASE(t_callback_receives_correct_params)
     BOOST_CHECK_EQUAL(seen_id, expect_id);
 
     ev->CancelListen(true); close(wfd);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+/* ═══ Trigger（自定义事件派发）═══
+   Trigger() 经 boost::asio::post 投递回调（回归 #7 io_context::post 移除），
+   LOOP_ONCE=run_one 直接派发 posted handler，无需 sleep。 */
+BOOST_AUTO_TEST_SUITE(EventTriggerTest)
+
+BOOST_AUTO_TEST_CASE(t_trigger_dispatches_callback)
+{
+    auto loop = std::make_shared<EventLoop>();
+    std::atomic_int fired{0};
+    int seen_fd = -99; short seen_ev = 0; EventId seen_id = 0;
+
+    auto ev = loop->CreateEvent(-1, EventOpt::READABLE,
+        [&](int fd, short evts, EventId id) {
+            fired++; seen_fd = fd; seen_ev = evts; seen_id = id;
+        });
+    BOOST_CHECK_EQUAL(ev->StartListen(0), 0);
+
+    BOOST_CHECK_EQUAL(ev->Trigger(EV_READ), 0);
+    loop->StartLoop(EventLoopOpt::LOOP_ONCE);
+
+    BOOST_CHECK_EQUAL(fired.load(), 1);
+    BOOST_CHECK_EQUAL(seen_fd, -1);
+    BOOST_CHECK(seen_ev & EV_READ);
+    BOOST_CHECK_EQUAL(seen_id, ev->GetEventId());
+
+    ev->CancelListen(false);
+}
+
+BOOST_AUTO_TEST_CASE(t_trigger_after_cancel_no_callback)
+{
+    auto loop = std::make_shared<EventLoop>();
+    std::atomic_int fired{0};
+
+    auto ev = loop->CreateEvent(-1, EventOpt::READABLE,
+        [&](int, short, EventId) { fired++; });
+    ev->StartListen(0);
+    ev->CancelListen(false);  // 移除回调注册，后续 Trigger 不应派发
+
+    BOOST_CHECK_EQUAL(ev->Trigger(EV_READ), 0);
+    loop->StartLoop(EventLoopOpt::LOOP_NONBLOCK);
+
+    BOOST_CHECK_EQUAL(fired.load(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
