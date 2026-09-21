@@ -42,6 +42,7 @@
 - 测试由 `unit_test/CMakeLists.txt` 注册，既有 CI 在 `build/unit_test/` 执行 `ctest`；本次初始化只静态核对入口，没有构建或测试通过结论。
 - `shell/build.sh` 包含系统目录写入和 `sudo`，只在明确安装授权后使用，不作为默认本地验证入口。
 - 实现任务须有可复现的构建与相关测试证据，无新增警告；公共接口改动由下游运行必要集成验证。缺依赖或工具链如实说明，不自动系统安装。
+- 本地验证边界：必走冒烟 + 本次开发功能的单测 + 直接耦合功能的单测，三者全过；本地不跑全量 `ctest`，全量走 PR 的 CI。同机多 agent 并行时：新 configure 加 `-DCMAKE_CXX_COMPILER_LAUNCHER=ccache`；本地并发取 `JOBS=$(( $(nproc) / 4 ))`（最小2，8核→2），增量用 `--target <t> --parallel $JOBS`；确需本地全量时串行（`flock /tmp/bbt-build.lock`，一次一个，`--parallel $(( $(nproc) / 2 ))`，8核→4）；禁止 bare `--parallel` / bare `ninja` / `make -j$(nproc)`。
 
 ## 独立接续与同机协作
 
